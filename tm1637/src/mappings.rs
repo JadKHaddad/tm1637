@@ -32,6 +32,7 @@ pub enum SegmentBits {
 }
 
 impl SegmentBits {
+    /// Returns all segments.
     pub fn all() -> [SegmentBits; 8] {
         [
             SegmentBits::SegA,
@@ -45,6 +46,7 @@ impl SegmentBits {
         ]
     }
 
+    /// Returns all segments as u8.
     pub fn all_u8() -> [u8; 8] {
         Self::all().map(|bit| bit as u8)
     }
@@ -53,7 +55,7 @@ impl SegmentBits {
 /// Maps a digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug)]
-pub enum NumCharBits {
+pub enum DigitBits {
     /// 0
     Zero = 0b00111111,
     /// 1
@@ -76,24 +78,43 @@ pub enum NumCharBits {
     Nine = 0b01101111,
 }
 
-impl NumCharBits {
-    pub fn all() -> [NumCharBits; 10] {
+impl DigitBits {
+    /// Returns all digits.
+    pub fn all() -> [DigitBits; 10] {
         [
-            NumCharBits::Zero,
-            NumCharBits::One,
-            NumCharBits::Two,
-            NumCharBits::Three,
-            NumCharBits::Four,
-            NumCharBits::Five,
-            NumCharBits::Six,
-            NumCharBits::Seven,
-            NumCharBits::Eight,
-            NumCharBits::Nine,
+            DigitBits::Zero,
+            DigitBits::One,
+            DigitBits::Two,
+            DigitBits::Three,
+            DigitBits::Four,
+            DigitBits::Five,
+            DigitBits::Six,
+            DigitBits::Seven,
+            DigitBits::Eight,
+            DigitBits::Nine,
         ]
     }
 
+    /// Returns all digits as [`u8`].
     pub fn all_u8() -> [u8; 10] {
         Self::all().map(|bit| bit as u8)
+    }
+
+    /// Create a new [`DigitBits`] from a [`u8`] digit.
+    pub fn from_digit(digit: u8) -> Self {
+        match digit {
+            0 => DigitBits::Zero,
+            1 => DigitBits::One,
+            2 => DigitBits::Two,
+            3 => DigitBits::Three,
+            4 => DigitBits::Four,
+            5 => DigitBits::Five,
+            6 => DigitBits::Six,
+            7 => DigitBits::Seven,
+            8 => DigitBits::Eight,
+            9 => DigitBits::Nine,
+            _ => DigitBits::Zero,
+        }
     }
 }
 
@@ -134,6 +155,7 @@ pub enum UpCharBits {
 }
 
 impl UpCharBits {
+    /// Returns all uppercase characters.
     pub fn all() -> [UpCharBits; 13] {
         [
             UpCharBits::UpA,
@@ -152,6 +174,7 @@ impl UpCharBits {
         ]
     }
 
+    /// Returns all uppercase characters as [`u8`].
     pub fn all_u8() -> [u8; 13] {
         Self::all().map(|bit| bit as u8)
     }
@@ -188,6 +211,7 @@ pub enum LoCharBits {
 }
 
 impl LoCharBits {
+    /// Returns all lowercase characters.
     pub fn all() -> [LoCharBits; 12] {
         [
             LoCharBits::LoA,
@@ -205,6 +229,7 @@ impl LoCharBits {
         ]
     }
 
+    /// Returns all lowercase characters as [`u8`].
     pub fn all_u8() -> [u8; 12] {
         Self::all().map(|bit| bit as u8)
     }
@@ -233,6 +258,7 @@ pub enum SpecialCharBits {
 }
 
 impl SpecialCharBits {
+    /// Returns all special characters.
     pub fn all() -> [SpecialCharBits; 6] {
         [
             SpecialCharBits::Space,
@@ -244,6 +270,7 @@ impl SpecialCharBits {
         ]
     }
 
+    /// Returns all special characters as [`u8`].
     pub fn all_u8() -> [u8; 6] {
         Self::all().map(|bit| bit as u8)
     }
