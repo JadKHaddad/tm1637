@@ -1,3 +1,8 @@
+//! Mappings for 7-segment display characters.
+
+// TODO: Check all the mappings and add more if needed.
+// TODO: Create a char mapper for charecters and special characters.
+
 //       A
 //      ---
 //  F  |   |  B

@@ -1,5 +1,6 @@
 #![no_std]
 #![deny(unsafe_code)]
+// TODO: #![deny(missing_docs)]
 
 /// Our custom `try!` macro aka `?`, to get rid of [`core::convert::From`]/[`core::convert::Into`] used by the `?` operator.
 macro_rules! tri {

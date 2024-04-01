@@ -1,3 +1,5 @@
+//! This module contains a demo implementation for the `TM1637` device.
+
 #[cfg(feature = "blocking")]
 pub mod blocking {
     use embedded_hal::{
@@ -37,6 +39,7 @@ pub mod blocking {
             }
         }
 
+        /// Move all segments across the display.
         pub fn moving_segments(&mut self) -> Result<(), TM1637Error<ERR>> {
             let mut all_seg_bits = SegmentBits::all_u8();
             for _ in 0..7 {
@@ -48,6 +51,7 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Move all digits across the display.
         pub fn moving_digits(&mut self) -> Result<(), TM1637Error<ERR>> {
             let mut all_dig_bits = DigitBits::all_u8();
             for _ in 0..10 {
@@ -59,6 +63,7 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Move all uppercase characters across the display.
         pub fn moving_up_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
             let mut all_up_char_bits = UpCharBits::all_u8();
             for _ in 0..13 {
@@ -70,6 +75,7 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Move all lowercase characters across the display.
         pub fn moving_lo_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
             let mut all_lo_char_bits = LoCharBits::all_u8();
             for _ in 0..12 {
@@ -81,6 +87,7 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Move all special characters across the display.
         pub fn moving_special_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
             let mut all_sp_char_bits = SpecialCharBits::all_u8();
             for _ in 0..12 {
@@ -92,6 +99,7 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Turn the display on and off.
         pub fn on_off(
             &mut self,
             brightness: Brightness,
@@ -108,8 +116,10 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Display the time and make the dots blink.
+        ///
+        /// Displays 19:06 with blinking dots.
         pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), TM1637Error<ERR>> {
-            // Display 19:06
             self.device.write_raw(
                 0,
                 &[
@@ -120,7 +130,6 @@ pub mod blocking {
                 ],
             )?;
 
-            // Make the dots blink
             let mut show = true;
             for _ in 0..cycles {
                 let bit = match show {
@@ -138,12 +147,14 @@ pub mod blocking {
             Ok(())
         }
 
+        /// Create a rotating circle animation.
+        ///
+        /// Creates a rotating circle at address 0.
         pub fn rotating_circle(
             &mut self,
             cycles: u32,
             rotating_delay_ms: u32,
         ) -> Result<(), TM1637Error<ERR>> {
-            // Rotating circle at address 0
             // First of all we create the shapes want to animate
 
             //  ---

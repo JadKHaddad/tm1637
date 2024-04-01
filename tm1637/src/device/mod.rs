@@ -4,6 +4,8 @@ use crate::functionality::BaseTM1637;
 
 pub mod brightness;
 
+// TODO: Add builer
+
 /// `TM1637` 7-segment display driver.
 #[derive(Debug, Clone)]
 pub struct TM1637<CLK, DIO, DELAY> {
