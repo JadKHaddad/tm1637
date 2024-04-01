@@ -29,7 +29,7 @@ where
         // Wait for the ACK
         tri_digital!(self.send_bit_and_delay(Bit::ONE));
         for _ in 0..255 {
-            if tri_digital!(self.dio().is_low()) {
+            if tri_digital!(self.dio_mut().is_low()) {
                 return Ok(());
             }
 
@@ -42,7 +42,7 @@ where
     /// Start the communication with the display.
     fn start(&mut self) -> Result<(), ERR> {
         tri!(self.send_bit_and_delay(Bit::ONE));
-        tri!(self.dio().set_low());
+        tri!(self.dio_mut().set_low());
 
         Ok(())
     }
@@ -50,7 +50,7 @@ where
     /// Stop the communication with the display.
     fn stop(&mut self) -> Result<(), ERR> {
         tri!(self.send_bit_and_delay(Bit::ZERO));
-        tri!(self.dio().set_high());
+        tri!(self.dio_mut().set_high());
         self.bit_delay();
 
         Ok(())
@@ -58,12 +58,12 @@ where
 
     /// Send a bit to the display and delay.
     fn send_bit_and_delay(&mut self, value: Bit) -> Result<(), ERR> {
-        tri!(self.clk().set_low());
+        tri!(self.clk_mut().set_low());
         match value {
-            Bit::ONE => tri!(self.dio().set_high()),
-            Bit::ZERO => tri!(self.dio().set_low()),
+            Bit::ONE => tri!(self.dio_mut().set_high()),
+            Bit::ZERO => tri!(self.dio_mut().set_low()),
         }
-        tri!(self.clk().set_high());
+        tri!(self.clk_mut().set_high());
         self.bit_delay();
 
         Ok(())
@@ -72,7 +72,7 @@ where
     /// Delay for the given amount of microseconds with the delay provider.
     fn bit_delay(&mut self) {
         let delay_us = self.delay_us();
-        self.delay().delay_us(delay_us);
+        self.delay_mut().delay_us(delay_us);
     }
 }
 
@@ -112,6 +112,7 @@ where
         address: u8,
         bytes: ITER,
     ) -> Result<(), TM1637Error<ERR>> {
+        #[cfg(not(feature = "disable-checks"))]
         if address >= self.address_count() {
             return Ok(());
         }
@@ -119,8 +120,10 @@ where
         tri_digital!(self.start());
         tri!(self.send_byte(0xc0 | (address & 0x0f)));
 
-        let bytes_to_send = bytes.take(self.address_count() as usize - address as usize);
-        for byte in bytes_to_send {
+        #[cfg(not(feature = "disable-checks"))]
+        let bytes = bytes.take(self.address_count() as usize - address as usize);
+
+        for byte in bytes {
             tri!(self.send_byte(byte));
         }
 

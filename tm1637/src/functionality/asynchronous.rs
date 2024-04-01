@@ -27,7 +27,7 @@ where
         // Wait for the ACK
         tri_digital!(self.send_bit_and_delay(Bit::ONE).await);
         for _ in 0..255 {
-            if tri_digital!(self.dio().is_low()) {
+            if tri_digital!(self.dio_mut().is_low()) {
                 return Ok(());
             }
 
@@ -40,7 +40,7 @@ where
     /// Start the communication with the display.
     async fn start(&mut self) -> Result<(), ERR> {
         tri!(self.send_bit_and_delay(Bit::ONE).await);
-        tri!(self.dio().set_low());
+        tri!(self.dio_mut().set_low());
 
         Ok(())
     }
@@ -48,7 +48,7 @@ where
     /// Stop the communication with the display.
     async fn stop(&mut self) -> Result<(), ERR> {
         tri!(self.send_bit_and_delay(Bit::ZERO).await);
-        tri!(self.dio().set_high());
+        tri!(self.dio_mut().set_high());
         self.bit_delay().await;
 
         Ok(())
@@ -56,12 +56,12 @@ where
 
     /// Send a bit to the display and delay.
     async fn send_bit_and_delay(&mut self, value: Bit) -> Result<(), ERR> {
-        tri!(self.clk().set_low());
+        tri!(self.clk_mut().set_low());
         match value {
-            Bit::ONE => tri!(self.dio().set_high()),
-            Bit::ZERO => tri!(self.dio().set_low()),
+            Bit::ONE => tri!(self.dio_mut().set_high()),
+            Bit::ZERO => tri!(self.dio_mut().set_low()),
         }
-        tri!(self.clk().set_high());
+        tri!(self.clk_mut().set_high());
         self.bit_delay().await;
 
         Ok(())
@@ -70,7 +70,7 @@ where
     /// Delay for the given amount of microseconds with the delay provider.
     async fn bit_delay(&mut self) {
         let delay_us = self.delay_us();
-        self.delay().delay_us(delay_us).await;
+        self.delay_mut().delay_us(delay_us).await;
     }
 }
 
@@ -91,7 +91,7 @@ where
             .await
     }
 
-    /// Write the given bytes to the display starting from the given address. See [`BlockingTM1637::write_raw_iter`].
+    /// Write the given bytes to the display starting from the given address. See [`AsyncTM1637::write_raw_iter`].
     ///
     /// ## Notes:
     /// - Addresses greater than [`BaseTM1637::address_count`] will be ignored.
@@ -100,7 +100,7 @@ where
         self.write_raw_iter(address, bytes.iter().map(|b| *b)).await
     }
 
-    /// Write the given bytes to the display starting from the given address. See [`BlockingTM1637::write_raw`].
+    /// Write the given bytes to the display starting from the given address. See [`AsyncTM1637::write_raw`].
     ///
     /// ## Notes:
     /// - Addresses greater than [`BaseTM1637::address_count`] will be ignored.
@@ -110,6 +110,7 @@ where
         address: u8,
         bytes: ITER,
     ) -> Result<(), TM1637Error<ERR>> {
+        #[cfg(not(feature = "disable-checks"))]
         if address >= self.address_count() {
             return Ok(());
         }
@@ -117,8 +118,10 @@ where
         tri_digital!(self.start().await);
         tri!(self.send_byte(0xc0 | (address & 0x0f)).await);
 
-        let bytes_to_send = bytes.take(self.address_count() as usize - address as usize);
-        for byte in bytes_to_send {
+        #[cfg(not(feature = "disable-checks"))]
+        let bytes = bytes.take(self.address_count() as usize - address as usize);
+
+        for byte in bytes {
             tri!(self.send_byte(byte).await);
         }
 

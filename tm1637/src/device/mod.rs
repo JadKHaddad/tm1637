@@ -35,15 +35,27 @@ impl<CLK, DIO, DELAY> TM1637<CLK, DIO, DELAY> {
 }
 
 impl<CLK, DIO, DELAY> BaseTM1637<CLK, DIO, DELAY> for TM1637<CLK, DIO, DELAY> {
-    fn clk(&mut self) -> &mut CLK {
+    fn clk(&self) -> &CLK {
+        &self.clk
+    }
+
+    fn clk_mut(&mut self) -> &mut CLK {
         &mut self.clk
     }
 
-    fn dio(&mut self) -> &mut DIO {
+    fn dio(&self) -> &DIO {
+        &self.dio
+    }
+
+    fn dio_mut(&mut self) -> &mut DIO {
         &mut self.dio
     }
 
-    fn delay(&mut self) -> &mut DELAY {
+    fn delay(&self) -> &DELAY {
+        &self.delay
+    }
+
+    fn delay_mut(&mut self) -> &mut DELAY {
         &mut self.delay
     }
 

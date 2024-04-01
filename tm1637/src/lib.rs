@@ -25,6 +25,9 @@ macro_rules! tri_digital {
     };
 }
 
+#[cfg(feature = "demo")]
+pub mod demo;
 pub mod device;
 pub mod functionality;
+#[cfg(feature = "mappings")]
 pub mod mappings;

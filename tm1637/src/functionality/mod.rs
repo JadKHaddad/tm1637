@@ -35,11 +35,17 @@ where
 
 /// Main functionality for TM1637 devices.
 pub(crate) trait BaseTM1637<CLK, DIO, DELAY> {
-    fn clk(&mut self) -> &mut CLK;
+    fn clk(&self) -> &CLK;
 
-    fn dio(&mut self) -> &mut DIO;
+    fn clk_mut(&mut self) -> &mut CLK;
 
-    fn delay(&mut self) -> &mut DELAY;
+    fn dio(&self) -> &DIO;
+
+    fn dio_mut(&mut self) -> &mut DIO;
+
+    fn delay(&self) -> &DELAY;
+
+    fn delay_mut(&mut self) -> &mut DELAY;
 
     fn delay_us(&self) -> u32;
 

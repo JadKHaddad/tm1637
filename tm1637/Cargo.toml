@@ -11,9 +11,12 @@ keywords = ["tm1637", "i2c", "embedded-hal", "no-std", "embedded"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["async", "blocking"]
+default = ["async", "blocking", "mappings"]
 async = ["dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
+mappings = []
+disable-checks = []
+demo = []
 
 [dependencies]
 embedded-hal-async = { version = "1.0.0", optional = true }
