@@ -33,7 +33,7 @@ pub enum SegmentBits {
 
 impl SegmentBits {
     /// Returns all segments.
-    pub fn all() -> [SegmentBits; 8] {
+    pub const fn all() -> [SegmentBits; 8] {
         [
             SegmentBits::SegA,
             SegmentBits::SegB,
@@ -47,8 +47,17 @@ impl SegmentBits {
     }
 
     /// Returns all segments as u8.
-    pub fn all_u8() -> [u8; 8] {
-        Self::all().map(|bit| bit as u8)
+    pub const fn all_u8() -> [u8; 8] {
+        [
+            SegmentBits::SegA as u8,
+            SegmentBits::SegB as u8,
+            SegmentBits::SegC as u8,
+            SegmentBits::SegD as u8,
+            SegmentBits::SegE as u8,
+            SegmentBits::SegF as u8,
+            SegmentBits::SegG as u8,
+            SegmentBits::SegPoint as u8,
+        ]
     }
 }
 
@@ -80,7 +89,7 @@ pub enum DigitBits {
 
 impl DigitBits {
     /// Returns all digits.
-    pub fn all() -> [DigitBits; 10] {
+    pub const fn all() -> [DigitBits; 10] {
         [
             DigitBits::Zero,
             DigitBits::One,
@@ -96,11 +105,22 @@ impl DigitBits {
     }
 
     /// Returns all digits as [`u8`].
-    pub fn all_u8() -> [u8; 10] {
-        Self::all().map(|bit| bit as u8)
+    pub const fn all_u8() -> [u8; 10] {
+        [
+            DigitBits::Zero as u8,
+            DigitBits::One as u8,
+            DigitBits::Two as u8,
+            DigitBits::Three as u8,
+            DigitBits::Four as u8,
+            DigitBits::Five as u8,
+            DigitBits::Six as u8,
+            DigitBits::Seven as u8,
+            DigitBits::Eight as u8,
+            DigitBits::Nine as u8,
+        ]
     }
 
-    /// Create a new [`DigitBits`] from a [`u8`] digit.
+    /// Creates a new [`DigitBits`] from a [`u8`] digit.
     pub fn from_digit(digit: u8) -> Self {
         match digit {
             0 => DigitBits::Zero,
@@ -156,7 +176,7 @@ pub enum UpCharBits {
 
 impl UpCharBits {
     /// Returns all uppercase characters.
-    pub fn all() -> [UpCharBits; 13] {
+    pub const fn all() -> [UpCharBits; 13] {
         [
             UpCharBits::UpA,
             UpCharBits::UpC,
@@ -175,8 +195,22 @@ impl UpCharBits {
     }
 
     /// Returns all uppercase characters as [`u8`].
-    pub fn all_u8() -> [u8; 13] {
-        Self::all().map(|bit| bit as u8)
+    pub const fn all_u8() -> [u8; 13] {
+        [
+            UpCharBits::UpA as u8,
+            UpCharBits::UpC as u8,
+            UpCharBits::UpE as u8,
+            UpCharBits::UpF as u8,
+            UpCharBits::UpG as u8,
+            UpCharBits::UpH as u8,
+            UpCharBits::UpI as u8,
+            UpCharBits::UpJ as u8,
+            UpCharBits::UpL as u8,
+            UpCharBits::UpO as u8,
+            UpCharBits::UpP as u8,
+            UpCharBits::UpS as u8,
+            UpCharBits::UpU as u8,
+        ]
     }
 }
 
@@ -212,7 +246,7 @@ pub enum LoCharBits {
 
 impl LoCharBits {
     /// Returns all lowercase characters.
-    pub fn all() -> [LoCharBits; 12] {
+    pub const fn all() -> [LoCharBits; 12] {
         [
             LoCharBits::LoA,
             LoCharBits::LoB,
@@ -230,8 +264,21 @@ impl LoCharBits {
     }
 
     /// Returns all lowercase characters as [`u8`].
-    pub fn all_u8() -> [u8; 12] {
-        Self::all().map(|bit| bit as u8)
+    pub const fn all_u8() -> [u8; 12] {
+        [
+            LoCharBits::LoA as u8,
+            LoCharBits::LoB as u8,
+            LoCharBits::LoC as u8,
+            LoCharBits::LoD as u8,
+            LoCharBits::LoH as u8,
+            LoCharBits::LoN as u8,
+            LoCharBits::LoO as u8,
+            LoCharBits::LoQ as u8,
+            LoCharBits::LoR as u8,
+            LoCharBits::LoT as u8,
+            LoCharBits::LoU as u8,
+            LoCharBits::LoY as u8,
+        ]
     }
 }
 
@@ -259,7 +306,7 @@ pub enum SpecialCharBits {
 
 impl SpecialCharBits {
     /// Returns all special characters.
-    pub fn all() -> [SpecialCharBits; 6] {
+    pub const fn all() -> [SpecialCharBits; 6] {
         [
             SpecialCharBits::Space,
             SpecialCharBits::Minus,
@@ -271,7 +318,14 @@ impl SpecialCharBits {
     }
 
     /// Returns all special characters as [`u8`].
-    pub fn all_u8() -> [u8; 6] {
-        Self::all().map(|bit| bit as u8)
+    pub const fn all_u8() -> [u8; 6] {
+        [
+            SpecialCharBits::Space as u8,
+            SpecialCharBits::Minus as u8,
+            SpecialCharBits::Underscore as u8,
+            SpecialCharBits::Equals as u8,
+            SpecialCharBits::QuestionMark as u8,
+            SpecialCharBits::Dot as u8,
+        ]
     }
 }
