@@ -488,7 +488,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "esp32-bmp180-example"
+name = "esp32-tm1637-example"
 version = "0.0.0"
 dependencies = [
  "embassy-embedded-hal",

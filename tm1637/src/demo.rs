@@ -39,9 +39,14 @@ pub mod blocking {
             }
         }
 
+        /// Clear the display.
+        pub fn clear(&mut self) -> Result<(), TM1637Error<ERR>> {
+            self.device.clear()
+        }
+
         /// Move all segments across the display.
         pub fn moving_segments(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let mut all_seg_bits = SegmentBits::all_u8();
+            let all_seg_bits = &mut SegmentBits::all_u8()[0..7];
             for _ in 0..7 {
                 all_seg_bits.rotate_left(1);
                 self.device.write_raw(0, &all_seg_bits)?;

@@ -2,7 +2,7 @@
 
 use crate::device::brightness::Brightness;
 
-use super::{BaseTM1637, Bit, TM1637Error};
+use super::{BaseTM1637, TM1637Error};
 
 use embedded_hal::{
     delay::DelayNs,
@@ -21,49 +21,58 @@ where
     fn send_byte(&mut self, byte: u8) -> Result<(), TM1637Error<ERR>> {
         let mut rest = byte;
         for _ in 0..8 {
-            let bit = if rest & 1 != 0 { Bit::ONE } else { Bit::ZERO };
-            tri_digital!(self.send_bit_and_delay(bit));
-            rest = rest >> 1;
-        }
+            self.bit_delay();
 
-        // Wait for the ACK
-        tri_digital!(self.send_bit_and_delay(Bit::ONE));
-        for _ in 0..255 {
-            if tri_digital!(self.dio_mut().is_low()) {
-                return Ok(());
-            }
+            tri_digital!(self.clk_mut().set_low());
 
             self.bit_delay();
+
+            match rest & 0x01 {
+                1 => tri_digital!(self.dio_mut().set_high()),
+                _ => tri_digital!(self.dio_mut().set_low()),
+            }
+            self.bit_delay();
+
+            tri_digital!(self.clk_mut().set_high());
+
+            self.bit_delay();
+
+            rest >>= 1;
         }
 
-        Err(TM1637Error::Ack)
+        tri_digital!(self.clk_mut().set_low());
+        tri_digital!(self.dio_mut().set_high());
+
+        self.bit_delay();
+
+        tri_digital!(self.clk_mut().set_high());
+
+        self.bit_delay();
+
+        tri_digital!(self.clk_mut().set_low());
+
+        self.bit_delay();
+
+        Ok(())
     }
 
     /// Start the communication with the display.
     fn start(&mut self) -> Result<(), ERR> {
-        tri!(self.send_bit_and_delay(Bit::ONE));
         tri!(self.dio_mut().set_low());
+        self.bit_delay();
+        tri!(self.clk_mut().set_low());
+        self.bit_delay();
 
         Ok(())
     }
 
     /// Stop the communication with the display.
     fn stop(&mut self) -> Result<(), ERR> {
-        tri!(self.send_bit_and_delay(Bit::ZERO));
-        tri!(self.dio_mut().set_high());
+        tri!(self.dio_mut().set_low());
         self.bit_delay();
-
-        Ok(())
-    }
-
-    /// Send a bit to the display and delay.
-    fn send_bit_and_delay(&mut self, value: Bit) -> Result<(), ERR> {
-        tri!(self.clk_mut().set_low());
-        match value {
-            Bit::ONE => tri!(self.dio_mut().set_high()),
-            Bit::ZERO => tri!(self.dio_mut().set_low()),
-        }
         tri!(self.clk_mut().set_high());
+        self.bit_delay();
+        tri!(self.dio_mut().set_high());
         self.bit_delay();
 
         Ok(())
@@ -117,8 +126,14 @@ where
             return Ok(());
         }
 
+        // COMM1
         tri_digital!(self.start());
-        tri!(self.send_byte(0xc0 | (address & 0x0f)));
+        tri!(self.send_byte(0x40));
+        tri_digital!(self.stop());
+
+        // COMM2
+        tri_digital!(self.start());
+        tri!(self.send_byte(0xc0 | (address & 0x03)));
 
         #[cfg(not(feature = "disable-checks"))]
         let bytes = bytes.take(self.address_count() as usize - address as usize);
@@ -128,6 +143,11 @@ where
         }
 
         tri_digital!(self.stop());
+
+        // COMM3
+        // tri_digital!(self.start());
+        // tri!(self.send_byte(Brightness::L0 as u8));
+        // tri_digital!(self.stop());
 
         Ok(())
     }

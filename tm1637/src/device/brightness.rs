@@ -13,7 +13,7 @@
 pub enum Brightness {
     /// Display off.
     OFF = 0b10000000,
-    /// Brightness level 0. Lowest brightness.
+    ///  Display on. Brightness level 0. Lowest brightness.
     L0 = 0b10001000,
     /// Brightness level 1.
     L1 = 0b10001001,

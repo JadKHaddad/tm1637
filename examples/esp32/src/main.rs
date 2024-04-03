@@ -4,6 +4,7 @@
 
 use esp_backtrace as _;
 use esp_hal::{clock::ClockControl, gpio, peripherals::Peripherals, prelude::*, Delay};
+use esp_println::println;
 use tm1637::{
     demo::blocking::Demo,
     device::{brightness::Brightness, TM1637},
@@ -26,17 +27,30 @@ fn main() -> ! {
     let mut tm = TM1637::new(clk, dio, delay, 10, 4);
 
     tm.clear().unwrap();
-    tm.set_brightness(Brightness::L0).unwrap();
+    tm.set_brightness(Brightness::L4).unwrap();
 
-    let mut demo = Demo::new(tm, delay, 300);
+    let mut demo = Demo::new(tm, delay, 500);
     loop {
         demo.rotating_circle(20, 200).unwrap();
+        demo.clear().unwrap();
+
         demo.time(10, 500).unwrap();
         demo.on_off(Brightness::L0, 10, 200).unwrap();
+        demo.clear().unwrap();
+
         demo.moving_segments().unwrap();
+        demo.clear().unwrap();
+
         demo.moving_digits().unwrap();
+        demo.clear().unwrap();
+
         demo.moving_up_chars().unwrap();
+        demo.clear().unwrap();
+
         demo.moving_lo_chars().unwrap();
+        demo.clear().unwrap();
+
         demo.moving_special_chars().unwrap();
+        demo.clear().unwrap();
     }
 }
