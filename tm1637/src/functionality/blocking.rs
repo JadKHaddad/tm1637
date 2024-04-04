@@ -57,7 +57,7 @@ where
         Ok(())
     }
 
-    /// Set the brightness level.
+    /// Write the brightness level to the display.
     fn write_brightness_raw(&mut self, brightness: u8) -> Result<(), TM1637Error<ERR>> {
         tri_digital!(self.start());
         tri!(self.write_byte(brightness));
@@ -88,7 +88,7 @@ where
         Ok(())
     }
 
-    /// Delay for the given amount of microseconds with the delay provider.
+    /// Delay for [`BaseTM1637::delay_us()`] microseconds using [`BaseTM1637::delay()`] provider.
     fn bit_delay(&mut self) {
         let delay_us = self.delay_us();
         self.delay_mut().delay_us(delay_us);
@@ -97,7 +97,7 @@ where
 
 /// Blocking functionality.
 ///
-/// Bring this trait into scope to enable blocking functionality for TM1637 devices.
+/// Bring this trait into scope to enable blocking functionality for `TM1637` devices.
 #[allow(private_bounds)]
 #[allow(async_fn_in_trait)]
 pub trait BlockingTM1637<CLK, DIO, DELAY, ERR>:
@@ -175,7 +175,7 @@ where
         Ok(())
     }
 
-    /// Set `brightness` in `Self` and write the brightness level.
+    /// Set `brightness` in `Self` and write the brightness level to the display.
     fn write_brightness(&mut self, brightness: Brightness) -> Result<(), TM1637Error<ERR>> {
         *self.brightness_mut() = brightness;
         self.write_brightness_raw(brightness as u8)

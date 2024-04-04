@@ -15,7 +15,7 @@ pub(crate) enum Bit {
     ONE,
 }
 
-/// Error type for TM1637 devices.
+/// Error type for `TM1637` devices.
 pub enum TM1637Error<ERR> {
     /// Acknowledge error. The device did not acknowledge the sent byte.
     Ack,
@@ -35,7 +35,7 @@ where
     }
 }
 
-/// Main functionality for TM1637 devices.
+/// Private main functionality for `TM1637` devices.
 pub(crate) trait BaseTM1637<CLK, DIO, DELAY> {
     fn clk(&self) -> &CLK;
 

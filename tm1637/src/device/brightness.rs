@@ -2,7 +2,7 @@
 
 /// The brightness level.
 ///
-/// Represents a byte that can be sent to the `TM1637` to set the brightness level.
+/// Represents a byte that can be sent directly to the `TM1637` to set the brightness level.
 ///
 /// ## Bits:
 /// - 1-3: Brightness level (0-7)
@@ -30,6 +30,8 @@ pub enum Brightness {
 }
 
 /// Display state.
+///
+/// Represents a byte that can be sent directly to the `TM1637` to set the display state.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DisplayState {
