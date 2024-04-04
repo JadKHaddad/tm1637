@@ -23,7 +23,7 @@ fn main() -> ! {
     let clk = io.pins.gpio4.into_open_drain_output();
     let dio = io.pins.gpio19.into_open_drain_output();
 
-    let mut tm = TM1637::new(clk, dio, delay, Brightness::L0, 10, 4);
+    let mut tm = TM1637::builder(clk, dio, delay).build();
 
     // initialize the display. clears the display and sets the initial brightness.
     tm.init().unwrap();

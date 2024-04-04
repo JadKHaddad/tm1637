@@ -6,7 +6,51 @@ use self::brightness::Brightness;
 
 pub mod brightness;
 
-// TODO: Add builer
+/// `TM1637` 7-segment display builder.
+#[derive(Debug, Clone)]
+pub struct TM1637Builder<CLK, DIO, DELAY> {
+    /// The inner `TM1637` instance.
+    inner: TM1637<CLK, DIO, DELAY>,
+}
+
+impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
+    /// Create a new `TM1637Builder` instance.
+    pub fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
+        Self {
+            inner: TM1637 {
+                clk,
+                dio,
+                delay,
+                brightness: Brightness::L0,
+                delay_us: 10,
+                num_positions: 4,
+            },
+        }
+    }
+
+    /// Set the brightness level.
+    pub fn brightness(mut self, brightness: Brightness) -> Self {
+        self.inner.brightness = brightness;
+        self
+    }
+
+    /// Set the delay in microseconds.
+    pub fn delay_us(mut self, delay_us: u32) -> Self {
+        self.inner.delay_us = delay_us;
+        self
+    }
+
+    /// Set the number of positions on the display.
+    pub fn num_positions(mut self, num_positions: u8) -> Self {
+        self.inner.num_positions = num_positions;
+        self
+    }
+
+    /// Build the `TM1637` instance.
+    pub fn build(self) -> TM1637<CLK, DIO, DELAY> {
+        self.inner
+    }
+}
 
 /// `TM1637` 7-segment display driver.
 #[derive(Debug, Clone)]
@@ -45,6 +89,11 @@ impl<CLK, DIO, DELAY> TM1637<CLK, DIO, DELAY> {
             delay_us,
             num_positions,
         }
+    }
+
+    /// Create a new `TM1637Builder` instance.
+    pub fn builder(clk: CLK, dio: DIO, delay: DELAY) -> TM1637Builder<CLK, DIO, DELAY> {
+        TM1637Builder::new(clk, dio, delay)
     }
 }
 
