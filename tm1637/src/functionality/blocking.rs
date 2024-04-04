@@ -24,10 +24,14 @@ where
         for _ in 0..8 {
             tri!(self.clk_mut().set_low());
 
+            self.bit_delay();
+
             match rest & 0x01 {
                 1 => tri!(self.dio_mut().set_high()),
                 _ => tri!(self.dio_mut().set_low()),
             }
+
+            self.bit_delay();
 
             tri!(self.clk_mut().set_high());
             self.bit_delay();
@@ -37,10 +41,13 @@ where
 
         tri!(self.clk_mut().set_low());
         tri!(self.dio_mut().set_high());
+        self.bit_delay();
+
         tri!(self.clk_mut().set_high());
         self.bit_delay();
 
         tri!(self.clk_mut().set_low());
+        self.bit_delay();
 
         Ok(())
     }
@@ -58,6 +65,8 @@ where
     fn start(&mut self) -> Result<(), ERR> {
         tri!(self.dio_mut().set_low());
         self.bit_delay();
+        tri!(self.clk_mut().set_low());
+        self.bit_delay();
 
         Ok(())
     }
@@ -65,6 +74,7 @@ where
     /// Stop the communication with the display.
     fn stop(&mut self) -> Result<(), ERR> {
         tri!(self.dio_mut().set_low());
+        self.bit_delay();
         tri!(self.clk_mut().set_high());
         self.bit_delay();
         tri!(self.dio_mut().set_high());
