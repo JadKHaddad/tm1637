@@ -1,8 +1,5 @@
 //! Mappings for 7-segment display characters.
 
-// TODO: Check all the mappings and add more if needed.
-// TODO: Create a char mapper for charecters and special characters.
-
 //       A
 //      ---
 //  F  |   |  B
@@ -149,6 +146,8 @@ impl DigitBits {
 pub enum UpCharBits {
     /// Uppercase A
     UpA = 0x77,
+    /// Uppercase B
+    UpB = 0x7F,
     /// Uppercase C
     UpC = 0x39,
     /// Uppercase E
@@ -177,13 +176,16 @@ pub enum UpCharBits {
     UpS = 0x6D,
     /// Uppercase U
     UpU = 0x3E,
+    /// Uppercase Z
+    UpZ = 0x5B,
 }
 
 impl UpCharBits {
     /// Returns all uppercase characters.
-    pub const fn all() -> [UpCharBits; 13] {
+    pub const fn all() -> [UpCharBits; 15] {
         [
             UpCharBits::UpA,
+            UpCharBits::UpB,
             UpCharBits::UpC,
             UpCharBits::UpE,
             UpCharBits::UpF,
@@ -196,13 +198,15 @@ impl UpCharBits {
             UpCharBits::UpP,
             UpCharBits::UpS,
             UpCharBits::UpU,
+            UpCharBits::UpZ,
         ]
     }
 
     /// Returns all uppercase characters as [`u8`].
-    pub const fn all_u8() -> [u8; 13] {
+    pub const fn all_u8() -> [u8; 15] {
         [
             UpCharBits::UpA as u8,
+            UpCharBits::UpB as u8,
             UpCharBits::UpC as u8,
             UpCharBits::UpE as u8,
             UpCharBits::UpF as u8,
@@ -215,6 +219,7 @@ impl UpCharBits {
             UpCharBits::UpP as u8,
             UpCharBits::UpS as u8,
             UpCharBits::UpU as u8,
+            UpCharBits::UpZ as u8,
         ]
     }
 }
@@ -231,8 +236,14 @@ pub enum LoCharBits {
     LoC = 0x58,
     /// Lowercase D
     LoD = 0x5E,
+    /// Lowercase e
+    LoE = 0x7B,
+    /// Lowercase G
+    LoG = 0x6F,
     /// Lowercase H
     LoH = 0x74,
+    /// Lowercase I
+    LoI = 0x10,
     /// Lowercase N
     LoN = 0x54,
     /// Lowercase O
@@ -251,13 +262,16 @@ pub enum LoCharBits {
 
 impl LoCharBits {
     /// Returns all lowercase characters.
-    pub const fn all() -> [LoCharBits; 12] {
+    pub const fn all() -> [LoCharBits; 15] {
         [
             LoCharBits::LoA,
             LoCharBits::LoB,
             LoCharBits::LoC,
             LoCharBits::LoD,
+            LoCharBits::LoE,
+            LoCharBits::LoG,
             LoCharBits::LoH,
+            LoCharBits::LoI,
             LoCharBits::LoN,
             LoCharBits::LoO,
             LoCharBits::LoQ,
@@ -269,13 +283,16 @@ impl LoCharBits {
     }
 
     /// Returns all lowercase characters as [`u8`].
-    pub const fn all_u8() -> [u8; 12] {
+    pub const fn all_u8() -> [u8; 15] {
         [
             LoCharBits::LoA as u8,
             LoCharBits::LoB as u8,
             LoCharBits::LoC as u8,
             LoCharBits::LoD as u8,
+            LoCharBits::LoE as u8,
+            LoCharBits::LoG as u8,
             LoCharBits::LoH as u8,
+            LoCharBits::LoI as u8,
             LoCharBits::LoN as u8,
             LoCharBits::LoO as u8,
             LoCharBits::LoQ as u8,
@@ -305,32 +322,28 @@ pub enum SpecialCharBits {
         | SegmentBits::SegB as u8
         | SegmentBits::SegG as u8
         | SegmentBits::SegE as u8,
-    /// Dot (.)
-    Dot = SegmentBits::SegPoint as u8,
 }
 
 impl SpecialCharBits {
     /// Returns all special characters.
-    pub const fn all() -> [SpecialCharBits; 6] {
+    pub const fn all() -> [SpecialCharBits; 5] {
         [
             SpecialCharBits::Space,
             SpecialCharBits::Minus,
             SpecialCharBits::Underscore,
             SpecialCharBits::Equals,
             SpecialCharBits::QuestionMark,
-            SpecialCharBits::Dot,
         ]
     }
 
     /// Returns all special characters as [`u8`].
-    pub const fn all_u8() -> [u8; 6] {
+    pub const fn all_u8() -> [u8; 5] {
         [
             SpecialCharBits::Space as u8,
             SpecialCharBits::Minus as u8,
             SpecialCharBits::Underscore as u8,
             SpecialCharBits::Equals as u8,
             SpecialCharBits::QuestionMark as u8,
-            SpecialCharBits::Dot as u8,
         ]
     }
 }

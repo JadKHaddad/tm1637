@@ -41,8 +41,9 @@ pub mod blocking {
 
         /// Move all segments across the display.
         pub fn moving_segments(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let all_seg_bits = &mut SegmentBits::all_u8()[0..7];
-            for _ in 0..7 {
+            let mut all_seg_bits = [0; 13];
+            all_seg_bits[4..11].copy_from_slice(&SegmentBits::all_u8()[0..7]);
+            for _ in 0..11 {
                 all_seg_bits.rotate_left(1);
                 self.device.write_segments_raw(0, &all_seg_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
@@ -53,8 +54,9 @@ pub mod blocking {
 
         /// Move all digits across the display.
         pub fn moving_digits(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let mut all_dig_bits = DigitBits::all_u8();
-            for _ in 0..10 {
+            let mut all_dig_bits = [0; 16];
+            all_dig_bits[4..14].copy_from_slice(&DigitBits::all_u8());
+            for _ in 0..14 {
                 all_dig_bits.rotate_left(1);
                 self.device.write_segments_raw(0, &all_dig_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
@@ -65,8 +67,9 @@ pub mod blocking {
 
         /// Move all uppercase characters across the display.
         pub fn moving_up_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let mut all_up_char_bits = UpCharBits::all_u8();
-            for _ in 0..13 {
+            let mut all_up_char_bits = [0; 21];
+            all_up_char_bits[4..19].copy_from_slice(&UpCharBits::all_u8());
+            for _ in 0..19 {
                 all_up_char_bits.rotate_left(1);
                 self.device.write_segments_raw(0, &all_up_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
@@ -77,8 +80,9 @@ pub mod blocking {
 
         /// Move all lowercase characters across the display.
         pub fn moving_lo_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let mut all_lo_char_bits = LoCharBits::all_u8();
-            for _ in 0..12 {
+            let mut all_lo_char_bits = [0; 21];
+            all_lo_char_bits[4..19].copy_from_slice(&LoCharBits::all_u8());
+            for _ in 0..19 {
                 all_lo_char_bits.rotate_left(1);
                 self.device.write_segments_raw(0, &all_lo_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
@@ -89,8 +93,9 @@ pub mod blocking {
 
         /// Move all special characters across the display.
         pub fn moving_special_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
-            let mut all_sp_char_bits = SpecialCharBits::all_u8();
-            for _ in 0..12 {
+            let mut all_sp_char_bits = [0; 11];
+            all_sp_char_bits[4..9].copy_from_slice(&SpecialCharBits::all_u8());
+            for _ in 0..9 {
                 all_sp_char_bits.rotate_left(1);
                 self.device.write_segments_raw(0, &all_sp_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
