@@ -6,14 +6,12 @@
 ///
 /// ## Bits:
 /// - 1-3: Brightness level (0-7)
-/// - 4: Display on/off
+/// - 4: Display state (0 - off, 1 - on). Always on.
 /// - 5-7: Base address
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 pub enum Brightness {
-    /// Display off.
-    OFF = 0b10000000,
-    ///  Display on. Brightness level 0. Lowest brightness.
+    /// Brightness level 0. Lowest brightness.
     L0 = 0b10001000,
     /// Brightness level 1.
     L1 = 0b10001001,
@@ -29,4 +27,12 @@ pub enum Brightness {
     L6 = 0b10001110,
     /// Brightness level 7. Highest brightness.
     L7 = 0b10001111,
+}
+
+/// Display state.
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum DisplayState {
+    /// Display off.
+    OFF = 0b10000000,
 }

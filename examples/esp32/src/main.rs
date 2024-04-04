@@ -4,7 +4,6 @@
 
 use esp_backtrace as _;
 use esp_hal::{clock::ClockControl, gpio, peripherals::Peripherals, prelude::*, Delay};
-use esp_println::println;
 use tm1637::{
     demo::blocking::Demo,
     device::{brightness::Brightness, TM1637},
@@ -24,33 +23,22 @@ fn main() -> ! {
     let clk = io.pins.gpio4.into_open_drain_output();
     let dio = io.pins.gpio19.into_open_drain_output();
 
-    let mut tm = TM1637::new(clk, dio, delay, 10, 4);
+    let mut tm = TM1637::new(clk, dio, delay, Brightness::L0, 10, 4);
 
-    tm.clear().unwrap();
-    tm.set_brightness(Brightness::L4).unwrap();
+    // initialize the display. clears the display and sets the initial brightness.
+    tm.init().unwrap();
+    // change the brightness
+    tm.write_brightness(Brightness::L3).unwrap();
 
     let mut demo = Demo::new(tm, delay, 500);
     loop {
         demo.rotating_circle(20, 200).unwrap();
-        demo.clear().unwrap();
-
         demo.time(10, 500).unwrap();
-        demo.on_off(Brightness::L0, 10, 200).unwrap();
-        demo.clear().unwrap();
-
+        demo.on_off(10, 200).unwrap();
         demo.moving_segments().unwrap();
-        demo.clear().unwrap();
-
         demo.moving_digits().unwrap();
-        demo.clear().unwrap();
-
         demo.moving_up_chars().unwrap();
-        demo.clear().unwrap();
-
         demo.moving_lo_chars().unwrap();
-        demo.clear().unwrap();
-
         demo.moving_special_chars().unwrap();
-        demo.clear().unwrap();
     }
 }

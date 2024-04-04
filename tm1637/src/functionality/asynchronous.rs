@@ -87,7 +87,7 @@ where
 {
     /// Clear the display.
     async fn clear(&mut self) -> Result<(), TM1637Error<ERR>> {
-        self.write_raw_iter(0, core::iter::repeat(0).take(self.address_count() as usize))
+        self.write_raw_iter(0, core::iter::repeat(0).take(self.num_positions() as usize))
             .await
     }
 
@@ -111,7 +111,7 @@ where
         bytes: ITER,
     ) -> Result<(), TM1637Error<ERR>> {
         #[cfg(not(feature = "disable-checks"))]
-        if address >= self.address_count() {
+        if address >= self.num_positions() {
             return Ok(());
         }
 
@@ -119,7 +119,7 @@ where
         tri!(self.send_byte(0xc0 | (address & 0x0f)).await);
 
         #[cfg(not(feature = "disable-checks"))]
-        let bytes = bytes.take(self.address_count() as usize - address as usize);
+        let bytes = bytes.take(self.num_positions() as usize - address as usize);
 
         for byte in bytes {
             tri!(self.send_byte(byte).await);

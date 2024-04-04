@@ -1,6 +1,6 @@
 //! Blocking functionality.
 
-use crate::device::brightness::Brightness;
+use crate::device::brightness::{Brightness, DisplayState};
 
 use super::{BaseTM1637, TM1637Error};
 
@@ -18,8 +18,9 @@ where
     DELAY: DelayNs,
 {
     /// Send a byte to the display and wait for the ACK.
-    fn send_byte(&mut self, byte: u8) -> Result<(), TM1637Error<ERR>> {
+    fn write_byte(&mut self, byte: u8) -> Result<(), TM1637Error<ERR>> {
         let mut rest = byte;
+
         for _ in 0..8 {
             self.bit_delay();
 
@@ -52,6 +53,15 @@ where
         tri_digital!(self.clk_mut().set_low());
 
         self.bit_delay();
+
+        Ok(())
+    }
+
+    /// Set the brightness level.
+    fn write_brightness_raw(&mut self, brightness: u8) -> Result<(), TM1637Error<ERR>> {
+        tri_digital!(self.start());
+        tri!(self.write_byte(brightness));
+        tri_digital!(self.stop());
 
         Ok(())
     }
@@ -97,67 +107,77 @@ where
     DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
+    /// Initialize the display.
+    ///
+    /// Clear the display and set the brightness level.
+    fn init(&mut self) -> Result<(), TM1637Error<ERR>> {
+        self.clear()?;
+        self.write_brightness_raw(self.brightness() as u8)
+    }
+
+    /// Turn the display on.
+    fn on(&mut self) -> Result<(), TM1637Error<ERR>> {
+        self.write_brightness_raw(self.brightness() as u8)
+    }
+
+    /// Turn the display off.
+    fn off(&mut self) -> Result<(), TM1637Error<ERR>> {
+        self.write_brightness_raw(DisplayState::OFF as u8)
+    }
+
     /// Clear the display.
     fn clear(&mut self) -> Result<(), TM1637Error<ERR>> {
-        self.write_raw_iter(0, core::iter::repeat(0).take(self.address_count() as usize))
+        self.write_segments_raw_iter(0, core::iter::repeat(0).take(self.num_positions() as usize))
     }
 
-    /// Write the given bytes to the display starting from the given address. See [`BlockingTM1637::write_raw_iter`].
+    /// Write the given bytes to the display starting from the given position.
     ///
-    /// ## Notes:
-    /// - Addresses greater than [`BaseTM1637::address_count`] will be ignored.
-    /// - Bytes with index greater than [`BaseTM1637::address_count`] will be ignored.
-    fn write_raw(&mut self, address: u8, bytes: &[u8]) -> Result<(), TM1637Error<ERR>> {
-        self.write_raw_iter(address, bytes.iter().map(|b| *b))
+    /// See [`BlockingTM1637::write_segments_raw_iter`].
+    fn write_segments_raw(&mut self, address: u8, bytes: &[u8]) -> Result<(), TM1637Error<ERR>> {
+        self.write_segments_raw_iter(address, bytes.iter().map(|b| *b))
     }
 
-    /// Write the given bytes to the display starting from the given address. See [`BlockingTM1637::write_raw`].
+    /// Write the given bytes to the display starting from the given position.
     ///
     /// ## Notes:
-    /// - Addresses greater than [`BaseTM1637::address_count`] will be ignored.
-    /// - Bytes with index greater than [`BaseTM1637::address_count`] will be ignored.
-    fn write_raw_iter<ITER: Iterator<Item = u8>>(
+    /// - Positions greater than [`BaseTM1637::num_positions`] will be ignored.
+    /// - Bytes with index greater than [`BaseTM1637::num_positions`] will be ignored.
+    ///
+    /// Brightness level will not be written to the device on each call. Make sure to call [`BlockingTM1637::write_brightness`] or [`BlockingTM1637::init`] to set the brightness level.
+    fn write_segments_raw_iter<ITER: Iterator<Item = u8>>(
         &mut self,
-        address: u8,
+        position: u8,
         bytes: ITER,
     ) -> Result<(), TM1637Error<ERR>> {
         #[cfg(not(feature = "disable-checks"))]
-        if address >= self.address_count() {
+        if position >= self.num_positions() {
             return Ok(());
         }
 
         // COMM1
         tri_digital!(self.start());
-        tri!(self.send_byte(0x40));
+        tri!(self.write_byte(0x40));
         tri_digital!(self.stop());
 
         // COMM2
         tri_digital!(self.start());
-        tri!(self.send_byte(0xc0 | (address & 0x03)));
+        tri!(self.write_byte(0xc0 | (position & 0x03)));
 
         #[cfg(not(feature = "disable-checks"))]
-        let bytes = bytes.take(self.address_count() as usize - address as usize);
+        let bytes = bytes.take(self.num_positions() as usize - position as usize);
 
         for byte in bytes {
-            tri!(self.send_byte(byte));
+            tri!(self.write_byte(byte));
         }
 
         tri_digital!(self.stop());
 
-        // COMM3
-        // tri_digital!(self.start());
-        // tri!(self.send_byte(Brightness::L0 as u8));
-        // tri_digital!(self.stop());
-
         Ok(())
     }
 
-    /// Set the brightness level.
-    fn set_brightness(&mut self, brightness: Brightness) -> Result<(), TM1637Error<ERR>> {
-        tri_digital!(self.start());
-        tri!(self.send_byte(brightness as u8));
-        tri_digital!(self.stop());
-
-        Ok(())
+    /// Set `brightness` in `Self` and write the brightness level.
+    fn write_brightness(&mut self, brightness: Brightness) -> Result<(), TM1637Error<ERR>> {
+        *self.brightness_mut() = brightness;
+        self.write_brightness_raw(brightness as u8)
     }
 }

@@ -8,7 +8,7 @@ pub mod blocking {
     };
 
     use crate::{
-        device::{brightness::Brightness, TM1637},
+        device::TM1637,
         functionality::{blocking::BlockingTM1637, TM1637Error},
         mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
     };
@@ -39,17 +39,12 @@ pub mod blocking {
             }
         }
 
-        /// Clear the display.
-        pub fn clear(&mut self) -> Result<(), TM1637Error<ERR>> {
-            self.device.clear()
-        }
-
         /// Move all segments across the display.
         pub fn moving_segments(&mut self) -> Result<(), TM1637Error<ERR>> {
             let all_seg_bits = &mut SegmentBits::all_u8()[0..7];
             for _ in 0..7 {
                 all_seg_bits.rotate_left(1);
-                self.device.write_raw(0, &all_seg_bits)?;
+                self.device.write_segments_raw(0, &all_seg_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
             }
 
@@ -61,7 +56,7 @@ pub mod blocking {
             let mut all_dig_bits = DigitBits::all_u8();
             for _ in 0..10 {
                 all_dig_bits.rotate_left(1);
-                self.device.write_raw(0, &all_dig_bits)?;
+                self.device.write_segments_raw(0, &all_dig_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
             }
 
@@ -73,7 +68,7 @@ pub mod blocking {
             let mut all_up_char_bits = UpCharBits::all_u8();
             for _ in 0..13 {
                 all_up_char_bits.rotate_left(1);
-                self.device.write_raw(0, &all_up_char_bits)?;
+                self.device.write_segments_raw(0, &all_up_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
             }
 
@@ -85,7 +80,7 @@ pub mod blocking {
             let mut all_lo_char_bits = LoCharBits::all_u8();
             for _ in 0..12 {
                 all_lo_char_bits.rotate_left(1);
-                self.device.write_raw(0, &all_lo_char_bits)?;
+                self.device.write_segments_raw(0, &all_lo_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
             }
 
@@ -97,7 +92,7 @@ pub mod blocking {
             let mut all_sp_char_bits = SpecialCharBits::all_u8();
             for _ in 0..12 {
                 all_sp_char_bits.rotate_left(1);
-                self.device.write_raw(0, &all_sp_char_bits)?;
+                self.device.write_segments_raw(0, &all_sp_char_bits)?;
                 self.delay.delay_ms(self.moving_delay_ms);
             }
 
@@ -107,14 +102,13 @@ pub mod blocking {
         /// Turn the display on and off.
         pub fn on_off(
             &mut self,
-            brightness: Brightness,
             cycles: u32,
             of_off_delay_ms: u32,
         ) -> Result<(), TM1637Error<ERR>> {
             for _ in 0..cycles {
-                self.device.set_brightness(Brightness::OFF)?;
+                self.device.off()?;
                 self.delay.delay_ms(of_off_delay_ms);
-                self.device.set_brightness(brightness)?;
+                self.device.on()?;
                 self.delay.delay_ms(of_off_delay_ms);
             }
 
@@ -125,7 +119,7 @@ pub mod blocking {
         ///
         /// Displays 19:06 with blinking dots.
         pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), TM1637Error<ERR>> {
-            self.device.write_raw(
+            self.device.write_segments_raw(
                 0,
                 &[
                     DigitBits::One as u8,
@@ -142,7 +136,7 @@ pub mod blocking {
                     false => DigitBits::Nine as u8,
                 };
 
-                self.device.write_raw(1, &[bit])?;
+                self.device.write_segments_raw(1, &[bit])?;
 
                 self.delay.delay_ms(blink_delay_ms);
 
@@ -230,7 +224,7 @@ pub mod blocking {
             let mut shapes = [shape_1, shape_2, shape_3, shape_4, shape_5, shape_6];
             for _ in 0..cycles {
                 shapes.rotate_left(1);
-                self.device.write_raw(0, &shapes[0..1]).unwrap();
+                self.device.write_segments_raw(0, &shapes[0..1]).unwrap();
                 self.delay.delay_ms(rotating_delay_ms);
             }
 

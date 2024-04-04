@@ -1,5 +1,7 @@
 //! Device functionality in async and blocking modes.
 
+use crate::device::brightness::Brightness;
+
 #[cfg(feature = "async")]
 pub mod asynchronous;
 #[cfg(feature = "blocking")]
@@ -47,7 +49,11 @@ pub(crate) trait BaseTM1637<CLK, DIO, DELAY> {
 
     fn delay_mut(&mut self) -> &mut DELAY;
 
+    fn brightness(&self) -> Brightness;
+
+    fn brightness_mut(&mut self) -> &mut Brightness;
+
     fn delay_us(&self) -> u32;
 
-    fn address_count(&self) -> u8;
+    fn num_positions(&self) -> u8;
 }

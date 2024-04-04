@@ -2,6 +2,8 @@
 
 use crate::functionality::BaseTM1637;
 
+use self::brightness::Brightness;
+
 pub mod brightness;
 
 // TODO: Add builer
@@ -15,23 +17,33 @@ pub struct TM1637<CLK, DIO, DELAY> {
     dio: DIO,
     /// Delay provider.
     delay: DELAY,
+    /// Brightness level.
+    brightness: Brightness,
     /// The delay in microseconds.
     ///
     /// Experiment with this value to find the best value for your display.
     delay_us: u32,
-    /// The number of addresses on the display.
-    address_count: u8,
+    /// The number of positions on the display.
+    num_positions: u8,
 }
 
 impl<CLK, DIO, DELAY> TM1637<CLK, DIO, DELAY> {
     /// Create a new `TM1637` instance.
-    pub fn new(clk: CLK, dio: DIO, delay: DELAY, delay_us: u32, address_count: u8) -> Self {
+    pub fn new(
+        clk: CLK,
+        dio: DIO,
+        delay: DELAY,
+        brightness: Brightness,
+        delay_us: u32,
+        num_positions: u8,
+    ) -> Self {
         Self {
             clk,
             dio,
             delay,
+            brightness,
             delay_us,
-            address_count,
+            num_positions,
         }
     }
 }
@@ -61,12 +73,20 @@ impl<CLK, DIO, DELAY> BaseTM1637<CLK, DIO, DELAY> for TM1637<CLK, DIO, DELAY> {
         &mut self.delay
     }
 
+    fn brightness(&self) -> Brightness {
+        self.brightness
+    }
+
+    fn brightness_mut(&mut self) -> &mut Brightness {
+        &mut self.brightness
+    }
+
     fn delay_us(&self) -> u32 {
         self.delay_us
     }
 
-    fn address_count(&self) -> u8 {
-        self.address_count
+    fn num_positions(&self) -> u8 {
+        self.num_positions
     }
 }
 
