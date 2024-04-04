@@ -57,10 +57,10 @@ where
         Ok(())
     }
 
-    /// Write the brightness level to the display.
-    fn write_brightness_raw(&mut self, brightness: u8) -> Result<(), TM1637Error<ERR>> {
+    /// Write the `cmd` to the display.
+    fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), TM1637Error<ERR>> {
         tri_digital!(self.start());
-        tri!(self.write_byte(brightness));
+        tri!(self.write_byte(cmd));
         tri_digital!(self.stop());
 
         Ok(())
@@ -112,17 +112,17 @@ where
     /// Clear the display and set the brightness level.
     fn init(&mut self) -> Result<(), TM1637Error<ERR>> {
         self.clear()?;
-        self.write_brightness_raw(self.brightness() as u8)
+        self.write_cmd_raw(self.brightness() as u8)
     }
 
     /// Turn the display on.
     fn on(&mut self) -> Result<(), TM1637Error<ERR>> {
-        self.write_brightness_raw(self.brightness() as u8)
+        self.write_cmd_raw(self.brightness() as u8)
     }
 
     /// Turn the display off.
     fn off(&mut self) -> Result<(), TM1637Error<ERR>> {
-        self.write_brightness_raw(DisplayState::OFF as u8)
+        self.write_cmd_raw(DisplayState::OFF as u8)
     }
 
     /// Clear the display.
@@ -133,8 +133,8 @@ where
     /// Write the given bytes to the display starting from the given position.
     ///
     /// See [`BlockingTM1637::write_segments_raw_iter`].
-    fn write_segments_raw(&mut self, address: u8, bytes: &[u8]) -> Result<(), TM1637Error<ERR>> {
-        self.write_segments_raw_iter(address, bytes.iter().map(|b| *b))
+    fn write_segments_raw(&mut self, position: u8, bytes: &[u8]) -> Result<(), TM1637Error<ERR>> {
+        self.write_segments_raw_iter(position, bytes.iter().map(|b| *b))
     }
 
     /// Write the given bytes to the display starting from the given position.
@@ -155,9 +155,7 @@ where
         }
 
         // COMM1
-        tri_digital!(self.start());
-        tri!(self.write_byte(0x40));
-        tri_digital!(self.stop());
+        tri!(self.write_cmd_raw(0x40));
 
         // COMM2
         tri_digital!(self.start());
@@ -178,6 +176,6 @@ where
     /// Set `brightness` in `Self` and write the brightness level to the display.
     fn write_brightness(&mut self, brightness: Brightness) -> Result<(), TM1637Error<ERR>> {
         *self.brightness_mut() = brightness;
-        self.write_brightness_raw(brightness as u8)
+        self.write_cmd_raw(brightness as u8)
     }
 }
