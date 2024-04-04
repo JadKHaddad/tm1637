@@ -2,7 +2,7 @@
 
 use crate::device::brightness::{Brightness, DisplayState};
 
-use super::{BaseTM1637, TM1637Error};
+use super::BaseTM1637;
 
 use embedded_hal::{
     delay::DelayNs,
@@ -18,39 +18,38 @@ where
     DELAY: DelayNs,
 {
     /// Send a byte to the display and wait for the ACK.
-    fn write_byte(&mut self, byte: u8) -> Result<(), TM1637Error<ERR>> {
+    fn write_byte(&mut self, byte: u8) -> Result<(), ERR> {
         let mut rest = byte;
 
         for _ in 0..8 {
-            tri_digital!(self.clk_mut().set_low());
+            tri!(self.clk_mut().set_low());
 
             match rest & 0x01 {
-                1 => tri_digital!(self.dio_mut().set_high()),
-                _ => tri_digital!(self.dio_mut().set_low()),
+                1 => tri!(self.dio_mut().set_high()),
+                _ => tri!(self.dio_mut().set_low()),
             }
 
-            tri_digital!(self.clk_mut().set_high());
+            tri!(self.clk_mut().set_high());
             self.bit_delay();
 
             rest >>= 1;
         }
 
-        tri_digital!(self.clk_mut().set_low());
-        tri_digital!(self.dio_mut().set_high());
-        tri_digital!(self.clk_mut().set_high());
+        tri!(self.clk_mut().set_low());
+        tri!(self.dio_mut().set_high());
+        tri!(self.clk_mut().set_high());
         self.bit_delay();
 
-        tri_digital!(self.clk_mut().set_low());
-        self.bit_delay();
+        tri!(self.clk_mut().set_low());
 
         Ok(())
     }
 
     /// Write the `cmd` to the display.
-    fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), TM1637Error<ERR>> {
-        tri_digital!(self.start());
+    fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), ERR> {
+        tri!(self.start());
         tri!(self.write_byte(cmd));
-        tri_digital!(self.stop());
+        tri!(self.stop());
 
         Ok(())
     }
@@ -59,8 +58,6 @@ where
     fn start(&mut self) -> Result<(), ERR> {
         tri!(self.dio_mut().set_low());
         self.bit_delay();
-        tri!(self.clk_mut().set_low());
-        self.bit_delay();
 
         Ok(())
     }
@@ -68,7 +65,6 @@ where
     /// Stop the communication with the display.
     fn stop(&mut self) -> Result<(), ERR> {
         tri!(self.dio_mut().set_low());
-        self.bit_delay();
         tri!(self.clk_mut().set_high());
         self.bit_delay();
         tri!(self.dio_mut().set_high());
@@ -99,30 +95,30 @@ where
     /// Initialize the display.
     ///
     /// Clear the display and set the brightness level.
-    fn init(&mut self) -> Result<(), TM1637Error<ERR>> {
-        self.clear()?;
+    fn init(&mut self) -> Result<(), ERR> {
+        tri!(self.clear());
         self.write_cmd_raw(self.brightness() as u8)
     }
 
     /// Turn the display on.
-    fn on(&mut self) -> Result<(), TM1637Error<ERR>> {
+    fn on(&mut self) -> Result<(), ERR> {
         self.write_cmd_raw(self.brightness() as u8)
     }
 
     /// Turn the display off.
-    fn off(&mut self) -> Result<(), TM1637Error<ERR>> {
+    fn off(&mut self) -> Result<(), ERR> {
         self.write_cmd_raw(DisplayState::OFF as u8)
     }
 
     /// Clear the display.
-    fn clear(&mut self) -> Result<(), TM1637Error<ERR>> {
+    fn clear(&mut self) -> Result<(), ERR> {
         self.write_segments_raw_iter(0, core::iter::repeat(0).take(self.num_positions() as usize))
     }
 
     /// Write the given bytes to the display starting from the given position.
     ///
     /// See [`BlockingTM1637::write_segments_raw_iter`].
-    fn write_segments_raw(&mut self, position: u8, bytes: &[u8]) -> Result<(), TM1637Error<ERR>> {
+    fn write_segments_raw(&mut self, position: u8, bytes: &[u8]) -> Result<(), ERR> {
         self.write_segments_raw_iter(position, bytes.iter().map(|b| *b))
     }
 
@@ -137,7 +133,7 @@ where
         &mut self,
         position: u8,
         bytes: ITER,
-    ) -> Result<(), TM1637Error<ERR>> {
+    ) -> Result<(), ERR> {
         #[cfg(not(feature = "disable-checks"))]
         if position >= self.num_positions() {
             return Ok(());
@@ -147,7 +143,7 @@ where
         tri!(self.write_cmd_raw(0x40));
 
         // COMM2
-        tri_digital!(self.start());
+        tri!(self.start());
         tri!(self.write_byte(0xc0 | (position & 0x03)));
 
         #[cfg(not(feature = "disable-checks"))]
@@ -157,13 +153,13 @@ where
             tri!(self.write_byte(byte));
         }
 
-        tri_digital!(self.stop());
+        tri!(self.stop());
 
         Ok(())
     }
 
     /// Set `brightness` in `Self` and write the brightness level to the display.
-    fn write_brightness(&mut self, brightness: Brightness) -> Result<(), TM1637Error<ERR>> {
+    fn write_brightness(&mut self, brightness: Brightness) -> Result<(), ERR> {
         *self.brightness_mut() = brightness;
         self.write_cmd_raw(brightness as u8)
     }

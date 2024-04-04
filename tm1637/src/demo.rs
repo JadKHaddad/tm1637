@@ -9,7 +9,7 @@ pub mod blocking {
 
     use crate::{
         device::TM1637,
-        functionality::{blocking::BlockingTM1637, TM1637Error},
+        functionality::blocking::BlockingTM1637,
         mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
     };
 
@@ -40,7 +40,7 @@ pub mod blocking {
         }
 
         /// Move all segments across the display.
-        pub fn moving_segments(&mut self) -> Result<(), TM1637Error<ERR>> {
+        pub fn moving_segments(&mut self) -> Result<(), ERR> {
             let mut all_seg_bits = [0; 13];
             all_seg_bits[4..11].copy_from_slice(&SegmentBits::all_u8()[0..7]);
             for _ in 0..11 {
@@ -53,7 +53,7 @@ pub mod blocking {
         }
 
         /// Move all digits across the display.
-        pub fn moving_digits(&mut self) -> Result<(), TM1637Error<ERR>> {
+        pub fn moving_digits(&mut self) -> Result<(), ERR> {
             let mut all_dig_bits = [0; 16];
             all_dig_bits[4..14].copy_from_slice(&DigitBits::all_u8());
             for _ in 0..14 {
@@ -66,7 +66,7 @@ pub mod blocking {
         }
 
         /// Move all uppercase characters across the display.
-        pub fn moving_up_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
+        pub fn moving_up_chars(&mut self) -> Result<(), ERR> {
             let mut all_up_char_bits = [0; 21];
             all_up_char_bits[4..19].copy_from_slice(&UpCharBits::all_u8());
             for _ in 0..19 {
@@ -79,7 +79,7 @@ pub mod blocking {
         }
 
         /// Move all lowercase characters across the display.
-        pub fn moving_lo_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
+        pub fn moving_lo_chars(&mut self) -> Result<(), ERR> {
             let mut all_lo_char_bits = [0; 21];
             all_lo_char_bits[4..19].copy_from_slice(&LoCharBits::all_u8());
             for _ in 0..19 {
@@ -92,7 +92,7 @@ pub mod blocking {
         }
 
         /// Move all special characters across the display.
-        pub fn moving_special_chars(&mut self) -> Result<(), TM1637Error<ERR>> {
+        pub fn moving_special_chars(&mut self) -> Result<(), ERR> {
             let mut all_sp_char_bits = [0; 11];
             all_sp_char_bits[4..9].copy_from_slice(&SpecialCharBits::all_u8());
             for _ in 0..9 {
@@ -105,11 +105,7 @@ pub mod blocking {
         }
 
         /// Turn the display on and off.
-        pub fn on_off(
-            &mut self,
-            cycles: u32,
-            of_off_delay_ms: u32,
-        ) -> Result<(), TM1637Error<ERR>> {
+        pub fn on_off(&mut self, cycles: u32, of_off_delay_ms: u32) -> Result<(), ERR> {
             for _ in 0..cycles {
                 self.device.off()?;
                 self.delay.delay_ms(of_off_delay_ms);
@@ -123,7 +119,7 @@ pub mod blocking {
         /// Display the time and make the dots blink.
         ///
         /// Displays 19:06 with blinking dots.
-        pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), TM1637Error<ERR>> {
+        pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), ERR> {
             self.device.write_segments_raw(
                 0,
                 &[
@@ -154,11 +150,7 @@ pub mod blocking {
         /// Create a rotating circle animation.
         ///
         /// Creates a rotating circle at address 0.
-        pub fn rotating_circle(
-            &mut self,
-            cycles: u32,
-            rotating_delay_ms: u32,
-        ) -> Result<(), TM1637Error<ERR>> {
+        pub fn rotating_circle(&mut self, cycles: u32, rotating_delay_ms: u32) -> Result<(), ERR> {
             // First of all we create the shapes want to animate
 
             //  ---
