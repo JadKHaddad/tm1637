@@ -24,14 +24,11 @@ where
         for _ in 0..8 {
             tri_digital!(self.clk_mut().set_low());
 
-            self.bit_delay();
-
             match rest & 0x01 {
                 1 => tri_digital!(self.dio_mut().set_high()),
                 _ => tri_digital!(self.dio_mut().set_low()),
             }
 
-            self.bit_delay();
             tri_digital!(self.clk_mut().set_high());
             self.bit_delay();
 
@@ -40,8 +37,6 @@ where
 
         tri_digital!(self.clk_mut().set_low());
         tri_digital!(self.dio_mut().set_high());
-        self.bit_delay();
-
         tri_digital!(self.clk_mut().set_high());
         self.bit_delay();
 
