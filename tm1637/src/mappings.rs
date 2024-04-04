@@ -29,7 +29,7 @@ pub enum SegmentBits {
     /// Double point
     ///
     /// ## Usage
-    /// `Or` this bit with the bit responsible for displaying the double point. Often second address.
+    /// `Or` this bit with the bit responsible for displaying the double point. Often second position.
     SegPoint = 0b10000000,
 }
 
