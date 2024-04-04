@@ -22,8 +22,8 @@ where
         let mut rest = byte;
 
         for _ in 0..8 {
+            self.bit_delay();
             tri!(self.clk_mut().set_low());
-
             self.bit_delay();
 
             match rest & 0x01 {
@@ -32,7 +32,6 @@ where
             }
 
             self.bit_delay();
-
             tri!(self.clk_mut().set_high());
             self.bit_delay();
 

@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+gdbServerPort = 3333
+elf = "target/thumbv6m-none-eabi/release/rp2040-tm1637-example"
+firmware = "target/thumbv6m-none-eabi/release/rp2040-tm1637-example"
