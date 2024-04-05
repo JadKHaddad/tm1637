@@ -1,5 +1,71 @@
 //! This module contains a demo implementation for the `TM1637` device.
 
+#[cfg(feature = "async")]
+pub mod asynchronous {
+    use embedded_hal::digital::{InputPin, OutputPin};
+    use embedded_hal_async::delay::DelayNs;
+
+    use crate::{device::TM1637, functionality::asynchronous::AsyncTM1637, mappings::DigitBits};
+
+    pub struct Demo<CLK, DIO, DELAY, ERR>
+    where
+        CLK: OutputPin<Error = ERR>,
+        DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+        DELAY: DelayNs,
+    {
+        device: TM1637<CLK, DIO, DELAY>,
+        delay: DELAY,
+    }
+    impl<CLK, DIO, DELAY, ERR> Demo<CLK, DIO, DELAY, ERR>
+    where
+        ERR: core::fmt::Debug,
+        CLK: OutputPin<Error = ERR>,
+        DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+        DELAY: DelayNs,
+    {
+        /// Create a new demo instance.
+        pub fn new(device: TM1637<CLK, DIO, DELAY>, delay: DELAY) -> Self {
+            Self { device, delay }
+        }
+
+        /// Create a timer that counts down from 9 to 0 at the first position.
+        pub async fn timer(&mut self) -> Result<(), ERR> {
+            for i in (0..=9).rev() {
+                self.device
+                    .write_segments_raw(0, &[DigitBits::from_digit(i) as u8])
+                    .await?;
+                self.delay.delay_ms(1000).await;
+            }
+
+            self.device
+                .write_segments_raw(
+                    0,
+                    &[
+                        DigitBits::Zero,
+                        DigitBits::Zero,
+                        DigitBits::Zero,
+                        DigitBits::Zero,
+                    ]
+                    .map(|d| d as u8),
+                )
+                .await?;
+
+            for _ in 0..5 {
+                self.delay.delay_ms(300).await;
+                self.device.off().await?;
+                self.delay.delay_ms(300).await;
+                self.device.on().await?;
+            }
+
+            self.delay.delay_ms(300).await;
+
+            self.device.clear().await?;
+
+            Ok(())
+        }
+    }
+}
+
 #[cfg(feature = "blocking")]
 pub mod blocking {
     use embedded_hal::{
@@ -31,6 +97,7 @@ pub mod blocking {
         DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
         DELAY: DelayNs,
     {
+        /// Create a new demo instance.
         pub fn new(device: TM1637<CLK, DIO, DELAY>, delay: DELAY, moving_delay_ms: u32) -> Self {
             Self {
                 device,

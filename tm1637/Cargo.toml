@@ -11,7 +11,7 @@ keywords = ["tm1637", "i2c", "embedded-hal", "no-std", "embedded"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
-default = ["async", "blocking", "mappings", "demo"]
+default = ["async", "blocking", "mappings"]
 async = ["dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 mappings = []

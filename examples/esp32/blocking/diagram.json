@@ -1,0 +1,81 @@
+{
+    "version": 1,
+    "author": "Jad K. Haddad",
+    "editor": "wokwi",
+    "parts": [
+        {
+            "type": "board-esp32-devkit-c-v4",
+            "id": "esp",
+            "top": 0,
+            "left": 4.84,
+            "attrs": {
+                "flashSize": "16"
+            }
+        },
+        {
+            "type": "wokwi-tm1637-7segment",
+            "id": "sevseg1",
+            "top": -124.84,
+            "left": -252.17,
+            "attrs": {
+                "color": "red"
+            }
+        }
+    ],
+    "connections": [
+        [
+            "esp:TX",
+            "$serialMonitor:RX",
+            "",
+            []
+        ],
+        [
+            "esp:RX",
+            "$serialMonitor:TX",
+            "",
+            []
+        ],
+        [
+            "sevseg1:CLK",
+            "esp:4",
+            "gold",
+            [
+                "h297.6",
+                "v240"
+            ]
+        ],
+        [
+            "sevseg1:DIO",
+            "esp:19",
+            "green",
+            [
+                "h278.4",
+                "v182.4"
+            ]
+        ],
+        [
+            "sevseg1:VCC",
+            "esp:5V",
+            "red",
+            [
+                "h28.8",
+                "v278.4",
+                "h57.45"
+            ]
+        ],
+        [
+            "sevseg1:GND",
+            "esp:GND.2",
+            "black",
+            [
+                "h259.2",
+                "v96"
+            ]
+        ]
+    ],
+    "serialMonitor": {
+        "display": "terminal",
+        "convertEol": true
+    },
+    "dependencies": {}
+}

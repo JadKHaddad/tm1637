@@ -93,7 +93,6 @@ where
 ///
 /// Bring this trait into scope to enable blocking functionality for `TM1637` devices.
 #[allow(private_bounds)]
-#[allow(async_fn_in_trait)]
 pub trait BlockingTM1637<CLK, DIO, DELAY, ERR>:
     PrivateBlockingTM1637<CLK, DIO, DELAY, ERR>
 where
