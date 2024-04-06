@@ -27,15 +27,16 @@ async fn main(spawner: Spawner) {
 
     embassy::init(&clocks, timg0);
 
-    // spin up some other tasks
-    // decrease the delay_ms and the logs will be printed more frequently causing the display to lag, but at least it's not blocking :>
+    // Spin up some other tasks
+    // Decrease the delay_ms and the logs will be printed more frequently causing the display to lag, but at least it's not blocking :>
     spawner.spawn(logger0(2000)).unwrap();
     spawner.spawn(logger1(2000)).unwrap();
     spawner.spawn(logger2(2000)).unwrap();
 
     let mut tm = TM1637::builder(clk, dio, delay).build();
 
-    // initialize the display. clears the display and sets the initial brightness.
+    // Initialize the display.
+    // Clear the display and set the initial brightness.
     tm.init().await.unwrap();
 
     let delay = Delay {};

@@ -25,9 +25,11 @@ fn main() -> ! {
 
     let mut tm = TM1637::builder(clk, dio, delay).build();
 
-    // initialize the display. clears the display and sets the initial brightness.
+    // Initialize the display.
+    // Clear the display and set the initial brightness.
     tm.init().unwrap();
-    // change the brightness
+
+    // Change the brightness
     tm.write_brightness(Brightness::L3).unwrap();
 
     let mut demo = Demo::new(tm, delay, 500);
