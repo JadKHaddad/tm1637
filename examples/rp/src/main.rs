@@ -1,47 +1,51 @@
 #![no_std]
 #![no_main]
 
-use embassy_executor::Spawner;
-use embassy_rp::bind_interrupts;
-use embassy_rp::gpio::{Level, OutputOpenDrain};
-use embassy_rp::peripherals::USB;
-use embassy_rp::usb::{Driver, InterruptHandler};
-use embassy_time::Delay;
-use tm1637::{
-    demo::blocking::Demo,
-    device::{brightness::Brightness, TM1637},
-    functionality::blocking::BlockingTM1637,
-};
-use {defmt_rtt as _, panic_probe as _};
+use defmt_rtt as _;
+use panic_probe as _;
+use rp2040_hal::{clocks::init_clocks_and_plls, entry, pac, sio::Sio, watchdog::Watchdog, Timer};
+use tm1637::{demo::blocking::Demo, BlockingTM1637, Brightness, TM1637};
 
-bind_interrupts!(struct Irqs {
-    USBCTRL_IRQ => InterruptHandler<USB>;
-});
+#[entry]
+fn main() -> ! {
+    let mut peripherals = pac::Peripherals::take().unwrap();
+    let mut watchdog = Watchdog::new(peripherals.WATCHDOG);
+    const XOSC_CRYSTAL_FREQ: u32 = 12_000_000; // Typically found in BSP crates
+    let mut clocks = init_clocks_and_plls(
+        XOSC_CRYSTAL_FREQ,
+        peripherals.XOSC,
+        peripherals.CLOCKS,
+        peripherals.PLL_SYS,
+        peripherals.PLL_USB,
+        &mut peripherals.RESETS,
+        &mut watchdog,
+    )
+    .ok()
+    .unwrap();
 
-#[embassy_executor::task]
-async fn logger_task(driver: Driver<'static, USB>) {
-    embassy_usb_logger::run!(1024, log::LevelFilter::Info, driver);
-}
+    let mut pac = pac::Peripherals::take().unwrap();
+    let sio = Sio::new(pac.SIO);
+    let pins = rp2040_hal::gpio::Pins::new(
+        pac.IO_BANK0,
+        pac.PADS_BANK0,
+        sio.gpio_bank0,
+        &mut pac.RESETS,
+    );
 
-#[embassy_executor::main]
-async fn main(spawner: Spawner) {
-    let p = embassy_rp::init(Default::default());
-
-    let delay = Delay {};
-    let clk = OutputOpenDrain::new(p.PIN_14, Level::Low);
-    let dio = OutputOpenDrain::new(p.PIN_15, Level::Low);
-
-    let driver = Driver::new(p.USB, Irqs);
-    spawner.spawn(logger_task(driver)).unwrap();
+    let delay = Timer::new(pac.TIMER, &mut pac.RESETS, &mut clocks);
+    let clk = pins.gpio14.into_push_pull_output();
+    let dio = rp2040_hal::gpio::InOutPin::new(pins.gpio15);
 
     let mut tm = TM1637::builder(clk, dio, delay).build();
 
-    // initialize the display. clears the display and sets the initial brightness.
+    // Initialize the display.
+    // Clear the display and set the initial brightness.
     tm.init().unwrap();
-    // change the brightness
+
+    // Change the brightness
     tm.write_brightness(Brightness::L3).unwrap();
 
-    let mut demo = Demo::new(tm, Delay {}, 500);
+    let mut demo = Demo::new(tm, delay, 500);
     loop {
         demo.rotating_circle(20, 200).unwrap();
         demo.time(10, 500).unwrap();
