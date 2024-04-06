@@ -8,8 +8,8 @@ use embedded_hal::digital::{InputPin, OutputPin};
 use embedded_hal_async::delay::DelayNs;
 
 /// Private asynchronous functionality.
-pub(crate) trait PrivateAsyncTM1637<CLK, DIO, DELAY, ERR>:
-    BaseTM1637<CLK, DIO, DELAY>
+#[allow(async_fn_in_trait)]
+pub trait PrivateAsyncTM1637<CLK, DIO, DELAY, ERR>: BaseTM1637<CLK, DIO, DELAY>
 where
     CLK: OutputPin<Error = ERR>,
     DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
@@ -90,7 +90,6 @@ where
 /// Asynchronous functionality.
 ///
 /// Bring this trait into scope to enable asynchronous functionality for `TM1637` devices.
-#[allow(private_bounds)]
 #[allow(async_fn_in_trait)]
 pub trait AsyncTM1637<CLK, DIO, DELAY, ERR>: PrivateAsyncTM1637<CLK, DIO, DELAY, ERR>
 where
@@ -136,7 +135,7 @@ where
     /// - Positions greater than [`BaseTM1637::num_positions`] will be ignored.
     /// - Bytes with index greater than [`BaseTM1637::num_positions`] will be ignored.
     ///
-    /// Brightness level will not be written to the device on each call. Make sure to call [`AsyncTM1637::write_brightness`] or [`BlockingTM1637::init`] to set the brightness level.
+    /// Brightness level will not be written to the device on each call. Make sure to call [`AsyncTM1637::write_brightness`] or [`AsyncTM1637::init`] to set the brightness level.
     async fn write_segments_raw_iter<ITER: Iterator<Item = u8>>(
         &mut self,
         position: u8,

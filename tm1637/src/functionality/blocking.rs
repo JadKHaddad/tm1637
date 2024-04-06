@@ -10,8 +10,7 @@ use embedded_hal::{
 };
 
 /// Private blocking functionality.
-pub(crate) trait PrivateBlockingTM1637<CLK, DIO, DELAY, ERR>:
-    BaseTM1637<CLK, DIO, DELAY>
+pub trait PrivateBlockingTM1637<CLK, DIO, DELAY, ERR>: BaseTM1637<CLK, DIO, DELAY>
 where
     CLK: OutputPin<Error = ERR>,
     DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
@@ -92,7 +91,6 @@ where
 /// Blocking functionality.
 ///
 /// Bring this trait into scope to enable blocking functionality for `TM1637` devices.
-#[allow(private_bounds)]
 pub trait BlockingTM1637<CLK, DIO, DELAY, ERR>:
     PrivateBlockingTM1637<CLK, DIO, DELAY, ERR>
 where

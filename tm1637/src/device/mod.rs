@@ -1,6 +1,6 @@
 //! Device definition and implementation.
 
-use crate::functionality::BaseTM1637;
+use crate::functionality::{BaseTM1637, Sealed};
 
 use self::brightness::Brightness;
 
@@ -138,6 +138,8 @@ impl<CLK, DIO, DELAY> BaseTM1637<CLK, DIO, DELAY> for TM1637<CLK, DIO, DELAY> {
         self.num_positions
     }
 }
+
+impl<CLK, DIO, DELAY> Sealed for TM1637<CLK, DIO, DELAY> {}
 
 #[cfg(feature = "blocking")]
 mod impl_blocking {
