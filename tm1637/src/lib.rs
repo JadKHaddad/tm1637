@@ -30,3 +30,9 @@ pub mod device;
 pub mod functionality;
 #[cfg(feature = "mappings")]
 pub mod mappings;
+
+pub use device::{brightness::Brightness, TM1637Builder, TM1637};
+#[cfg(feature = "async")]
+pub use functionality::asynchronous::AsyncTM1637;
+#[cfg(feature = "blocking")]
+pub use functionality::blocking::BlockingTM1637;
