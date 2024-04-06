@@ -14,7 +14,7 @@ async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 mappings = []
 disable-checks = []
-demo = []
+demo = ["mappings"]
 
 [dependencies]
 embedded-hal-async = { version = "1.0.0", optional = true }

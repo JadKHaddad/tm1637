@@ -9,12 +9,12 @@ pub mod brightness;
 /// `TM1637` 7-segment display builder.
 #[derive(Debug, Clone)]
 pub struct TM1637Builder<CLK, DIO, DELAY> {
-    /// The inner `TM1637` instance.
+    /// The inner [`TM1637`] instance.
     inner: TM1637<CLK, DIO, DELAY>,
 }
 
 impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
-    /// Create a new `TM1637Builder` instance.
+    /// Create a new [`TM1637Builder`] instance.
     pub fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
         Self {
             inner: TM1637 {
@@ -46,7 +46,7 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
         self
     }
 
-    /// Build the `TM1637` instance.
+    /// Build the [`TM1637`] instance.
     pub fn build(self) -> TM1637<CLK, DIO, DELAY> {
         self.inner
     }
@@ -72,7 +72,7 @@ pub struct TM1637<CLK, DIO, DELAY> {
 }
 
 impl<CLK, DIO, DELAY> TM1637<CLK, DIO, DELAY> {
-    /// Create a new `TM1637` instance.
+    /// Create a new [`TM1637`] instance.
     pub fn new(
         clk: CLK,
         dio: DIO,
@@ -91,7 +91,7 @@ impl<CLK, DIO, DELAY> TM1637<CLK, DIO, DELAY> {
         }
     }
 
-    /// Create a new `TM1637Builder` instance.
+    /// Create a new [`TM1637Builder`] instance.
     pub fn builder(clk: CLK, dio: DIO, delay: DELAY) -> TM1637Builder<CLK, DIO, DELAY> {
         TM1637Builder::new(clk, dio, delay)
     }

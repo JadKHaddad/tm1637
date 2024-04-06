@@ -305,7 +305,6 @@ impl LoCharBits {
 }
 
 /// Maps a character to its closest possible representation on a 7-segment display.
-/// The 8th segment is the dot.
 #[repr(u8)]
 #[derive(Debug)]
 pub enum SpecialCharBits {
