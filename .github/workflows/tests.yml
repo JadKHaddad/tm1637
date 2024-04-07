@@ -38,23 +38,19 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
-      - name: Check formatting
-        uses: actions-rs/cargo@v1
-        working-directory: ${{env.working-directory}}
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@v2
         with:
-          command: fmt
-          args: -- --check
+          tool: cargo-nextest
+        
+      - name: Check formatting
+        working-directory: ${{env.working-directory}}
+        run: cargo fmt -- --check
 
       - name: Check for clippy warnings
-        uses: actions-rs/cargo@v1
         working-directory: ${{env.working-directory}}
-        with:
-          command: clippy
-          args: --all --all-features -- -D warnings
-
+        run: cargo clippy --all --all-features -- -D warnings
+        
       - name: Run tests
-        uses: actions-rs/cargo@v1
         working-directory: ${{env.working-directory}}
-        with:
-          command: test
-          args: --all-features
+        run: cargo test --all-features
