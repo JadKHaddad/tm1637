@@ -7,6 +7,7 @@ description = "A platform agnostic driver to interface with the TM1637 (4-digit 
 repository = "https://github.com/JadKHaddad/tm1637"
 license = "MIT OR Apache-2.0"
 keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
+readme = "../README.md"
 
 [features]
 default = ["async", "blocking", "mappings"]
