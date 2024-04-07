@@ -40,18 +40,21 @@ jobs:
 
       - name: Check formatting
         uses: actions-rs/cargo@v1
+        working-directory: ${{env.working-directory}}
         with:
           command: fmt
           args: -- --check
 
       - name: Check for clippy warnings
         uses: actions-rs/cargo@v1
+        working-directory: ${{env.working-directory}}
         with:
           command: clippy
           args: --all --all-features -- -D warnings
 
       - name: Run tests
         uses: actions-rs/cargo@v1
+        working-directory: ${{env.working-directory}}
         with:
           command: test
           args: --all-features
