@@ -9,16 +9,18 @@ publish = false
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
+
+rp2040-hal = { version = "0.10.0", features = ["rt", "critical-section-impl"] }
+rp2040-boot2 = "0.3.0"
+
 embedded-hal = { version = "1.0.0" }
-embedded-hal-old = { package = "embedded-hal", version = "0.2.5", features = [
+embedded-hal-0-2 = { package = "embedded-hal", version = "0.2.5", features = [
     "unproven",
 ] }
 
 defmt = "0.3"
 defmt-rtt = "0.4"
-panic-probe = { version = "0.3", features = ["print-defmt"] }
-
-rp-pico = "0.8"
+panic-halt = "0.2.0"
 
 tm1637 = { path = "../../tm1637", default-features = false, features = [
     "blocking",
