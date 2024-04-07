@@ -36,5 +36,5 @@ pub enum Brightness {
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum DisplayState {
     /// Display off.
-    OFF = 0b10000000,
+    Off = 0b10000000,
 }

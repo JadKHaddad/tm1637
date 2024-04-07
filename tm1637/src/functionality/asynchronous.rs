@@ -112,7 +112,7 @@ where
 
     /// Turn the display off.
     async fn off(&mut self) -> Result<(), ERR> {
-        self.write_cmd_raw(DisplayState::OFF as u8).await
+        self.write_cmd_raw(DisplayState::Off as u8).await
     }
 
     /// Clear the display.
@@ -125,7 +125,7 @@ where
     ///
     /// See [`AsyncTM1637::write_segments_raw_iter`].
     async fn write_segments_raw(&mut self, position: u8, bytes: &[u8]) -> Result<(), ERR> {
-        self.write_segments_raw_iter(position, bytes.iter().map(|b| *b))
+        self.write_segments_raw_iter(position, bytes.iter().copied())
             .await
     }
 
