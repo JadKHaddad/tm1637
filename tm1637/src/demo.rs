@@ -2,7 +2,7 @@
 
 #[cfg(feature = "async")]
 pub mod asynchronous {
-    //! Asynchronous demo.
+    //! Asynchronous demo module.
 
     use embedded_hal::digital::{InputPin, OutputPin};
     use embedded_hal_async::delay::DelayNs;
@@ -71,7 +71,7 @@ pub mod asynchronous {
 
 #[cfg(feature = "blocking")]
 pub mod blocking {
-    //! Blocking demo.
+    //! Blocking demo module.
 
     use embedded_hal::{
         delay::DelayNs,
