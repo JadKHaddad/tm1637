@@ -1,6 +1,7 @@
 //! This module contains a demo implementation for the `TM1637` device.
 
 #[cfg(feature = "async")]
+#[allow(clippy::mixed_attributes_style)]
 pub mod asynchronous {
     //! Asynchronous demo module.
 
@@ -70,6 +71,7 @@ pub mod asynchronous {
 }
 
 #[cfg(feature = "blocking")]
+#[allow(clippy::mixed_attributes_style)]
 pub mod blocking {
     //! Blocking demo module.
 
