@@ -10,7 +10,7 @@ keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
 readme = "../README.md"
 
 [features]
-default = ["async", "blocking", "mappings"]
+default = ["async", "impl-debug"]
 async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 mappings = []

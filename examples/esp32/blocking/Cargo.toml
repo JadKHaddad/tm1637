@@ -26,7 +26,6 @@ embedded-hal = "1.0.0"
 
 tm1637 = { path = "../../../tm1637", default-features = false, features = [
     "blocking",
-    "mappings",
     "demo",
 ] }
 

@@ -1,9 +1,11 @@
-//! A platform agnostic driver to interface with the `TM1637` (4-digit 7-segment display) using the [`embedded-hal`](embedded_hal) and [`embedded-hal-async`](embedded_hal_async) traits.
+//! A platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](embedded_hal) and [`embedded-hal-async`](embedded_hal_async) traits.
 //!
 //! ## Features
 //! The following features are available:
 //! - `blocking`: enables blocking functionality.
 //! - `async`: enables asynchronous functionality.
+//! - `impl-debug`: implements `core::fmt::Debug` for structs and enums.
+//! - `impl-defmt-format`: implements `defmt::Format` for structs and enums.
 //! - `mappings`: enables the mappings module.
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
@@ -40,9 +42,3 @@ pub mod demo;
 
 #[cfg(feature = "mappings")]
 pub mod mappings;
-
-// pub use device_::{brightness::Brightness, TM1637Builder, TM1637};
-// #[cfg(feature = "async")]
-// pub use functionality::asynchronous::AsyncTM1637;
-// #[cfg(feature = "blocking")]
-// pub use functionality::blocking::BlockingTM1637;

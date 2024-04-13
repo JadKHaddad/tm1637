@@ -28,7 +28,6 @@ log = "0.4.20"
 
 tm1637 = { path = "../../../tm1637", default-features = false, features = [
     "async",
-    "mappings",
     "demo",
 ] }
 
