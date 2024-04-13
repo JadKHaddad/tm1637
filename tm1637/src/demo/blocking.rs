@@ -6,8 +6,7 @@ use embedded_hal::{
 };
 
 use crate::{
-    device::TM1637,
-    functionality::blocking::BlockingTM1637,
+    blocking::TM1637,
     mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
 };
 

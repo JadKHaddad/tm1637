@@ -3,7 +3,7 @@
 use embedded_hal::digital::{InputPin, OutputPin};
 use embedded_hal_async::delay::DelayNs;
 
-use crate::{device::TM1637, functionality::asynchronous::AsyncTM1637, mappings::DigitBits};
+use crate::{asynch::TM1637, mappings::DigitBits};
 
 /// Asynchronous demo.
 pub struct Demo<CLK, DIO, DELAY, ERR>

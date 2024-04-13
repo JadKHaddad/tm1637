@@ -16,7 +16,11 @@ blocking = ["dep:embedded-hal"]
 mappings = []
 disable-checks = []
 demo = ["mappings"]
+impl-debug = []
+impl-defmt-format = ["dep:defmt"]
 
 [dependencies]
+duplicate = "1.0.0"
 embedded-hal-async = { version = "1.0.0", optional = true }
 embedded-hal = { version = "1.0.0", optional = true }
+defmt = { version = "0.3.6", optional = true }

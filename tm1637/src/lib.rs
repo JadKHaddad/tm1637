@@ -24,15 +24,25 @@ macro_rules! tri {
     };
 }
 
+mod brightness;
+mod device;
+
+pub use brightness::Brightness;
+
+#[cfg(feature = "async")]
+pub use crate::device::asynch;
+
+#[cfg(feature = "blocking")]
+pub use crate::device::blocking;
+
 #[cfg(feature = "demo")]
 pub mod demo;
-pub mod device;
-pub mod functionality;
+
 #[cfg(feature = "mappings")]
 pub mod mappings;
 
-pub use device::{brightness::Brightness, TM1637Builder, TM1637};
-#[cfg(feature = "async")]
-pub use functionality::asynchronous::AsyncTM1637;
-#[cfg(feature = "blocking")]
-pub use functionality::blocking::BlockingTM1637;
+// pub use device_::{brightness::Brightness, TM1637Builder, TM1637};
+// #[cfg(feature = "async")]
+// pub use functionality::asynchronous::AsyncTM1637;
+// #[cfg(feature = "blocking")]
+// pub use functionality::blocking::BlockingTM1637;
