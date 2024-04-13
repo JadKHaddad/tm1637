@@ -8,7 +8,7 @@ use esp_backtrace as _;
 use esp_hal::{
     clock::ClockControl, embassy, peripherals::Peripherals, prelude::*, timer::TimerGroup, IO,
 };
-use tm1637::{demo::asynchronous::Demo, AsyncTM1637, TM1637};
+use tm1637::{asynch::TM1637, demo::asynch::Demo};
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -28,7 +28,7 @@ async fn main(spawner: Spawner) {
     embassy::init(&clocks, timg0);
 
     // Spin up some other tasks.
-    // Decrease the delay_ms and the logs will be printed more frequently causing the display to lag, but at least it's not blocking :>
+    // Decrease the delay_ms and the logs will be printed more frequently causing the display to lag.
     spawner.spawn(logger0(2000)).unwrap();
     spawner.spawn(logger1(2000)).unwrap();
     spawner.spawn(logger2(2000)).unwrap();

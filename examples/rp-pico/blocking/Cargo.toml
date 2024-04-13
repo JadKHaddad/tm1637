@@ -24,7 +24,6 @@ panic-halt = "0.2.0"
 
 tm1637 = { path = "../../../tm1637", default-features = false, features = [
     "blocking",
-    "mappings",
     "demo",
 ] }
 

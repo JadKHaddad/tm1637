@@ -11,7 +11,7 @@ use embassy_rp::{
 };
 use embassy_time::{Delay, Duration, Timer};
 use panic_probe as _;
-use tm1637::{demo::asynchronous::Demo, device::TM1637, functionality::asynchronous::AsyncTM1637};
+use tm1637::{asynch::TM1637, demo::asynch::Demo};
 
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
@@ -34,7 +34,7 @@ async fn main(spawner: Spawner) {
     spawner.spawn(logger_task(driver)).unwrap();
 
     // Spin up some other tasks.
-    // Decrease the delay_ms and the logs will be printed more frequently causing the display to lag, but at least it's not blocking :>
+    // Decrease the delay_ms and the logs will be printed more frequently causing the display to lag.
     spawner.spawn(logger0(2000)).unwrap();
     spawner.spawn(logger1(2000)).unwrap();
     spawner.spawn(logger2(2000)).unwrap();

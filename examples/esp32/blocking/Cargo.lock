@@ -135,6 +135,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "duplicate"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de78e66ac9061e030587b2a2e75cc88f22304913c907b11307bca737141230cb"
+dependencies = [
+ "heck",
+ "proc-macro-error",
+]
+
+[[package]]
 name = "embassy-executor"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -991,6 +1001,7 @@ dependencies = [
 name = "tm1637"
 version = "0.1.0"
 dependencies = [
+ "duplicate",
  "embedded-hal 1.0.0",
 ]
 
