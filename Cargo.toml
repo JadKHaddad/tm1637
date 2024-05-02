@@ -1,0 +1,10 @@
+[workspace]
+members = ["tm1637"]
+exclude = [
+    "examples/esp32/async",
+    "examples/esp32/blocking",
+    "examples/rp-pico/async",
+    "examples/rp-pico/blocking",
+]
+resolver = "2"
+default-members = ["tm1637"]

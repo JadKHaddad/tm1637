@@ -150,7 +150,7 @@ where
     ///
     /// Creates a rotating circle at address 0.
     pub fn rotating_circle(&mut self, cycles: u32, rotating_delay_ms: u32) -> Result<(), ERR> {
-        // First of all we create the shapes want to animate
+        // First of all we create the shapes we want to animate
 
         //  ---
         // |   |
