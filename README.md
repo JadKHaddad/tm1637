@@ -16,7 +16,9 @@ The following features are available:
 
 ## Usage
 
-See [examples](https://github.com/JadKHaddad/tm1637/tree/main/examples) directory.
+See [examples](https://github.com/JadKHaddad/tm1637/tree/main/examples) directory or visit [wokwi.com](https://wokwi.com/projects/397159262874205185).
+
+![example](https://github.com/JadKHaddad/tm1637/blob/main/assets/esp32c3-wokwi.gif?raw=true)
 
 ## Other Repositories
 
