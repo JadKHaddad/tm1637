@@ -8,7 +8,7 @@ use esp_backtrace as _;
 use esp_hal::{
     clock::ClockControl, embassy, peripherals::Peripherals, prelude::*, timer::TimerGroup, IO,
 };
-use tm1637::{asynch::TM1637, demo::asynch::Demo};
+use tm1637_embedded_hal::{asynch::TM1637, demo::asynch::Demo};
 
 #[main]
 async fn main(spawner: Spawner) {

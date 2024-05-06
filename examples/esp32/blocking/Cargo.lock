@@ -450,7 +450,7 @@ dependencies = [
  "esp-hal",
  "esp-println",
  "esp-wifi",
- "tm1637",
+ "tm1637-embedded-hal",
 ]
 
 [[package]]
@@ -998,7 +998,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "tm1637"
+name = "tm1637-embedded-hal"
 version = "0.1.0"
 dependencies = [
  "duplicate",

@@ -4,7 +4,7 @@
 
 use esp_backtrace as _;
 use esp_hal::{clock::ClockControl, gpio, peripherals::Peripherals, prelude::*, Delay};
-use tm1637::{blocking::TM1637, demo::blocking::Demo, Brightness};
+use tm1637_embedded_hal::{blocking::TM1637, demo::blocking::Demo, Brightness};
 
 #[entry]
 fn main() -> ! {

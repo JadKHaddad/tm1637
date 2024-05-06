@@ -4,7 +4,7 @@
 use panic_halt as _;
 use rp2040_hal::gpio::{AnyPin, InOutPin};
 use rp2040_hal::pac;
-use tm1637::{blocking::TM1637, demo::blocking::Demo, Brightness};
+use tm1637_embedded_hal::{blocking::TM1637, demo::blocking::Demo, Brightness};
 
 #[link_section = ".boot2"]
 #[used]

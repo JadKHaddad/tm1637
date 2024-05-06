@@ -32,7 +32,7 @@ embassy-usb-logger = "0.1.0"
 
 log = "0.4"
 
-tm1637 = { path = "../../../tm1637", default-features = false, features = [
+tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, features = [
     "async",
     "demo",
 ] }

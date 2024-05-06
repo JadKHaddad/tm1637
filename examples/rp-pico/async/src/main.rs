@@ -11,7 +11,7 @@ use embassy_rp::{
 };
 use embassy_time::{Delay, Duration, Timer};
 use panic_probe as _;
-use tm1637::{asynch::TM1637, demo::asynch::Demo};
+use tm1637_embedded_hal::{asynch::TM1637, demo::asynch::Demo};
 
 bind_interrupts!(struct Irqs {
     USBCTRL_IRQ => InterruptHandler<USB>;
