@@ -8,6 +8,7 @@ use embedded_hal::{
 use crate::{
     blocking::TM1637,
     mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
+    formatters::i16_to_4digits,
 };
 
 /// Blocking demo.
@@ -59,6 +60,16 @@ where
             all_dig_bits.rotate_left(1);
             self.device.write_segments_raw(0, &all_dig_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
+        }
+
+        Ok(())
+    }
+
+    /// Countdown from 100 to 0.
+    pub fn countdown(&mut self) -> Result<(), ERR> {
+        for i in (0..100).rev() {
+            self.device.write_segments_raw(0, &i16_to_4digits(i))?;
+            self.delay.delay_ms(self.moving_delay_ms / 10);
         }
 
         Ok(())

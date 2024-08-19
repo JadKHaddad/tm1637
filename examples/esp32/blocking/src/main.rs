@@ -35,6 +35,7 @@ fn main() -> ! {
         demo.on_off(10, 200).unwrap();
         demo.moving_segments().unwrap();
         demo.moving_digits().unwrap();
+        demo.countdown().unwrap();
         demo.moving_up_chars().unwrap();
         demo.moving_lo_chars().unwrap();
         demo.moving_special_chars().unwrap();

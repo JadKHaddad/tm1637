@@ -42,3 +42,6 @@ pub mod demo;
 
 #[cfg(feature = "mappings")]
 pub mod mappings;
+
+#[cfg(feature = "formatters")]
+pub mod formatters;
