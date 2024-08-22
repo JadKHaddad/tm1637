@@ -7,8 +7,8 @@ use embedded_hal::{
 
 use crate::{
     blocking::TM1637,
-    mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
     formatters::i16_to_4digits,
+    mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
 };
 
 /// Blocking demo.
