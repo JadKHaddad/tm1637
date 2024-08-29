@@ -144,6 +144,84 @@ impl DigitBits {
     }
 }
 
+/// Maps a upside-down digit to its closest possible representation on a 7-segment display.
+#[repr(u8)]
+#[derive(Clone, Copy)]
+#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+pub enum UpsideDownDigitBits {
+    /// Upside-down 0
+    Zero = 0b00111111,
+    /// Upside-down 1
+    One = 0b00110000,
+    /// Upside-down 2
+    Two = 0b01011011,
+    /// Upside-down 3
+    Three = 0b01111001,
+    /// Upside-down 4
+    Four = 0b01110100,
+    /// Upside-down 5
+    Five = 0b01101101,
+    /// Upside-down 6
+    Six = 0b01101111,
+    /// Upside-down 7
+    Seven = 0b00111000,
+    /// Upside-down 8
+    Eight = 0b01111111,
+    /// Upside-down 9
+    Nine = 0b01111101,
+}
+impl UpsideDownDigitBits {
+    /// Returns all digits.
+    pub const fn all() -> [UpsideDownDigitBits; 10] {
+        [
+            UpsideDownDigitBits::Zero,
+            UpsideDownDigitBits::One,
+            UpsideDownDigitBits::Two,
+            UpsideDownDigitBits::Three,
+            UpsideDownDigitBits::Four,
+            UpsideDownDigitBits::Five,
+            UpsideDownDigitBits::Six,
+            UpsideDownDigitBits::Seven,
+            UpsideDownDigitBits::Eight,
+            UpsideDownDigitBits::Nine,
+        ]
+    }
+
+    /// Returns all digits as [`u8`].
+    pub const fn all_u8() -> [u8; 10] {
+        [
+            UpsideDownDigitBits::Zero as u8,
+            UpsideDownDigitBits::One as u8,
+            UpsideDownDigitBits::Two as u8,
+            UpsideDownDigitBits::Three as u8,
+            UpsideDownDigitBits::Four as u8,
+            UpsideDownDigitBits::Five as u8,
+            UpsideDownDigitBits::Six as u8,
+            UpsideDownDigitBits::Seven as u8,
+            UpsideDownDigitBits::Eight as u8,
+            UpsideDownDigitBits::Nine as u8,
+        ]
+    }
+
+    /// Creates a new [`DigitBits`] from a [`u8`] digit.
+    pub fn from_digit(digit: u8) -> Self {
+        match digit {
+            0 => UpsideDownDigitBits::Zero,
+            1 => UpsideDownDigitBits::One,
+            2 => UpsideDownDigitBits::Two,
+            3 => UpsideDownDigitBits::Three,
+            4 => UpsideDownDigitBits::Four,
+            5 => UpsideDownDigitBits::Five,
+            6 => UpsideDownDigitBits::Six,
+            7 => UpsideDownDigitBits::Seven,
+            8 => UpsideDownDigitBits::Eight,
+            9 => UpsideDownDigitBits::Nine,
+            _ => UpsideDownDigitBits::Zero,
+        }
+    }
+}
+
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Clone, Copy)]

@@ -14,8 +14,9 @@ default = ["async", "impl-debug"]
 async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 mappings = []
+formatters = ["mappings"]
 disable-checks = []
-demo = ["mappings"]
+demo = ["mappings", "formatters"]
 impl-debug = []
 impl-defmt-format = ["dep:defmt"]
 
@@ -24,3 +25,6 @@ duplicate = "1.0.0"
 embedded-hal-async = { version = "1.0.0", optional = true }
 embedded-hal = { version = "1.0.0", optional = true }
 defmt = { version = "0.3.6", optional = true }
+
+[package.metadata.docs.rs]
+features = ["formatters", "mappings", "demo"]

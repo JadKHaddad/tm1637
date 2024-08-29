@@ -2,6 +2,8 @@
 
 A platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](https://crates.io/crates/embedded-hal) and [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) traits.
 
+!["ruSt" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-rust.webp?raw=true)
+
 ## Features
 
 The following features are available:
@@ -11,6 +13,7 @@ The following features are available:
 - `impl-debug`: implements `core::fmt::Debug` for structs and enums.
 - `impl-defmt-format`: implements `defmt::Format` for structs and enums.
 - `mappings`: enables the mappings module.
+- `formatters`: enables the number formatting module.
 - `demo`: enables the demo module.
 - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
 

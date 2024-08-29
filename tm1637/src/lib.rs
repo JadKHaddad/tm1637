@@ -7,6 +7,7 @@
 //! - `impl-debug`: implements `core::fmt::Debug` for structs and enums.
 //! - `impl-defmt-format`: implements `defmt::Format` for structs and enums.
 //! - `mappings`: enables the mappings module.
+//! - `formatters`: enables the number formatting module.
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
 
@@ -42,3 +43,6 @@ pub mod demo;
 
 #[cfg(feature = "mappings")]
 pub mod mappings;
+
+#[cfg(feature = "formatters")]
+pub mod formatters;
