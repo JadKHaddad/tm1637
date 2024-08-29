@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust,ignore
-//! tm.write_bytes_raw(0, i16_to_4digits(1234) );
+//! tm.write_bytes_raw(0, i16_to_4digits(1234));
 //! ```
 //!
 
@@ -37,7 +37,7 @@ pub fn i16_to_4digits(n: i16) -> [u8; 4] {
         };
     }
 
-    return bytes;
+    bytes
 }
 
 /// Formats a [i32] clamped between -99999 and 999999, for a 6-digit display
@@ -82,7 +82,7 @@ pub fn celsius_to_4digits(n: i8) -> [u8; 4] {
             break;
         };
     }
-    return b;
+    b
 }
 
 /// Formats a [i16] clamped between -99 and 999, appending the degrees symbol (°),
@@ -105,7 +105,7 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
             break;
         };
     }
-    return b;
+    b
 }
 
 /// Formats two [i8]s between 0 and 99, with an optional colon between them.
@@ -126,7 +126,7 @@ pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
     b[2] = DigitBits::from_digit(minute / 10) as u8;
     b[3] = DigitBits::from_digit(minute % 10) as u8;
 
-    return b;
+    b
 }
 
 /// Formats a [i16] clamped between -999 and 9999, for an upside-down 4-digit display
@@ -147,7 +147,7 @@ pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
         };
     }
 
-    return bytes;
+    bytes
 }
 
 /// Formats a [f32] with the given amount of decimal digits, for a 6-digit display
