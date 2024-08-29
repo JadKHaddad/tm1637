@@ -10,43 +10,14 @@
 //!
 //! All numbers are aligned to the right.
 //!
-//! #Example
+//! # Example
 //!
 //! ```rust,ignore
 //! tm.write_bytes_raw(0, i16_to_4digits(1234) );
 //! ```
 //!
 
-// Duplicated from mappings::DigitBits::from_digit
-fn digit_to_byte(n: u8) -> u8 {
-    match n {
-        1 => 0b00000110,
-        2 => 0b01011011,
-        3 => 0b01001111,
-        4 => 0b01100110,
-        5 => 0b01101101,
-        6 => 0b01111101,
-        7 => 0b00000111,
-        8 => 0b01111111,
-        9 => 0b01101111,
-        _ => 0b00111111,
-    }
-}
-
-fn digit_to_upsidedown_byte(n: u8) -> u8 {
-    match n {
-        1 => 0b00110000,
-        2 => 0b01011011,
-        3 => 0b01111001,
-        4 => 0b01110100,
-        5 => 0b01101101,
-        6 => 0b01101111,
-        7 => 0b00111000,
-        8 => 0b01111111,
-        9 => 0b01111101,
-        _ => 0b00111111,
-    }
-}
+use crate::mappings::{DigitBits, UpsideDownDigitBits};
 
 /// Formats a [i16] clamped between -999 and 9999, for a 4-digit display
 pub fn i16_to_4digits(n: i16) -> [u8; 4] {
@@ -54,12 +25,12 @@ pub fn i16_to_4digits(n: i16) -> [u8; 4] {
     let mut m: i16 = n.clamp(-999, 9999).abs();
 
     for position in (0..4).rev() {
-        bytes[position as usize] = digit_to_byte((m % 10) as u8);
+        bytes[position as usize] = DigitBits::from_digit((m % 10) as u8) as u8;
 
         m /= 10;
 
         if m == 0 {
-            if !n.is_positive() {
+            if n < 0 {
                 bytes[position as usize - 1] = 0b01000000; // minus sign
             }
             break;
@@ -75,7 +46,7 @@ pub fn i32_to_6digits(n: i32) -> [u8; 6] {
     let mut m: i32 = n.clamp(-99999, 999999).abs();
 
     for position in (0..6).rev() {
-        b[position as usize] = digit_to_byte((m % 10) as u8);
+        b[position as usize] = DigitBits::from_digit((m % 10) as u8) as u8;
 
         m /= 10;
 
@@ -100,7 +71,7 @@ pub fn celsius_to_4digits(n: i8) -> [u8; 4] {
     let mut b: [u8; 4] = [0, 0, 0x63, 0x39];
 
     for position in (0..2).rev() {
-        b[position as usize] = digit_to_byte((m.abs() % 10) as u8);
+        b[position as usize] = DigitBits::from_digit((m.abs() % 10) as u8) as u8;
 
         m /= 10;
 
@@ -123,7 +94,7 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
     let mut b: [u8; 4] = [0, 0, 0, 0x63];
 
     for position in (0..3).rev() {
-        b[position as usize] = digit_to_byte((m.abs() % 10) as u8);
+        b[position as usize] = DigitBits::from_digit((m.abs() % 10) as u8) as u8;
 
         m /= 10;
 
@@ -145,15 +116,15 @@ pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
     let mut b: [u8; 4] = [0, 0, 0, 0];
 
     if hour >= 10 {
-        b[0] = digit_to_byte(hour / 10);
+        b[0] = DigitBits::from_digit(hour / 10) as u8;
     }
-    b[1] = digit_to_byte(hour % 10);
+    b[1] = DigitBits::from_digit(hour % 10) as u8;
 
     if colon {
         b[1] |= 0b1000_0000
     }
-    b[2] = digit_to_byte(minute / 10);
-    b[3] = digit_to_byte(minute % 10);
+    b[2] = DigitBits::from_digit(minute / 10) as u8;
+    b[3] = DigitBits::from_digit(minute % 10) as u8;
 
     return b;
 }
@@ -164,7 +135,7 @@ pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
     let mut m: i16 = n.clamp(-999, 9999).abs();
 
     for position in 0..4 {
-        bytes[position as usize] = digit_to_upsidedown_byte((m % 10) as u8);
+        bytes[position as usize] = UpsideDownDigitBits::from_digit((m % 10) as u8) as u8;
 
         m /= 10;
 
@@ -196,7 +167,7 @@ pub fn f32_to_6digits(n: f32, decimals: u8) -> [u8; 6] {
         .abs();
 
     for position in (0..6).rev() {
-        b[position as usize] = digit_to_byte((m % 10) as u8);
+        b[position as usize] = DigitBits::from_digit((m % 10) as u8) as u8;
 
         m /= 10;
 
