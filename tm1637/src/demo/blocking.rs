@@ -1,9 +1,6 @@
 //! Blocking demo module.
 
-use embedded_hal::{
-    delay::DelayNs,
-    digital::OutputPin,
-};
+use embedded_hal::{delay::DelayNs, digital::OutputPin};
 
 use crate::{
     blocking::TM1637,
