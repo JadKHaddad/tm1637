@@ -1,6 +1,6 @@
 //! Asynchronous demo module.
 
-use embedded_hal::digital::{InputPin, OutputPin};
+use embedded_hal::digital::OutputPin;
 use embedded_hal_async::delay::DelayNs;
 
 use crate::{asynch::TM1637, mappings::DigitBits};
@@ -9,7 +9,7 @@ use crate::{asynch::TM1637, mappings::DigitBits};
 pub struct Demo<CLK, DIO, DELAY, ERR>
 where
     CLK: OutputPin<Error = ERR>,
-    DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
     device: TM1637<CLK, DIO, DELAY>,
@@ -19,7 +19,7 @@ impl<CLK, DIO, DELAY, ERR> Demo<CLK, DIO, DELAY, ERR>
 where
     ERR: core::fmt::Debug,
     CLK: OutputPin<Error = ERR>,
-    DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
     /// Create a new demo instance.
