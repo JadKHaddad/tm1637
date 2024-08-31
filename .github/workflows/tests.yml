@@ -79,14 +79,6 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: cargo clippy --features=demo -- -D warnings
 
-      - name: Clippy -- impl-debug
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=impl-debug -- -D warnings
-
-      - name: Clippy -- impl-defmt-format 
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=impl-defmt-format  -- -D warnings
-      
       - name: Clippy --all-features
         working-directory: ${{env.working-directory}}
         run: cargo clippy --all --all-features -- -D warnings
