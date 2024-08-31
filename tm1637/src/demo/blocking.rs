@@ -1,9 +1,6 @@
 //! Blocking demo module.
 
-use embedded_hal::{
-    delay::DelayNs,
-    digital::{InputPin, OutputPin},
-};
+use embedded_hal::{delay::DelayNs, digital::OutputPin};
 
 use crate::{
     blocking::TM1637,
@@ -15,7 +12,7 @@ use crate::{
 pub struct Demo<CLK, DIO, DELAY, ERR>
 where
     CLK: OutputPin<Error = ERR>,
-    DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
     device: TM1637<CLK, DIO, DELAY>,
@@ -27,7 +24,7 @@ impl<CLK, DIO, DELAY, ERR> Demo<CLK, DIO, DELAY, ERR>
 where
     ERR: core::fmt::Debug,
     CLK: OutputPin<Error = ERR>,
-    DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
     /// Create a new demo instance.
