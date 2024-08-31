@@ -16,6 +16,10 @@
 //! tm.write_bytes_raw(0, i16_to_4digits(1234));
 //! ```
 //!
+//! This module is only available when the `formatters` feature of this
+//! library is activated.
+
+// TODO: let tm.write_bytes_raw(0, i16_to_4digits(1234)); be tested in docs rs.
 
 use crate::mappings::{DigitBits, UpsideDownDigitBits};
 

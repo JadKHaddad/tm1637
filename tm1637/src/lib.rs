@@ -14,7 +14,9 @@
 #![no_std]
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[cfg(any(feature = "async", feature = "blocking"))]
 /// Our custom `try!` macro aka `?`, to get rid of [`core::convert::From`]/[`core::convert::Into`] used by the `?` operator.
 macro_rules! tri {
     ($e:expr $(,)?) => {
@@ -33,16 +35,21 @@ mod device;
 pub use brightness::Brightness;
 
 #[cfg(feature = "async")]
+#[cfg_attr(docsrs, doc(cfg(feature = "async")))]
 pub use crate::device::asynch;
 
 #[cfg(feature = "blocking")]
+#[cfg_attr(docsrs, doc(cfg(feature = "blocking")))]
 pub use crate::device::blocking;
 
 #[cfg(feature = "demo")]
+#[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
 pub mod demo;
 
 #[cfg(feature = "mappings")]
+#[cfg_attr(docsrs, doc(cfg(feature = "mappings")))]
 pub mod mappings;
 
 #[cfg(feature = "formatters")]
+#[cfg_attr(docsrs, doc(cfg(feature = "formatters")))]
 pub mod formatters;
