@@ -1,4 +1,7 @@
 //! Asynchronous demo module.
+//!
+//! This module is only available when the `demo` and `async` features of this
+//! library are activated.
 
 use embedded_hal::digital::OutputPin;
 use embedded_hal_async::delay::DelayNs;
