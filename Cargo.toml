@@ -5,6 +5,7 @@ exclude = [
     "examples/esp32/blocking",
     "examples/rp-pico/async",
     "examples/rp-pico/blocking",
+    "examples/linux-ftdi/blocking",
 ]
 resolver = "2"
 default-members = ["tm1637"]
