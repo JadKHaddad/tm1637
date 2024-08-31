@@ -28,7 +28,7 @@ pub mod module {
     mod inner {
         use super::super::Identity;
         use crate::brightness::{Brightness, DisplayState};
-        use embedded_hal::digital::{InputPin, OutputPin};
+        use embedded_hal::digital::OutputPin;
 
         /// `TM1637` 7-segment display builder.
         #[derive(Clone)]
@@ -102,7 +102,7 @@ pub mod module {
         impl<CLK, DIO, DELAY, ERR> TM1637<CLK, DIO, DELAY>
         where
             CLK: OutputPin<Error = ERR>,
-            DIO: InputPin<Error = ERR> + OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR>,
             DELAY: delay_trait,
         {
             /// Create a new [`TM1637`] instance.
