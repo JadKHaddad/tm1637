@@ -1,4 +1,7 @@
 //! Blocking demo module.
+//!
+//! This module is only available when the `demo` and `blocking` features of this
+//! library are activated.
 
 use embedded_hal::{delay::DelayNs, digital::OutputPin};
 
