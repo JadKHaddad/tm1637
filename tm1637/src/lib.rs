@@ -16,6 +16,7 @@
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[cfg(any(feature = "async", feature = "blocking"))]
 /// Our custom `try!` macro aka `?`, to get rid of [`core::convert::From`]/[`core::convert::Into`] used by the `?` operator.
 macro_rules! tri {
     ($e:expr $(,)?) => {

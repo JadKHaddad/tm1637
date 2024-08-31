@@ -38,6 +38,7 @@ pub enum Brightness {
 #[derive(Clone, Copy)]
 #[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
 #[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[cfg(any(feature = "async", feature = "blocking"))]
 pub(crate) enum DisplayState {
     /// Display off.
     Off = 0b10000000,
