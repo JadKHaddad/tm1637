@@ -1,4 +1,4 @@
-//! Format numbers into byte arrays
+//! Format numbers into byte arrays.
 //!
 //! Functions for converting numbers ([i8]s, [i16]s, [i32]s or [f32]s) into arrays of bytes
 //! that can be sent to a TM1637 display.
