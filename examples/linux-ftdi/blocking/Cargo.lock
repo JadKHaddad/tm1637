@@ -86,15 +86,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "361a90feb7004eca4019fb28352a9465666b24f840f5c3cddf0ff13920590b89"
 
 [[package]]
-name = "embedded-hal-async"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c4c685bbef7fe13c3c6dd4da26841ed3980ef33e841cddfa15ce8a8fb3f1884"
-dependencies = [
- "embedded-hal 1.0.0",
-]
-
-[[package]]
 name = "embedded-hal-nb"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -140,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "ftdi-tm1637-example"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "embedded-hal 1.0.0",
@@ -455,13 +446,10 @@ dependencies = [
 
 [[package]]
 name = "tm1637-embedded-hal"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f15a72481f65e23614b0ee00b596430d33c13d5b1709ba98b571ccaba9622b2"
+version = "0.2.1"
 dependencies = [
  "duplicate",
  "embedded-hal 1.0.0",
- "embedded-hal-async",
 ]
 
 [[package]]
