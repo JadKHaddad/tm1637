@@ -23,6 +23,10 @@ See [examples](https://github.com/JadKHaddad/tm1637/tree/main/examples) director
 
 ![example](https://github.com/JadKHaddad/tm1637/blob/main/assets/esp32c3-wokwi.gif?raw=true)
 
+## Demo
+
+See [demo](DEMO.md).
+
 ## Other Repositories
 
 - `Rust` [generic-tm1637-gpio-driver-rust](https://github.com/phip1611/generic-tm1637-gpio-driver-rust)
