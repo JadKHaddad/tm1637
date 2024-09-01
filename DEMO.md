@@ -31,3 +31,7 @@
 ## 6-digit i32
 
 !["i32" on a 6-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/6digits-i32.webp?raw=true)
+
+## 4-digit animated
+
+!["animated" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/esp32c3-wokwi.gif?raw=true)
