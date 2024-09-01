@@ -437,3 +437,93 @@ impl SpecialCharBits {
         ]
     }
 }
+
+/// Flips the segments of a byte upside down.
+///
+/// Swaps the segments:
+/// - A and D
+/// - B and C
+/// - E and F
+pub const fn flip(byte: u8) -> u8 {
+    let a_d_swapped = ((byte & 0b00001000) >> 3) | ((byte & 0b00000001) << 3);
+    let b_c_swapped = ((byte & 0b00000100) >> 1) | ((byte & 0b00000010) << 1);
+    let e_f_swapped = ((byte & 0b00100000) >> 1) | ((byte & 0b00010000) << 1);
+
+    (byte & 0b11000000) | a_d_swapped | b_c_swapped | e_f_swapped
+}
+
+/// Mirrors the segments of a byte.
+///
+/// Swaps the segments:
+/// - B and F
+/// - C and E
+pub const fn mirror(byte: u8) -> u8 {
+    let seg_a = byte & 0b00000001;
+    let seg_b = (byte & 0b00000010) << 4; // B -> F
+    let seg_c = (byte & 0b00000100) << 2; // C -> E
+    let seg_d = byte & 0b00001000;
+    let seg_e = (byte & 0b00010000) >> 2; // E -> C
+    let seg_f = (byte & 0b00100000) >> 4; // F -> B
+    let seg_g = byte & 0b01000000;
+    let seg_point = byte & 0b10000000;
+
+    seg_a | seg_b | seg_c | seg_d | seg_e | seg_f | seg_g | seg_point
+}
+
+/// Flips and mirrors the segments of a byte.
+///
+/// See [`flip`] and [`mirror`] for more information.
+pub const fn flip_mirror(byte: u8) -> u8 {
+    mirror(flip(byte))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn flipped_four() {
+        let four = DigitBits::Four as u8;
+        let flipped_four = flip(four);
+        let should_flipped_four = SegmentBits::SegB as u8
+            | SegmentBits::SegC as u8
+            | SegmentBits::SegE as u8
+            | SegmentBits::SegG as u8;
+
+        assert_eq!(flipped_four, should_flipped_four);
+    }
+
+    #[test]
+    fn mirrored_four() {
+        let four = DigitBits::Four as u8;
+        let mirrored_four = mirror(four);
+        let should_mirrored_four = SegmentBits::SegB as u8
+            | SegmentBits::SegE as u8
+            | SegmentBits::SegF as u8
+            | SegmentBits::SegG as u8;
+
+        assert_eq!(mirrored_four, should_mirrored_four);
+    }
+
+    #[test]
+    fn flipped_mirrored_four() {
+        let four = DigitBits::Four as u8;
+        let flipped_mirrored_four = flip_mirror(four);
+        let should_flipped_mirrored_four = SegmentBits::SegC as u8
+            | SegmentBits::SegE as u8
+            | SegmentBits::SegF as u8
+            | SegmentBits::SegG as u8;
+
+        assert_eq!(flipped_mirrored_four, should_flipped_mirrored_four);
+    }
+
+    #[test]
+    fn mirrored_flipped_is_flipped_mirrored() {
+        let four = DigitBits::Four as u8;
+
+        let mirrored_flipped_four = mirror(flip(four));
+        let flipped_mirrored_four = flip(mirror(four));
+
+        assert_eq!(mirrored_flipped_four, flipped_mirrored_four);
+    }
+}
