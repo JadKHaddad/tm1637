@@ -553,7 +553,7 @@ mod tests {
     }
 
     #[test]
-    fn mirrored_mirror_is_original() {
+    fn mirrored_mirrored_is_original() {
         let five = DigitBits::Five as u8;
 
         let mirrored_mirrored_five = mirror(mirror(five));
