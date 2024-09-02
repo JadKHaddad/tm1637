@@ -458,16 +458,10 @@ pub const fn flip(byte: u8) -> u8 {
 /// - B and F
 /// - C and E
 pub const fn mirror(byte: u8) -> u8 {
-    let seg_a = byte & 0b00000001;
-    let seg_b = (byte & 0b00000010) << 4; // B -> F
-    let seg_c = (byte & 0b00000100) << 2; // C -> E
-    let seg_d = byte & 0b00001000;
-    let seg_e = (byte & 0b00010000) >> 2; // E -> C
-    let seg_f = (byte & 0b00100000) >> 4; // F -> B
-    let seg_g = byte & 0b01000000;
-    let seg_point = byte & 0b10000000;
+    let b_f_swapped = ((byte & 0b00100000) >> 4) | ((byte & 0b00000010) << 4);
+    let c_e_swapped = ((byte & 0b00010000) >> 2) | ((byte & 0b00000100) << 2);
 
-    seg_a | seg_b | seg_c | seg_d | seg_e | seg_f | seg_g | seg_point
+    (byte & 0b11001001) | b_f_swapped | c_e_swapped
 }
 
 /// Flips and mirrors the segments of a byte.
@@ -494,6 +488,15 @@ mod tests {
     }
 
     #[test]
+    fn flipped_e() {
+        let e = UpCharBits::UpE as u8;
+        let flipped_e = flip(e);
+        let should_flipped_e = UpCharBits::UpE as u8;
+
+        assert_eq!(flipped_e, should_flipped_e);
+    }
+
+    #[test]
     fn mirrored_four() {
         let four = DigitBits::Four as u8;
         let mirrored_four = mirror(four);
@@ -503,6 +506,19 @@ mod tests {
             | SegmentBits::SegG as u8;
 
         assert_eq!(mirrored_four, should_mirrored_four);
+    }
+
+    #[test]
+    fn mirrored_e() {
+        let e = UpCharBits::UpE as u8;
+        let mirrored_e = mirror(e);
+        let should_mirrored_e = SegmentBits::SegA as u8
+            | SegmentBits::SegB as u8
+            | SegmentBits::SegC as u8
+            | SegmentBits::SegD as u8
+            | SegmentBits::SegG as u8;
+
+        assert_eq!(mirrored_e, should_mirrored_e);
     }
 
     #[test]
@@ -525,5 +541,23 @@ mod tests {
         let flipped_mirrored_four = flip(mirror(four));
 
         assert_eq!(mirrored_flipped_four, flipped_mirrored_four);
+    }
+
+    #[test]
+    fn flipped_flipped_is_original() {
+        let seven = DigitBits::Seven as u8;
+
+        let flipped_flipped_seven = flip(flip(seven));
+
+        assert_eq!(seven, flipped_flipped_seven);
+    }
+
+    #[test]
+    fn mirrored_mirror_is_original() {
+        let five = DigitBits::Five as u8;
+
+        let mirrored_mirrored_five = mirror(mirror(five));
+
+        assert_eq!(five, mirrored_mirrored_five);
     }
 }
