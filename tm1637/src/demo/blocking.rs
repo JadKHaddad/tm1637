@@ -115,12 +115,12 @@ where
     }
 
     /// Turn the display on and off.
-    pub fn on_off(&mut self, cycles: u32, of_off_delay_ms: u32) -> Result<(), ERR> {
+    pub fn on_off(&mut self, cycles: u32, on_off_delay_ms: u32) -> Result<(), ERR> {
         for _ in 0..cycles {
             self.device.off()?;
-            self.delay.delay_ms(of_off_delay_ms);
+            self.delay.delay_ms(on_off_delay_ms);
             self.device.on()?;
-            self.delay.delay_ms(of_off_delay_ms);
+            self.delay.delay_ms(on_off_delay_ms);
         }
 
         Ok(())
@@ -142,12 +142,12 @@ where
 
         let mut show = true;
         for _ in 0..cycles {
-            let bit = match show {
+            let byte = match show {
                 true => DigitBits::Nine as u8 | SegmentBits::SegPoint as u8,
                 false => DigitBits::Nine as u8,
             };
 
-            self.device.write_segments_raw(1, &[bit])?;
+            self.device.write_segments_raw(1, &[byte])?;
 
             self.delay.delay_ms(blink_delay_ms);
 
