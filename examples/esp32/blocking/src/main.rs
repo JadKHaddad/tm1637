@@ -4,7 +4,9 @@
 
 use esp_backtrace as _;
 use esp_hal::{clock::ClockControl, gpio, peripherals::Peripherals, prelude::*, Delay};
-use tm1637_embedded_hal::{blocking::TM1637, demo::blocking::Demo, Brightness};
+use tm1637_embedded_hal::{
+    blocking::TM1637, demo::blocking::Demo, mappings::from_ascii_byte, Brightness,
+};
 
 #[entry]
 fn main() -> ! {
@@ -28,6 +30,17 @@ fn main() -> ! {
     // Change the brightness
     tm.write_brightness(Brightness::L3).unwrap();
 
+    // let segs = "Error"
+    //     .as_bytes()
+    //     .iter()
+    //     .copied()
+    //     .map(from_ascii_byte);
+
+    let mut segs = [b'E', b'r', b'r', b'o', b'r', b' ', b'O', b'H', b' '].map(from_ascii_byte);
+    // let mut segs = [b'E', b'r'].map(from_ascii_byte);
+
+    tm.move_segments(1, &mut segs, 500).ok();
+    loop {}
     let mut demo = Demo::new(tm, delay, 500);
     loop {
         demo.rotating_circle(20, 200).unwrap();

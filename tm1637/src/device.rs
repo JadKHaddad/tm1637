@@ -279,6 +279,32 @@ pub mod module {
                 self.brightness = brightness;
                 self.write_cmd_raw(brightness as u8).await
             }
+
+            /// Move all segments across the display starting and ending at `position`.
+            ///
+            /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will be written to the display.
+            // TODO: add a move direction parameter
+            pub async fn move_segments(
+                &mut self,
+                position: u8,
+                bytes: &mut [u8],
+                delay_ms: u32,
+            ) -> Result<(), ERR> {
+                if bytes.len() <= self.num_positions as usize - position as usize {
+                    return self.write_segments_raw(position, bytes).await;
+                }
+
+                // we have to place the first byte at the first pos after the animation ends
+                for _ in 0..bytes.len() + 1 {
+                    tri!(self.write_segments_raw(position, bytes).await);
+
+                    self.delay.delay_ms(delay_ms).await;
+
+                    bytes.rotate_left(1);
+                }
+
+                Ok(())
+            }
         }
     }
 
