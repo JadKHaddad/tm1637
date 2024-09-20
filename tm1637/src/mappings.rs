@@ -474,6 +474,19 @@ pub const fn flip_mirror(byte: u8) -> u8 {
 /// Converts an `ASCII` byte to a 7-segment display byte.
 ///
 /// Unknown characters are converted to `0` (all segments off).
+///
+/// # Note
+///
+/// Rust strings are `UTF-8` encoded, so what you see as a single character may be multiple bytes.
+///
+/// # Example
+///
+/// Display `Err` text on a 4-digit display:
+///
+/// ```rust,ignore
+/// let err = "Err".as_bytes().iter().copied().map(from_ascii_byte);
+/// tm.write_segments_raw_iter(0, err).ok();
+/// ```
 pub const fn from_ascii_byte(byte: u8) -> u8 {
     match byte {
         b'0' => DigitBits::Zero as u8,
@@ -527,6 +540,11 @@ pub const fn from_ascii_byte(byte: u8) -> u8 {
 
         _ => 0,
     }
+}
+
+/// Converts a `char` to a 7-segment display byte. See [`from_ascii_byte`] for more information.
+pub const fn from_char(c: char) -> u8 {
+    from_ascii_byte(c as u8)
 }
 
 #[cfg(test)]
