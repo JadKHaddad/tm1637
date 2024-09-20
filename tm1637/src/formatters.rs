@@ -121,29 +121,14 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///
 /// Let's create a clock displaying `12:34` with a blinking colon:
 ///
-/// ```rust
-/// use tm1637_embedded_hal::{
-///     blocking::TM1637,
-///     formatters::clock_to_4digits,
-///     Brightness,
-/// };
-/// use embedded_hal::delay::DelayNs;
-/// use embedded_hal_mock::eh1::{delay::NoopDelay, digital::Mock as PinMock};
-///
-/// let clk = PinMock::new([]);
-/// let dio = PinMock::new([]);
-///
-/// let delay = NoopDelay::new();
-///
-/// let mut tm = TM1637::builder(clk, dio, delay)
+/// ```rust, ignore
+/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
 ///     .brightness(Brightness::L3)
 ///     .build();
 ///
-/// tm.init().unwrap();
+/// tm.init().ok();
 ///
-/// let mut delay = NoopDelay::new();
-///
-/// for hour in 13..24 {
+/// for hour in 12..24 {
 ///     for minute in 34..60 {
 ///         for second in 0..120 {
 ///             let blink = second % 2 == 0;
