@@ -112,10 +112,50 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
     b
 }
 
-/// Formats two [i8]s between 0 and 99, with an optional colon between them.
+/// Formats two [u8]s between 0 and 99, with an optional colon between them.
 ///
 /// This will only work for 4-digit displays where there's a physical colon,
 /// and that colon acts as the decimal dot between the 2nd and 3rd digit.
+///
+/// # Example
+///
+/// Let's create a clock displaying `12:34` with a blinking colon:
+///
+/// ```rust
+/// use tm1637_embedded_hal::{
+///     blocking::TM1637,
+///     formatters::clock_to_4digits,
+///     Brightness,
+/// };
+/// use embedded_hal::delay::DelayNs;
+/// use embedded_hal_mock::eh1::{delay::NoopDelay, digital::Mock as PinMock};
+///
+/// let clk = PinMock::new([]);
+/// let dio = PinMock::new([]);
+///
+/// let delay = NoopDelay::new();
+///
+/// let mut tm = TM1637::builder(clk, dio, delay)
+///     .brightness(Brightness::L3)
+///     .build();
+///
+/// tm.init().unwrap();
+///
+/// let mut delay = NoopDelay::new();
+///
+/// for hour in 13..24 {
+///     for minute in 34..60 {
+///         for second in 0..120 {
+///             let blink = second % 2 == 0;
+///             let segs = clock_to_4digits(hour, minute, blink);
+///
+///             tm.write_segments_raw(0, &segs).ok();
+///
+///             delay.delay_ms(500);
+///         }
+///     }
+/// }
+/// ```
 pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
     let mut b: [u8; 4] = [0, 0, 0, 0];
 
