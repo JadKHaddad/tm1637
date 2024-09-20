@@ -19,11 +19,28 @@
 //! This module is only available when the `formatters` feature of this
 //! library is activated.
 
-// TODO: let tm.write_bytes_raw(0, i16_to_4digits(1234)); be tested in docs rs.
-
 use crate::mappings::{DigitBits, UpsideDownDigitBits};
 
-/// Formats a [i16] clamped between -999 and 9999, for a 4-digit display
+/// Formats a [i16] clamped between `-999` and `9999`, for a `4-digit display`
+///
+/// # Example
+///
+/// A counter that goes from `-100` to `100`:
+///
+/// ```rust, ignore
+/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+///     .brightness(Brightness::L3)
+///     .build();
+///
+/// tm.init().ok();
+///
+/// for i in -100..100 {
+///     let segs = i16_to_4digits(i);
+///     tm.write_segments_raw(0, &segs).ok();
+///
+///     delay.delay_ms(100u16);
+/// }
+/// ```
 pub fn i16_to_4digits(n: i16) -> [u8; 4] {
     let mut bytes: [u8; 4] = [0; 4];
     let mut m: i16 = n.clamp(-999, 9999).abs();
