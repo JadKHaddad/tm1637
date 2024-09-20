@@ -1,6 +1,6 @@
 //! Format numbers into byte arrays.
 //!
-//! Functions for converting numbers ([i8]s, [i16]s, [i32]s or [f32]s) into arrays of bytes
+//! Functions for converting numbers ([`i8`]s, [`i16`]s, [`i32`]s or [`f32`]s) into arrays of bytes
 //! that can be sent to a TM1637 display.
 //!
 //! There are versions of these functions that are meant for 4-digit displays
@@ -19,11 +19,28 @@
 //! This module is only available when the `formatters` feature of this
 //! library is activated.
 
-// TODO: let tm.write_bytes_raw(0, i16_to_4digits(1234)); be tested in docs rs.
-
 use crate::mappings::{DigitBits, UpsideDownDigitBits};
 
-/// Formats a [i16] clamped between -999 and 9999, for a 4-digit display
+/// Formats a [`i16`] clamped between `-999` and `9999`, for a `4-digit display`.
+///
+/// # Example
+///
+/// A counter that goes from `-100` to `100`:
+///
+/// ```rust, ignore
+/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+///     .brightness(Brightness::L3)
+///     .build();
+///
+/// tm.init().ok();
+///
+/// for i in -100..100 {
+///     let segs = i16_to_4digits(i);
+///     tm.write_segments_raw(0, &segs).ok();
+///
+///     delay.delay_ms(100u16);
+/// }
+/// ```
 pub fn i16_to_4digits(n: i16) -> [u8; 4] {
     let mut bytes: [u8; 4] = [0; 4];
     let mut m: i16 = n.clamp(-999, 9999).abs();
@@ -44,7 +61,7 @@ pub fn i16_to_4digits(n: i16) -> [u8; 4] {
     bytes
 }
 
-/// Formats a [i32] clamped between -99999 and 999999, for a 6-digit display
+/// Formats a [`i32`] clamped between `-99999` and `999999`, for a `6-digit display`.
 pub fn i32_to_6digits(n: i32) -> [u8; 6] {
     let mut b: [u8; 6] = [0; 6];
     let mut m: i32 = n.clamp(-99999, 999999).abs();
@@ -66,8 +83,8 @@ pub fn i32_to_6digits(n: i32) -> [u8; 6] {
     [b[2], b[1], b[0], b[5], b[4], b[3]]
 }
 
-/// Formats a [i8] clamped between -9 and 99, appending the degrees symbol (°)
-/// and an uppercase C, for a 4-digit display
+/// Formats a [`i8`] clamped between `-9` and `99`, appending the degrees symbol `(°)`
+/// and an `uppercase C`, for a `4-digit display`.
 pub fn celsius_to_4digits(n: i8) -> [u8; 4] {
     let mut m: i8 = n.clamp(-9, 99);
 
@@ -89,8 +106,8 @@ pub fn celsius_to_4digits(n: i8) -> [u8; 4] {
     b
 }
 
-/// Formats a [i16] clamped between -99 and 999, appending the degrees symbol (°),
-/// for a 4-digit display
+/// Formats a [`i16`] clamped between `-99` and `999`, appending the degrees symbol `(°)`,
+/// for a `4-digit display`.
 pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
     let mut m: i16 = n.clamp(-99, 999);
 
@@ -112,10 +129,35 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
     b
 }
 
-/// Formats two [i8]s between 0 and 99, with an optional colon between them.
+/// Formats two [`u8`]s between `0` and `99`, with an optional colon between them.
 ///
-/// This will only work for 4-digit displays where there's a physical colon,
+/// This will only work for `4-digit displays` where there's a physical colon,
 /// and that colon acts as the decimal dot between the 2nd and 3rd digit.
+///
+/// # Example
+///
+/// Let's create a clock displaying `12:34` with a blinking colon:
+///
+/// ```rust, ignore
+/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+///     .brightness(Brightness::L3)
+///     .build();
+///
+/// tm.init().ok();
+///
+/// for hour in 12..24 {
+///     for minute in 34..60 {
+///         for second in 0..120 {
+///             let blink = second % 2 == 0;
+///             let segs = clock_to_4digits(hour, minute, blink);
+///
+///             tm.write_segments_raw(0, &segs).ok();
+///
+///             delay.delay_ms(500);
+///         }
+///     }
+/// }
+/// ```
 pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
     let mut b: [u8; 4] = [0, 0, 0, 0];
 
@@ -133,7 +175,7 @@ pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
     b
 }
 
-/// Formats a [i16] clamped between -999 and 9999, for an upside-down 4-digit display
+/// Formats a [`i16`] clamped between `-999` and `9999`, for an `upside-down 4-digit display`.
 pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
     let mut bytes: [u8; 4] = [0; 4];
     let mut m: i16 = n.clamp(-999, 9999).abs();
@@ -154,7 +196,7 @@ pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
     bytes
 }
 
-/// Formats a [f32] with the given amount of decimal digits, for a 6-digit display
+/// Formats a [`f32`] with the given amount of decimal digits, for a `6-digit display`.
 pub fn f32_to_6digits(n: f32, decimals: u8) -> [u8; 6] {
     use core::ops::Mul;
 
