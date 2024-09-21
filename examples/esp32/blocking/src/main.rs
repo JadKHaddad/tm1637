@@ -53,7 +53,7 @@ fn main() -> ! {
     //     .for_each(|(i, &byte)| segs[i] = from_ascii_byte(byte));
 
     let segs = b"Err Oh no ".map(from_ascii_byte);
-    tm.move_segments_efficient::<4>(0, &segs, 500).ok();
+    tm.move_segments::<4>(0, &segs, 500).ok();
 
     // let segs = b"Error".map(from_ascii_byte);
     // let mut segs = [b'E', b'r'].map(from_ascii_byte);
