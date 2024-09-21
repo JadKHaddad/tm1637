@@ -240,7 +240,7 @@ pub mod module {
 
             /// Write the given bytes to the display starting from the given position.
             ///
-            /// ## Notes:
+            /// # Notes:
             /// - Positions greater than [`TM1637::num_positions`] will be ignored.
             /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
             ///
@@ -278,6 +278,38 @@ pub mod module {
             pub async fn write_brightness(&mut self, brightness: Brightness) -> Result<(), ERR> {
                 self.brightness = brightness;
                 self.write_cmd_raw(brightness as u8).await
+            }
+
+            /// Move all segments across the display starting and ending at `position`.
+            ///
+            /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will only be written to the display.
+            ///
+            /// `N` is the size of the internal window used to move the segments. Please make sure that `N` is equal to [`TM1637::num_positions`].
+            /// [`TM1637::num_positions`] will be removed in the future in favor of a constant generic parameter representing the number of positions.
+            pub async fn move_segments_raw<const N: usize>(
+                &mut self,
+                position: u8,
+                bytes: &[u8],
+                delay_ms: u32,
+            ) -> Result<(), ERR> {
+                let num_positions = self.num_positions as usize;
+
+                if bytes.len() <= num_positions - position as usize {
+                    return self.write_segments_raw(position, bytes).await;
+                }
+
+                for i in 0..=bytes.len() {
+                    let mut window = [0u8; N];
+                    for j in 0..num_positions {
+                        window[j] = bytes[(i + j) % bytes.len()];
+                    }
+
+                    tri!(self.write_segments_raw(position, &window).await);
+
+                    self.delay.delay_ms(delay_ms).await;
+                }
+
+                Ok(())
             }
         }
     }

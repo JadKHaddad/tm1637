@@ -471,6 +471,82 @@ pub const fn flip_mirror(byte: u8) -> u8 {
     mirror(flip(byte))
 }
 
+/// Converts an `ASCII` byte to a 7-segment display byte.
+///
+/// Unknown characters are converted to `0` (all segments off).
+///
+/// # Note
+///
+/// Rust strings are `UTF-8` encoded, so what you see as a single character may be multiple bytes.
+///
+/// # Example
+///
+/// Display `Err` text on a 4-digit display:
+///
+/// ```rust,ignore
+/// let err = "Err".as_bytes().iter().copied().map(from_ascii_byte);
+/// tm.write_segments_raw_iter(0, err).ok();
+/// ```
+pub const fn from_ascii_byte(byte: u8) -> u8 {
+    match byte {
+        b'0' => DigitBits::Zero as u8,
+        b'1' => DigitBits::One as u8,
+        b'2' => DigitBits::Two as u8,
+        b'3' => DigitBits::Three as u8,
+        b'4' => DigitBits::Four as u8,
+        b'5' => DigitBits::Five as u8,
+        b'6' => DigitBits::Six as u8,
+        b'7' => DigitBits::Seven as u8,
+        b'8' => DigitBits::Eight as u8,
+        b'9' => DigitBits::Nine as u8,
+
+        b'A' => UpCharBits::UpA as u8,
+        b'B' => UpCharBits::UpB as u8,
+        b'C' => UpCharBits::UpC as u8,
+        b'E' => UpCharBits::UpE as u8,
+        b'F' => UpCharBits::UpF as u8,
+        b'G' => UpCharBits::UpG as u8,
+        b'H' => UpCharBits::UpH as u8,
+        b'I' => UpCharBits::UpI as u8,
+        b'J' => UpCharBits::UpJ as u8,
+        b'L' => UpCharBits::UpL as u8,
+        b'O' => UpCharBits::UpO as u8,
+        b'P' => UpCharBits::UpP as u8,
+        b'S' => UpCharBits::UpS as u8,
+        b'U' => UpCharBits::UpU as u8,
+        b'Z' => UpCharBits::UpZ as u8,
+
+        b'a' => LoCharBits::LoA as u8,
+        b'b' => LoCharBits::LoB as u8,
+        b'c' => LoCharBits::LoC as u8,
+        b'd' => LoCharBits::LoD as u8,
+        b'e' => LoCharBits::LoE as u8,
+        b'g' => LoCharBits::LoG as u8,
+        b'h' => LoCharBits::LoH as u8,
+        b'i' => LoCharBits::LoI as u8,
+        b'n' => LoCharBits::LoN as u8,
+        b'o' => LoCharBits::LoO as u8,
+        b'q' => LoCharBits::LoQ as u8,
+        b'r' => LoCharBits::LoR as u8,
+        b't' => LoCharBits::LoT as u8,
+        b'u' => LoCharBits::LoU as u8,
+        b'y' => LoCharBits::LoY as u8,
+
+        b' ' => SpecialCharBits::Space as u8,
+        b'-' => SpecialCharBits::Minus as u8,
+        b'_' => SpecialCharBits::Underscore as u8,
+        b'=' => SpecialCharBits::Equals as u8,
+        b'?' => SpecialCharBits::QuestionMark as u8,
+
+        _ => 0,
+    }
+}
+
+/// Converts a `char` to a 7-segment display byte. See [`from_ascii_byte`] for more information.
+pub const fn from_char(c: char) -> u8 {
+    from_ascii_byte(c as u8)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
