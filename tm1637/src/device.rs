@@ -283,7 +283,7 @@ pub mod module {
             /// Move all segments across the display starting and ending at `position`.
             ///
             /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will be written to the display.
-            pub async fn move_segments_efficient<const N: usize>(
+            pub async fn move_segments<const N: usize>(
                 &mut self,
                 position: u8,
                 bytes: &[u8],
