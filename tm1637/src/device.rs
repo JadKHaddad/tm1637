@@ -311,6 +311,43 @@ pub mod module {
 
                 Ok(())
             }
+
+            /// Convert an `ASCII` string to a byte array using [`from_ascii_byte`](crate::mappings::from_ascii_byte) and move the segments across the display using [`TM1637::move_segments_raw`].
+            ///
+            /// - `N` is the size of the internal window used to move the segments. See [`TM1637::move_segments_raw`] for more information.
+            /// - `M` is the maximum number of bytes that can be converted from the `ASCII` string.
+            ///
+            /// # Example
+            ///
+            /// Move the string `"HELLO "` across a `4-digit display`:
+            ///
+            /// ```rust, ignore
+            /// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+            ///    .brightness(Brightness::L3)
+            ///    .build();
+            ///
+            /// tm.init().ok();
+            ///
+            /// tm.move_ascii_str::<4, 6>(0, "HELLO ", 500).ok();
+            /// ```
+            #[cfg(feature = "mappings")]
+            pub async fn move_ascii_str<const N: usize, const M: usize>(
+                &mut self,
+                position: u8,
+                ascii_str: &str,
+                delay_ms: u32,
+            ) -> Result<(), ERR> {
+                let mut bytes = [0u8; M];
+                ascii_str
+                    .as_bytes()
+                    .iter()
+                    .take(M)
+                    .enumerate()
+                    .for_each(|(i, &byte)| bytes[i] = crate::mappings::from_ascii_byte(byte));
+
+                self.move_segments_raw::<N>(position, &bytes, delay_ms)
+                    .await
+            }
         }
     }
 
