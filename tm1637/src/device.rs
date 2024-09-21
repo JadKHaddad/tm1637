@@ -312,10 +312,45 @@ pub mod module {
                 Ok(())
             }
 
+            /// Convert an `ASCII` string to a byte iterator using [`from_ascii_byte`](crate::mappings::from_ascii_byte) and write the segments to the display using [`TM1637::write_segments_raw_iter`].
+            ///
+            /// Only available when the `mappings` feature of this library is activated.
+            ///
+            /// # Example
+            ///
+            /// Write the string `"Err"` to the display:
+            ///
+            /// ```rust, ignore
+            /// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+            ///    .brightness(Brightness::L3)
+            ///    .build();
+            ///
+            /// tm.init().ok();
+            ///
+            /// tm.write_ascii_str(0, "Err").ok();
+            /// ```
+            #[cfg(feature = "mappings")]
+            pub async fn write_ascii_str(
+                &mut self,
+                position: u8,
+                ascii_str: &str,
+            ) -> Result<(), ERR> {
+                let iter = ascii_str
+                    .as_bytes()
+                    .iter()
+                    .take(self.num_positions as usize - position as usize)
+                    .copied()
+                    .map(crate::mappings::from_ascii_byte);
+
+                self.write_segments_raw_iter(position, iter).await
+            }
+
             /// Convert an `ASCII` string to a byte array using [`from_ascii_byte`](crate::mappings::from_ascii_byte) and move the segments across the display using [`TM1637::move_segments_raw`].
             ///
             /// - `N` is the size of the internal window used to move the segments. See [`TM1637::move_segments_raw`] for more information.
             /// - `M` is the maximum number of bytes that can be converted from the `ASCII` string.
+            ///
+            /// Only available when the `mappings` feature of this library is activated.
             ///
             /// # Example
             ///
