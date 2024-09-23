@@ -329,6 +329,14 @@ pub mod module {
             ///
             /// tm.write_ascii_str(0, "Err").ok();
             /// ```
+            ///
+            /// On a `4-digit display`, this will look like this:
+            ///
+            /// ```text
+            /// +---+ +---+ +---+ +---+
+            /// | E | | r | | r | |   |
+            /// +---+ +---+ +---+ +---+
+            /// ```
             #[cfg(feature = "mappings")]
             pub async fn write_ascii_str(
                 &mut self,
@@ -363,7 +371,42 @@ pub mod module {
             ///
             /// tm.init().ok();
             ///
+            /// // 4 is the actual number of positions on the display.
+            /// // 6 is the maximum number of bytes that can be converted from the ASCII string.
+            /// // In case of "HELLO ", all six bytes will be converted.
             /// tm.move_ascii_str::<4, 6>(0, "HELLO ", 500).ok();
+            /// ```
+            ///
+            /// On a `4-digit display`, this will look like this:
+            ///
+            /// ```text
+            /// +---+ +---+ +---+ +---+
+            /// | H | | E | | L | | L |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | E | | L | | L | | O |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | L | | L | | O | |   |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | L | | O | |   | | H |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | O | |   | | H | | E |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// |   | | H | | E | | L |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | H | | E | | L | | L |
+            /// +---+ +---+ +---+ +---+
             /// ```
             #[cfg(feature = "mappings")]
             pub async fn move_ascii_str<const N: usize, const M: usize>(
