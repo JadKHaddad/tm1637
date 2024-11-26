@@ -337,7 +337,6 @@ pub mod module {
             /// | E | | r | | r | |   |
             /// +---+ +---+ +---+ +---+
             /// ```
-            #[cfg(feature = "mappings")]
             pub async fn write_ascii_str(
                 &mut self,
                 position: u8,
@@ -408,7 +407,6 @@ pub mod module {
             /// | H | | E | | L | | L |
             /// +---+ +---+ +---+ +---+
             /// ```
-            #[cfg(feature = "mappings")]
             pub async fn move_ascii_str<const N: usize, const M: usize>(
                 &mut self,
                 position: u8,
