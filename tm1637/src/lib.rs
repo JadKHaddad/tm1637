@@ -11,14 +11,22 @@
 // TODO: ack feature
 
 #![no_std]
-#![deny(unsafe_code)]
-#![deny(missing_docs)]
+#![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod brightness;
+mod conditional;
+#[cfg(feature = "demo")]
+#[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
+pub mod demo;
 mod device;
+mod error;
+pub mod formatters;
+pub mod mappings;
 
 pub use brightness::Brightness;
+pub use conditional::ConditionalInputPin;
+pub use error::Error;
 
 #[cfg(feature = "async")]
 #[cfg_attr(docsrs, doc(cfg(feature = "async")))]
@@ -27,14 +35,3 @@ pub use crate::device::asynch;
 #[cfg(feature = "blocking")]
 #[cfg_attr(docsrs, doc(cfg(feature = "blocking")))]
 pub use crate::device::blocking;
-
-#[cfg(feature = "demo")]
-#[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
-pub mod demo;
-
-pub mod mappings;
-
-pub mod formatters;
-
-mod error;
-pub use error::Error;

@@ -12,6 +12,7 @@ use crate::{
 };
 
 /// Blocking demo.
+#[derive(Debug)]
 pub struct Demo<CLK, DIO, DELAY, ERR>
 where
     CLK: OutputPin<Error = ERR>,

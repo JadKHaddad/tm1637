@@ -29,6 +29,7 @@ async fn main(spawner: Spawner) {
 
     tm.init().await.unwrap();
     tm.write_ascii_str(0, "UP  ").await.unwrap();
+    tm.write_ascii_str(0, "HO  ").await.unwrap();
 
     loop {}
 }

@@ -12,8 +12,8 @@ readme = "../README.md"
 [features]
 default = ["async", "demo", "ack"]
 ack = []
-async = ["dep:embedded-hal", "dep:embedded-hal-async"]
-blocking = ["dep:embedded-hal"]
+async = ["dep:embedded-hal-async"]
+blocking = []
 disable-checks = []
 demo = []
 defmt = ["dep:defmt"]
@@ -21,7 +21,7 @@ defmt = ["dep:defmt"]
 [dependencies]
 duplicate = "1.0.0"
 embedded-hal-async = { version = "1.0.0", optional = true }
-embedded-hal = { version = "1.0.0", optional = true }
+embedded-hal = { version = "1.0.0" }
 defmt = { version = "0.3.6", optional = true }
 
 [package.metadata.docs.rs]

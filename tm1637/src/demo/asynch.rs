@@ -6,9 +6,10 @@
 use embedded_hal::digital::OutputPin;
 use embedded_hal_async::delay::DelayNs;
 
-use crate::{asynch::TM1637, device::ConditionalInputPin, mappings::DigitBits, Error};
+use crate::{asynch::TM1637, mappings::DigitBits, ConditionalInputPin, Error};
 
 /// Asynchronous demo.
+#[derive(Debug)]
 pub struct Demo<CLK, DIO, DELAY, ERR>
 where
     CLK: OutputPin<Error = ERR>,

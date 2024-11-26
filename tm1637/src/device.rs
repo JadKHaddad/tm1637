@@ -1,7 +1,6 @@
 //! Device definition and implementation.
 
 use duplicate::duplicate_item;
-use embedded_hal::digital::InputPin;
 
 /// Identity trait.
 ///
@@ -17,31 +16,6 @@ trait Identity: Sized {
 #[cfg(any(feature = "async", feature = "blocking"))]
 impl<T: Sized> Identity for T {}
 
-/// Conditional input pin trait.
-///
-/// Used for conditional requirement of the [`InputPin`] trait based on the `ack` feature.
-/// - Every [`InputPin`] implements this trait, if the `ack` feature is enabled.
-/// - Everything implements this trait, if the `ack` feature is not enabled.
-pub trait ConditionalInputPin<ERR> {
-    /// Is the input pin low?
-    fn is_low(&mut self) -> Result<bool, ERR> {
-        Ok(false)
-    }
-}
-
-#[cfg(feature = "ack")]
-impl<ERR, T> ConditionalInputPin<ERR> for T
-where
-    T: InputPin<Error = ERR>,
-{
-    fn is_low(&mut self) -> Result<bool, ERR> {
-        self.is_low()
-    }
-}
-
-#[cfg(not(feature = "ack"))]
-impl<ERR, T> ConditionalInputPin<ERR> for T {}
-
 #[duplicate_item(
     feature_        module        async     await               delay_trait;
     ["async"]       [asynch]      [async]   [await.identity()]  [embedded_hal_async::delay::DelayNs];
@@ -52,9 +26,9 @@ pub mod module {
 
     #[cfg(feature=feature_)]
     mod inner {
-        use super::super::{ConditionalInputPin, Identity};
+        use super::super::Identity;
         use crate::brightness::{Brightness, DisplayState};
-        use crate::Error;
+        use crate::{ConditionalInputPin, Error};
         use embedded_hal::digital::OutputPin;
 
         /// `TM1637` 7-segment display builder.
@@ -159,9 +133,7 @@ pub mod module {
                 let mut rest = byte;
 
                 for _ in 0..8 {
-                    self.bit_delay().await;
                     self.clk.set_low()?;
-                    self.bit_delay().await;
 
                     match rest & 0x01 {
                         1 => self.dio.set_high()?,
@@ -169,6 +141,7 @@ pub mod module {
                     }
 
                     self.bit_delay().await;
+
                     self.clk.set_high()?;
                     self.bit_delay().await;
 
@@ -176,7 +149,7 @@ pub mod module {
                 }
 
                 self.clk.set_low()?;
-                self.dio.set_high()?;
+                self.dio.set_low()?;
                 self.bit_delay().await;
 
                 self.clk.set_high()?;
@@ -184,14 +157,29 @@ pub mod module {
 
                 // Ack
                 #[cfg(feature = "ack")]
-                if !self.dio.is_low()? {
-                    return Err(Error::Ack);
-                }
+                let ack = self.wait_for_ack().await?;
 
                 self.clk.set_low()?;
+                self.dio.set_low()?;
                 self.bit_delay().await;
 
+                #[cfg(feature = "ack")]
+                ack.then_some(()).ok_or(Error::Ack)?;
+
                 Ok(())
+            }
+
+            #[cfg(feature = "ack")]
+            async fn wait_for_ack(&mut self) -> Result<bool, Error<ERR>> {
+                for _ in 0..255 {
+                    if self.dio.is_low()? {
+                        return Ok(true);
+                    }
+
+                    self.bit_delay().await;
+                }
+
+                Ok(false)
             }
 
             /// Write the `cmd` to the display.
@@ -205,9 +193,10 @@ pub mod module {
 
             /// Start the communication with the display.
             async fn start(&mut self) -> Result<(), Error<ERR>> {
-                self.dio.set_low()?;
+                self.dio.set_high()?;
+                self.clk.set_high()?;
                 self.bit_delay().await;
-                self.clk.set_low()?;
+                self.dio.set_low()?;
                 self.bit_delay().await;
 
                 Ok(())
@@ -216,7 +205,6 @@ pub mod module {
             /// Stop the communication with the display.
             async fn stop(&mut self) -> Result<(), Error<ERR>> {
                 self.dio.set_low()?;
-                self.bit_delay().await;
                 self.clk.set_high()?;
                 self.bit_delay().await;
                 self.dio.set_high()?;
