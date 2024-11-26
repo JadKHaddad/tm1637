@@ -2,13 +2,12 @@
 //!
 //! ## Features
 //! The following features are available:
+//! - `ack`: enables driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
 //! - `blocking`: enables blocking functionality.
 //! - `async`: enables asynchronous functionality.
 //! - `defmt`: implements `defmt::Format` for structs and enums.
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
-
-// TODO: ack feature
 
 #![no_std]
 #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
