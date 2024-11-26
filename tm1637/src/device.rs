@@ -1,6 +1,7 @@
 //! Device definition and implementation.
 
 use duplicate::duplicate_item;
+use embedded_hal::digital::InputPin;
 
 /// Identity trait.
 ///
@@ -16,6 +17,31 @@ trait Identity: Sized {
 #[cfg(any(feature = "async", feature = "blocking"))]
 impl<T: Sized> Identity for T {}
 
+/// Conditional input pin trait.
+///
+/// Used for conditional requirement of the [`InputPin`] trait based on the `ack` feature.
+/// - Every [`InputPin`] implements this trait, if the `ack` feature is enabled.
+/// - Everything implements this trait, if the `ack` feature is not enabled.
+pub trait ConditionalInputPin<ERR> {
+    /// Is the input pin low?
+    fn is_low(&mut self) -> Result<bool, ERR> {
+        Ok(false)
+    }
+}
+
+#[cfg(feature = "ack")]
+impl<ERR, T> ConditionalInputPin<ERR> for T
+where
+    T: InputPin<Error = ERR>,
+{
+    fn is_low(&mut self) -> Result<bool, ERR> {
+        self.is_low()
+    }
+}
+
+#[cfg(not(feature = "ack"))]
+impl<ERR, T> ConditionalInputPin<ERR> for T {}
+
 #[duplicate_item(
     feature_        module        async     await               delay_trait;
     ["async"]       [asynch]      [async]   [await.identity()]  [embedded_hal_async::delay::DelayNs];
@@ -26,7 +52,7 @@ pub mod module {
 
     #[cfg(feature=feature_)]
     mod inner {
-        use super::super::Identity;
+        use super::super::{ConditionalInputPin, Identity};
         use crate::brightness::{Brightness, DisplayState};
         use crate::Error;
         use embedded_hal::digital::OutputPin;
@@ -101,7 +127,7 @@ pub mod module {
         impl<CLK, DIO, DELAY, ERR> TM1637<CLK, DIO, DELAY>
         where
             CLK: OutputPin<Error = ERR>,
-            DIO: OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
         {
             /// Create a new [`TM1637`] instance.
@@ -155,6 +181,12 @@ pub mod module {
 
                 self.clk.set_high()?;
                 self.bit_delay().await;
+
+                // Ack
+                #[cfg(feature = "ack")]
+                if !self.dio.is_low()? {
+                    return Err(Error::Ack);
+                }
 
                 self.clk.set_low()?;
                 self.bit_delay().await;
