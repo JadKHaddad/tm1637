@@ -5,7 +5,7 @@
 //!
 //! There are versions of these functions that are meant for 4-digit displays
 //! and for 6-digit displays. The 6-digit versions take into account that the
-//! order of the bytes does not drectly correlate with the order of the physical
+//! order of the bytes does not directly correlate with the order of the physical
 //! digits.
 //!
 //! All numbers are aligned to the right.
@@ -26,7 +26,7 @@ use crate::mappings::{DigitBits, UpsideDownDigitBits};
 /// A counter that goes from `-100` to `100`:
 ///
 /// ```rust, ignore
-/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+/// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
 ///     .brightness(Brightness::L3)
 ///     .build();
 ///
@@ -137,7 +137,7 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 /// Let's create a clock displaying `12:34` with a blinking colon:
 ///
 /// ```rust, ignore
-/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
+/// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
 ///     .brightness(Brightness::L3)
 ///     .build();
 ///

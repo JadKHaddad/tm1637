@@ -9,7 +9,7 @@ use esp_hal::{
     prelude::*,
 };
 use log::info;
-use tm1637_embedded_hal::asynch::TM1637;
+use tm1637_embedded_hal::asynch::{TM1637Builder, TM1637};
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -25,11 +25,12 @@ async fn main(spawner: Spawner) {
     let clk = Output::new(peripherals.GPIO4.degrade(), Level::Low);
     let dio = OutputOpenDrain::new(peripherals.GPIO19.degrade(), Level::Low, Pull::Up);
 
-    let mut tm = TM1637::builder(clk, dio, delay).build();
+    let mut tm = TM1637Builder::new(clk, dio, delay).build::<4>();
 
     tm.init().await.unwrap();
     tm.write_ascii_str(0, "UP  ").await.unwrap();
     tm.write_ascii_str(0, "HO  ").await.unwrap();
+    tm.move_ascii_str(0, "HELLO ", 500).await.unwrap();
 
     loop {}
 }

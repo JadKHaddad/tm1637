@@ -9,6 +9,7 @@ use crate::{
     blocking::TM1637,
     formatters::i16_to_4digits,
     mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
+    ConditionalInputPin, Error,
 };
 
 /// Blocking demo.
@@ -19,7 +20,7 @@ where
     DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
-    device: TM1637<CLK, DIO, DELAY>,
+    device: TM1637<4, CLK, DIO, DELAY>,
     delay: DELAY,
     moving_delay_ms: u32,
 }
@@ -28,11 +29,11 @@ impl<CLK, DIO, DELAY, ERR> Demo<CLK, DIO, DELAY, ERR>
 where
     ERR: core::fmt::Debug,
     CLK: OutputPin<Error = ERR>,
-    DIO: OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
     DELAY: DelayNs,
 {
     /// Create a new demo instance.
-    pub fn new(device: TM1637<CLK, DIO, DELAY>, delay: DELAY, moving_delay_ms: u32) -> Self {
+    pub fn new(device: TM1637<4, CLK, DIO, DELAY>, delay: DELAY, moving_delay_ms: u32) -> Self {
         Self {
             device,
             delay,
@@ -41,7 +42,7 @@ where
     }
 
     /// Move all segments across the display.
-    pub fn moving_segments(&mut self) -> Result<(), ERR> {
+    pub fn moving_segments(&mut self) -> Result<(), Error<ERR>> {
         let mut all_seg_bits = [0; 13];
         all_seg_bits[4..11].copy_from_slice(&SegmentBits::all_u8()[0..7]);
         for _ in 0..11 {
@@ -54,7 +55,7 @@ where
     }
 
     /// Move all digits across the display.
-    pub fn moving_digits(&mut self) -> Result<(), ERR> {
+    pub fn moving_digits(&mut self) -> Result<(), Error<ERR>> {
         let mut all_dig_bits = [0; 16];
         all_dig_bits[4..14].copy_from_slice(&DigitBits::all_u8());
         for _ in 0..14 {
@@ -67,7 +68,7 @@ where
     }
 
     /// Countdown from 100 to 0.
-    pub fn countdown(&mut self) -> Result<(), ERR> {
+    pub fn countdown(&mut self) -> Result<(), Error<ERR>> {
         for i in (0..100).rev() {
             self.device.write_segments_raw(0, &i16_to_4digits(i))?;
             self.delay.delay_ms(self.moving_delay_ms / 10);
@@ -77,7 +78,7 @@ where
     }
 
     /// Move all uppercase characters across the display.
-    pub fn moving_up_chars(&mut self) -> Result<(), ERR> {
+    pub fn moving_up_chars(&mut self) -> Result<(), Error<ERR>> {
         let mut all_up_char_bits = [0; 21];
         all_up_char_bits[4..19].copy_from_slice(&UpCharBits::all_u8());
         for _ in 0..19 {
@@ -90,7 +91,7 @@ where
     }
 
     /// Move all lowercase characters across the display.
-    pub fn moving_lo_chars(&mut self) -> Result<(), ERR> {
+    pub fn moving_lo_chars(&mut self) -> Result<(), Error<ERR>> {
         let mut all_lo_char_bits = [0; 21];
         all_lo_char_bits[4..19].copy_from_slice(&LoCharBits::all_u8());
         for _ in 0..19 {
@@ -103,7 +104,7 @@ where
     }
 
     /// Move all special characters across the display.
-    pub fn moving_special_chars(&mut self) -> Result<(), ERR> {
+    pub fn moving_special_chars(&mut self) -> Result<(), Error<ERR>> {
         let mut all_sp_char_bits = [0; 11];
         all_sp_char_bits[4..9].copy_from_slice(&SpecialCharBits::all_u8());
         for _ in 0..9 {
@@ -116,7 +117,7 @@ where
     }
 
     /// Turn the display on and off.
-    pub fn on_off(&mut self, cycles: u32, on_off_delay_ms: u32) -> Result<(), ERR> {
+    pub fn on_off(&mut self, cycles: u32, on_off_delay_ms: u32) -> Result<(), Error<ERR>> {
         for _ in 0..cycles {
             self.device.off()?;
             self.delay.delay_ms(on_off_delay_ms);
@@ -130,7 +131,7 @@ where
     /// Display the time and make the dots blink.
     ///
     /// Displays 19:06 with blinking dots.
-    pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), ERR> {
+    pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), Error<ERR>> {
         self.device.write_segments_raw(
             0,
             &[
@@ -161,7 +162,11 @@ where
     /// Create a rotating circle animation.
     ///
     /// Creates a rotating circle at address 0.
-    pub fn rotating_circle(&mut self, cycles: u32, rotating_delay_ms: u32) -> Result<(), ERR> {
+    pub fn rotating_circle(
+        &mut self,
+        cycles: u32,
+        rotating_delay_ms: u32,
+    ) -> Result<(), Error<ERR>> {
         // First of all we create the shapes we want to animate
 
         //  ---
