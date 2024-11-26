@@ -10,7 +10,7 @@
 /// - 5-7: Base address
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Brightness {
     /// Brightness level 0. Lowest brightness.
     L0 = 0b10001000,
@@ -35,7 +35,7 @@ pub enum Brightness {
 /// Represents a byte that can be sent directly to the `TM1637` to set the display state.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[cfg(any(feature = "async", feature = "blocking"))]
 pub(crate) enum DisplayState {
     /// Display off.

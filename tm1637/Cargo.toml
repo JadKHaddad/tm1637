@@ -9,16 +9,13 @@ license = "MIT OR Apache-2.0"
 keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
 readme = "../README.md"
 
-# TODO: impl debug by default. Not a feature. 
-# defmt is a feature to derive impls
-# mappings and formatters are not features.
 [features]
 default = ["async"]
 async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 disable-checks = []
 demo = []
-impl-defmt-format = ["dep:defmt"]
+defmt = ["dep:defmt"]
 
 [dependencies]
 duplicate = "1.0.0"

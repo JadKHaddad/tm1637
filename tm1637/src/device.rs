@@ -32,7 +32,7 @@ pub mod module {
 
         /// `TM1637` 7-segment display builder.
         #[derive(Debug, Clone)]
-        #[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct TM1637Builder<CLK, DIO, DELAY> {
             /// The inner [`TM1637`] instance.
             inner: TM1637<CLK, DIO, DELAY>,
@@ -79,7 +79,7 @@ pub mod module {
 
         /// `TM1637` 7-segment display driver.
         #[derive(Debug, Clone)]
-        #[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct TM1637<CLK, DIO, DELAY> {
             /// Clock.
             clk: CLK,

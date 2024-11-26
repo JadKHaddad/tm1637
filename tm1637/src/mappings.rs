@@ -14,7 +14,7 @@
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SegmentBits {
     /// A segment
     SegA = 0b00000001,
@@ -70,7 +70,7 @@ impl SegmentBits {
 /// Maps a digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum DigitBits {
     /// 0
     Zero = 0b00111111,
@@ -148,7 +148,7 @@ impl DigitBits {
 /// Maps a upside-down digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UpsideDownDigitBits {
     /// Upside-down 0
     Zero = 0b00111111,
@@ -225,7 +225,7 @@ impl UpsideDownDigitBits {
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UpCharBits {
     /// Uppercase A
     UpA = 0x77,
@@ -310,7 +310,7 @@ impl UpCharBits {
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum LoCharBits {
     /// Lowercase A
     LoA = 0x5F,
@@ -391,7 +391,7 @@ impl LoCharBits {
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SpecialCharBits {
     /// Space symbol
     Space = 0,
