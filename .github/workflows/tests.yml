@@ -63,14 +63,6 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: cargo clippy --features=blocking -- -D warnings
       
-      - name: Clippy -- mappings
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=mappings -- -D warnings
-
-      - name: Clippy -- formatters
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=formatters -- -D warnings
-
       - name: Clippy -- disable-checks
         working-directory: ${{env.working-directory}}
         run: cargo clippy --features=disable-checks -- -D warnings

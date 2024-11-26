@@ -1,7 +1,5 @@
 //! Mappings for 7-segment display characters.
 //!
-//! This module is only available when the `mappings` feature of this
-//! library is activated.
 
 //       A
 //      ---

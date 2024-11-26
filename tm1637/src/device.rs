@@ -336,8 +336,6 @@ pub mod module {
 
             /// Convert an `ASCII` string to a byte iterator using [`from_ascii_byte`](crate::mappings::from_ascii_byte) and write the segments to the display using [`TM1637::write_segments_raw_iter`].
             ///
-            /// Only available when the `mappings` feature of this library is activated.
-            ///
             /// # Example
             ///
             /// Write the string `"Err"` to the display:
