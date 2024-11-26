@@ -8,23 +8,12 @@
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
 
+// TODO: ack feature
+
 #![no_std]
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-
-#[cfg(any(feature = "async", feature = "blocking"))]
-/// Our custom `try!` macro aka `?`, to get rid of [`core::convert::From`]/[`core::convert::Into`] used by the `?` operator.
-macro_rules! tri {
-    ($e:expr $(,)?) => {
-        match $e {
-            core::result::Result::Ok(value) => value,
-            core::result::Result::Err(err) => {
-                return core::result::Result::Err(err);
-            }
-        }
-    };
-}
 
 mod brightness;
 mod device;
@@ -43,8 +32,9 @@ pub use crate::device::blocking;
 #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
 pub mod demo;
 
-#[cfg_attr(docsrs, doc(cfg(feature = "mappings")))]
 pub mod mappings;
 
-#[cfg_attr(docsrs, doc(cfg(feature = "formatters")))]
 pub mod formatters;
+
+mod error;
+pub use error::Error;

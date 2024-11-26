@@ -10,7 +10,8 @@ keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
 readme = "../README.md"
 
 [features]
-default = ["async"]
+default = ["async", "ack"]
+ack = []
 async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 disable-checks = []

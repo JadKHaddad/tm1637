@@ -28,6 +28,7 @@ pub mod module {
     mod inner {
         use super::super::Identity;
         use crate::brightness::{Brightness, DisplayState};
+        use crate::Error;
         use embedded_hal::digital::OutputPin;
 
         /// `TM1637` 7-segment display builder.
@@ -128,65 +129,65 @@ pub mod module {
             }
 
             /// Send a byte to the display and wait for the ACK.
-            async fn write_byte(&mut self, byte: u8) -> Result<(), ERR> {
+            async fn write_byte(&mut self, byte: u8) -> Result<(), Error<ERR>> {
                 let mut rest = byte;
 
                 for _ in 0..8 {
                     self.bit_delay().await;
-                    tri!(self.clk.set_low());
+                    self.clk.set_low()?;
                     self.bit_delay().await;
 
                     match rest & 0x01 {
-                        1 => tri!(self.dio.set_high()),
-                        _ => tri!(self.dio.set_low()),
+                        1 => self.dio.set_high()?,
+                        _ => self.dio.set_low()?,
                     }
 
                     self.bit_delay().await;
-                    tri!(self.clk.set_high());
+                    self.clk.set_high()?;
                     self.bit_delay().await;
 
                     rest >>= 1;
                 }
 
-                tri!(self.clk.set_low());
-                tri!(self.dio.set_high());
+                self.clk.set_low()?;
+                self.dio.set_high()?;
                 self.bit_delay().await;
 
-                tri!(self.clk.set_high());
+                self.clk.set_high()?;
                 self.bit_delay().await;
 
-                tri!(self.clk.set_low());
+                self.clk.set_low()?;
                 self.bit_delay().await;
 
                 Ok(())
             }
 
             /// Write the `cmd` to the display.
-            async fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), ERR> {
-                tri!(self.start().await);
-                tri!(self.write_byte(cmd).await);
-                tri!(self.stop().await);
+            async fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), Error<ERR>> {
+                self.start().await?;
+                self.write_byte(cmd).await?;
+                self.stop().await?;
 
                 Ok(())
             }
 
             /// Start the communication with the display.
-            async fn start(&mut self) -> Result<(), ERR> {
-                tri!(self.dio.set_low());
+            async fn start(&mut self) -> Result<(), Error<ERR>> {
+                self.dio.set_low()?;
                 self.bit_delay().await;
-                tri!(self.clk.set_low());
+                self.clk.set_low()?;
                 self.bit_delay().await;
 
                 Ok(())
             }
 
             /// Stop the communication with the display.
-            async fn stop(&mut self) -> Result<(), ERR> {
-                tri!(self.dio.set_low());
+            async fn stop(&mut self) -> Result<(), Error<ERR>> {
+                self.dio.set_low()?;
                 self.bit_delay().await;
-                tri!(self.clk.set_high());
+                self.clk.set_high()?;
                 self.bit_delay().await;
-                tri!(self.dio.set_high());
+                self.dio.set_high()?;
                 self.bit_delay().await;
 
                 Ok(())
@@ -200,23 +201,23 @@ pub mod module {
             /// Initialize the display.
             ///
             /// Clear the display and set the brightness level.
-            pub async fn init(&mut self) -> Result<(), ERR> {
-                tri!(self.clear().await);
+            pub async fn init(&mut self) -> Result<(), Error<ERR>> {
+                self.clear().await?;
                 self.write_cmd_raw(self.brightness as u8).await
             }
 
             /// Turn the display on.
-            pub async fn on(&mut self) -> Result<(), ERR> {
+            pub async fn on(&mut self) -> Result<(), Error<ERR>> {
                 self.write_cmd_raw(self.brightness as u8).await
             }
 
             /// Turn the display off.
-            pub async fn off(&mut self) -> Result<(), ERR> {
+            pub async fn off(&mut self) -> Result<(), Error<ERR>> {
                 self.write_cmd_raw(DisplayState::Off as u8).await
             }
 
             /// Clear the display.
-            pub async fn clear(&mut self) -> Result<(), ERR> {
+            pub async fn clear(&mut self) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_iter(
                     0,
                     core::iter::repeat(0).take(self.num_positions as usize),
@@ -231,7 +232,7 @@ pub mod module {
                 &mut self,
                 position: u8,
                 bytes: &[u8],
-            ) -> Result<(), ERR> {
+            ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_iter(position, bytes.iter().copied())
                     .await
             }
@@ -247,33 +248,36 @@ pub mod module {
                 &mut self,
                 position: u8,
                 bytes: ITER,
-            ) -> Result<(), ERR> {
+            ) -> Result<(), Error<ERR>> {
                 #[cfg(not(feature = "disable-checks"))]
                 if position >= self.num_positions {
                     return Ok(());
                 }
 
                 // COMM1
-                tri!(self.write_cmd_raw(0x40).await);
+                self.write_cmd_raw(0x40).await?;
 
                 // COMM2
-                tri!(self.start().await);
-                tri!(self.write_byte(0xc0 | (position & 0x03)).await);
+                self.start().await?;
+                self.write_byte(0xc0 | (position & 0x03)).await?;
 
                 #[cfg(not(feature = "disable-checks"))]
                 let bytes = bytes.take(self.num_positions as usize - position as usize);
 
                 for byte in bytes {
-                    tri!(self.write_byte(byte).await);
+                    self.write_byte(byte).await?;
                 }
 
-                tri!(self.stop().await);
+                self.stop().await?;
 
                 Ok(())
             }
 
             /// Set [`TM1637::brightness`] and write the brightness level to the display.
-            pub async fn write_brightness(&mut self, brightness: Brightness) -> Result<(), ERR> {
+            pub async fn write_brightness(
+                &mut self,
+                brightness: Brightness,
+            ) -> Result<(), Error<ERR>> {
                 self.brightness = brightness;
                 self.write_cmd_raw(brightness as u8).await
             }
@@ -289,7 +293,7 @@ pub mod module {
                 position: u8,
                 bytes: &[u8],
                 delay_ms: u32,
-            ) -> Result<(), ERR> {
+            ) -> Result<(), Error<ERR>> {
                 let num_positions = self.num_positions as usize;
 
                 if bytes.len() <= num_positions - position as usize {
@@ -302,7 +306,7 @@ pub mod module {
                         window[j] = bytes[(i + j) % bytes.len()];
                     }
 
-                    tri!(self.write_segments_raw(position, &window).await);
+                    self.write_segments_raw(position, &window).await?;
 
                     self.delay.delay_ms(delay_ms).await;
                 }
@@ -339,7 +343,7 @@ pub mod module {
                 &mut self,
                 position: u8,
                 ascii_str: &str,
-            ) -> Result<(), ERR> {
+            ) -> Result<(), Error<ERR>> {
                 let iter = ascii_str
                     .as_bytes()
                     .iter()
@@ -410,7 +414,7 @@ pub mod module {
                 position: u8,
                 ascii_str: &str,
                 delay_ms: u32,
-            ) -> Result<(), ERR> {
+            ) -> Result<(), Error<ERR>> {
                 let mut bytes = [0u8; M];
                 ascii_str
                     .as_bytes()

@@ -8,6 +8,7 @@ A platform agnostic driver to interface with the `TM1637` (7-segment display) us
 
 The following features are available:
 
+- TODO: ack
 - `blocking`: enables blocking functionality.
 - `async`: enables asynchronous functionality.
 - `defmt`: implements `defmt::Format` for structs and enums.
