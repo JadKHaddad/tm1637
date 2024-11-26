@@ -4,7 +4,6 @@
 //! The following features are available:
 //! - `blocking`: enables blocking functionality.
 //! - `async`: enables asynchronous functionality.
-//! - `impl-debug`: implements `core::fmt::Debug` for structs and enums.
 //! - `impl-defmt-format`: implements `defmt::Format` for structs and enums.
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.

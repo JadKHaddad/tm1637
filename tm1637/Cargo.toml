@@ -13,12 +13,11 @@ readme = "../README.md"
 # defmt is a feature to derive impls
 # mappings and formatters are not features.
 [features]
-default = ["async", "impl-debug"]
+default = ["async"]
 async = ["dep:embedded-hal", "dep:embedded-hal-async"]
 blocking = ["dep:embedded-hal"]
 disable-checks = []
 demo = []
-impl-debug = []
 impl-defmt-format = ["dep:defmt"]
 
 [dependencies]
