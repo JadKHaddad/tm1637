@@ -289,14 +289,13 @@ pub mod module {
                 &mut self,
                 position: u8,
                 bytes: ITER,
-                map: impl Fn(u8) -> u8,
             ) -> Result<(), Error<ERR>> {
                 self.start().await?;
 
                 self.write_byte(0xc0 | (position & 0x03)).await?;
 
                 for byte in bytes {
-                    self.write_byte(map(byte)).await?;
+                    self.write_byte(byte).await?;
                 }
 
                 self.stop().await?;
@@ -343,26 +342,26 @@ pub mod module {
 
             /// Write the given `bytes` to the display starting from the given `position`.
             ///
-            /// See [`TM1637::write_segments_raw_iter`].
+            /// See [`TM1637::write_segments_raw_mapped`].
             pub async fn write_segments_raw(
                 &mut self,
                 position: u8,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_mapped(position, bytes, |byte| byte)
+                self.write_segments_raw_iter(position, bytes.iter().copied())
                     .await
             }
 
             /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
             ///
-            /// See [`TM1637::write_segments_raw`].
+            /// See [`TM1637::write_segments_raw_iter`].
             pub async fn write_segments_raw_mapped(
                 &mut self,
                 position: u8,
                 bytes: &[u8],
-                map: impl Fn(u8) -> u8,
+                map: impl FnMut(u8) -> u8,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter_mapped(position, bytes.iter().copied(), map)
+                self.write_segments_raw_iter(position, bytes.iter().copied().map(map))
                     .await
             }
 
@@ -373,23 +372,10 @@ pub mod module {
             /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
             ///
             /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
-            pub async fn write_segments_raw_iter<ITER: Iterator<Item = u8>>(
+            pub async fn write_segments_raw_iter(
                 &mut self,
                 position: u8,
-                bytes: ITER,
-            ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter_mapped(position, bytes, |byte| byte)
-                    .await
-            }
-
-            /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
-            ///
-            /// See [`TM1637::write_segments_raw_iter`].
-            pub async fn write_segments_raw_iter_mapped<ITER: Iterator<Item = u8>>(
-                &mut self,
-                position: u8,
-                bytes: ITER,
-                map: impl Fn(u8) -> u8,
+                bytes: impl Iterator<Item = u8>,
             ) -> Result<(), Error<ERR>> {
                 #[cfg(not(feature = "disable-checks"))]
                 if position as usize >= self.num_positions() {
@@ -403,7 +389,7 @@ pub mod module {
                 self.write_start_segments_cmd().await?;
 
                 // Comm 2
-                self.write_set_segments_cmd(position, bytes, map).await?;
+                self.write_set_segments_cmd(position, bytes).await?;
 
                 Ok(())
             }
@@ -421,6 +407,8 @@ pub mod module {
             /// Move the given `bytes` across the display starting and ending at `position`.
             ///
             /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will only be written to the display.
+            ///
+            /// See [`TM1637::move_segments_raw_mapped`].
             pub async fn move_segments_raw(
                 &mut self,
                 position: u8,
@@ -432,14 +420,12 @@ pub mod module {
             }
 
             /// Move the given `bytes` across the display starting and ending at `position` mapping each byte using the provided `map` function.
-            ///
-            /// See [`TM1637::move_segments_raw`].
             pub async fn move_segments_raw_mapped(
                 &mut self,
                 position: u8,
                 bytes: &[u8],
                 delay_ms: u32,
-                map: impl Fn(u8) -> u8 + Clone,
+                map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
                 if bytes.len() <= self.num_positions() - position as usize {
                     return self.write_segments_raw_mapped(position, bytes, map).await;
@@ -462,6 +448,8 @@ pub mod module {
             }
 
             /// Write the given `ascii_str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            ///
+            /// See [`TM1637::write_segments_raw_mapped`].
             ///
             /// # Example
             ///
@@ -498,6 +486,8 @@ pub mod module {
             }
 
             /// Move the given `ascii_str` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            ///
+            /// See [`TM1637::move_segments_raw_mapped`].
             ///
             /// # Example
             ///
