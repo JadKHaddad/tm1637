@@ -2,7 +2,7 @@
 //!
 //! ## Features
 //! The following features are available:
-//! - `ack`: enables driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
+//! - `ack`: enables the driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
 //! - `blocking`: enables blocking functionality.
 //! - `async`: enables asynchronous functionality.
 //! - `defmt`: implements `defmt::Format` for structs and enums.
