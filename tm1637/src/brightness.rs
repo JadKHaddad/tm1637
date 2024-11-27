@@ -2,16 +2,19 @@
 
 /// The brightness level.
 ///
-/// Represents a byte that can be sent directly to the `TM1637` to set the brightness level.
+/// Represents a byte that can be sent directly (as a cmd) to the `TM1637` to set the brightness level.
 ///
-/// ## Bits:
+/// # Bits
+///
 /// - 1-3: Brightness level (0-7)
-/// - 4: Display state (0 - off, 1 - on). Always on.
+/// - 4: Display state (0 - off, 1 - on)
 /// - 5-7: Base address
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Brightness {
+    /// Display off.
+    Off = 0b10000000,
     /// Brightness level 0. Lowest brightness.
     L0 = 0b10001000,
     /// Brightness level 1.
@@ -28,15 +31,4 @@ pub enum Brightness {
     L6 = 0b10001110,
     /// Brightness level 7. Highest brightness.
     L7 = 0b10001111,
-}
-
-/// Display state.
-///
-/// Represents a byte that can be sent directly to the `TM1637` to set the display state.
-#[repr(u8)]
-#[derive(Debug, Clone, Copy)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub(crate) enum DisplayState {
-    /// Display off.
-    Off = 0b10000000,
 }

@@ -87,15 +87,14 @@ pub mod module {
 
     mod inner {
         use super::super::Identity;
-        use crate::{
-            brightness::DisplayState, Brightness, ConditionalInputPin, Error, TM1637Builder,
-        };
+        use crate::{Brightness, ConditionalInputPin, Error, TM1637Builder};
         use embedded_hal::digital::OutputPin;
 
         #[doc = name]
         /// `TM1637` 7-segment display driver.
         ///
         /// # Type parameters
+        ///
         /// - `N`: Number of positions on the display.
         /// - `CLK`: Clock.
         /// - `DIO`: Data input/output.
@@ -343,7 +342,7 @@ pub mod module {
 
             /// Turn the display off.
             pub async fn off(&mut self) -> Result<(), Error<ERR>> {
-                self.write_cmd_raw(DisplayState::Off as u8).await
+                self.write_cmd_raw(Brightness::Off as u8).await
             }
 
             /// Clear the display.
