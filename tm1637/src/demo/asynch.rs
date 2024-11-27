@@ -6,7 +6,7 @@
 use embedded_hal::digital::OutputPin;
 use embedded_hal_async::delay::DelayNs;
 
-use crate::{asynch::TM1637, mappings::DigitBits, ConditionalInputPin, Error};
+use crate::{mappings::DigitBits, AsyncTM1637, ConditionalInputPin, Error};
 
 /// Asynchronous demo.
 #[derive(Debug)]
@@ -16,7 +16,7 @@ where
     DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
-    device: TM1637<4, CLK, DIO, DELAY>,
+    device: AsyncTM1637<4, CLK, DIO, DELAY>,
     delay: DELAY,
 }
 impl<CLK, DIO, DELAY, ERR> Demo<CLK, DIO, DELAY, ERR>
@@ -27,7 +27,7 @@ where
     DELAY: DelayNs,
 {
     /// Create a new demo instance.
-    pub fn new(device: TM1637<4, CLK, DIO, DELAY>, delay: DELAY) -> Self {
+    pub fn new(device: AsyncTM1637<4, CLK, DIO, DELAY>, delay: DELAY) -> Self {
         Self { device, delay }
     }
 

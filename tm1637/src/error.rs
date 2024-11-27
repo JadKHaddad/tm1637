@@ -1,4 +1,4 @@
-/// An Error type for the TM1637 driver.
+/// An Error type for the `TM1637` driver.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 #[non_exhaustive]

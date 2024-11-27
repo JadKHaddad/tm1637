@@ -3,8 +3,6 @@
 //! ## Features
 //! The following features are available:
 //! - `ack`: enables the driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
-//! - `blocking`: enables blocking functionality.
-//! - `async`: enables asynchronous functionality.
 //! - `defmt`: implements `defmt::Format` for structs and enums.
 //! - `demo`: enables the demo module.
 //! - `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
@@ -25,12 +23,7 @@ pub mod mappings;
 
 pub use brightness::Brightness;
 pub use conditional::ConditionalInputPin;
+pub use device::{
+    asynch::TM1637 as AsyncTM1637, blocking::TM1637 as BlockingTM1637, TM1637Builder,
+};
 pub use error::Error;
-
-#[cfg(feature = "async")]
-#[cfg_attr(docsrs, doc(cfg(feature = "async")))]
-pub use crate::device::asynch;
-
-#[cfg(feature = "blocking")]
-#[cfg_attr(docsrs, doc(cfg(feature = "blocking")))]
-pub use crate::device::blocking;

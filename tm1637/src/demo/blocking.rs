@@ -6,10 +6,9 @@
 use embedded_hal::{delay::DelayNs, digital::OutputPin};
 
 use crate::{
-    blocking::TM1637,
     formatters::i16_to_4digits,
     mappings::{DigitBits, LoCharBits, SegmentBits, SpecialCharBits, UpCharBits},
-    ConditionalInputPin, Error,
+    BlockingTM1637, ConditionalInputPin, Error,
 };
 
 /// Blocking demo.
@@ -20,7 +19,7 @@ where
     DIO: OutputPin<Error = ERR>,
     DELAY: DelayNs,
 {
-    device: TM1637<4, CLK, DIO, DELAY>,
+    device: BlockingTM1637<4, CLK, DIO, DELAY>,
     delay: DELAY,
     moving_delay_ms: u32,
 }
@@ -33,7 +32,11 @@ where
     DELAY: DelayNs,
 {
     /// Create a new demo instance.
-    pub fn new(device: TM1637<4, CLK, DIO, DELAY>, delay: DELAY, moving_delay_ms: u32) -> Self {
+    pub fn new(
+        device: BlockingTM1637<4, CLK, DIO, DELAY>,
+        delay: DELAY,
+        moving_delay_ms: u32,
+    ) -> Self {
         Self {
             device,
             delay,

@@ -2,85 +2,97 @@
 
 use duplicate::duplicate_item;
 
+use crate::Brightness;
+
 /// Identity trait.
 ///
 /// Used to trick the compiler while using [`duplicate_item`] to implement `async` and `blocking` versions of the same module.
 /// Using this trait, we can write normal rust code that can also be formatted by `rustfmt`.
-#[cfg(any(feature = "async", feature = "blocking"))]
 trait Identity: Sized {
     fn identity(self) -> Self {
         self
     }
 }
 
-#[cfg(any(feature = "async", feature = "blocking"))]
 impl<T: Sized> Identity for T {}
 
+/// `TM1637` 7-segment display builder.
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct TM1637Builder<CLK, DIO, DELAY> {
+    clk: CLK,
+    dio: DIO,
+    delay: DELAY,
+    brightness: Brightness,
+    delay_us: u32,
+}
+
+impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
+    /// Create a new [`TM1637Builder`] instance with default values.
+    ///
+    /// - `brightness`: [`Brightness::L0`]
+    /// - `delay_us`: 10
+    pub const fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
+        Self {
+            clk,
+            dio,
+            delay,
+            brightness: Brightness::L0,
+            delay_us: 10,
+        }
+    }
+
+    /// Set the brightness level.
+    pub fn brightness(mut self, brightness: Brightness) -> Self {
+        self.brightness = brightness;
+        self
+    }
+
+    /// Set the delay in microseconds.
+    pub fn delay_us(mut self, delay_us: u32) -> Self {
+        self.delay_us = delay_us;
+        self
+    }
+
+    /// Build an [`AsyncTM1637`](crate::AsyncTM1637) instance.
+    pub fn build_async<const N: usize>(self) -> asynch::TM1637<N, CLK, DIO, DELAY> {
+        asynch::TM1637::new(
+            self.clk,
+            self.dio,
+            self.delay,
+            self.brightness,
+            self.delay_us,
+        )
+    }
+
+    /// Build a [`BlockingTM1637`](crate::BlockingTM1637) instance.
+    pub fn build_blocking<const N: usize>(self) -> blocking::TM1637<N, CLK, DIO, DELAY> {
+        blocking::TM1637::new(
+            self.clk,
+            self.dio,
+            self.delay,
+            self.brightness,
+            self.delay_us,
+        )
+    }
+}
+
 #[duplicate_item(
-    feature_        module        async     await               delay_trait;
-    ["async"]       [asynch]      [async]   [await.identity()]  [embedded_hal_async::delay::DelayNs];
-    ["blocking"]    [blocking]    []        [identity()]        [embedded_hal::delay::DelayNs];
+    name          module        async     await               delay_trait;
+    ["Async"]     [asynch]      [async]   [await.identity()]  [embedded_hal_async::delay::DelayNs];
+    ["Blocking"]  [blocking]    []        [identity()]        [embedded_hal::delay::DelayNs];
 )]
 pub mod module {
     //! Device definition and implementation.
 
-    #[cfg(feature=feature_)]
     mod inner {
         use super::super::Identity;
-        use crate::brightness::{Brightness, DisplayState};
-        use crate::{ConditionalInputPin, Error};
+        use crate::{
+            brightness::DisplayState, Brightness, ConditionalInputPin, Error, TM1637Builder,
+        };
         use embedded_hal::digital::OutputPin;
 
-        /// `TM1637` 7-segment display builder.
-        #[derive(Debug, Clone)]
-        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-        pub struct TM1637Builder<CLK, DIO, DELAY> {
-            clk: CLK,
-            dio: DIO,
-            delay: DELAY,
-            brightness: Brightness,
-            delay_us: u32,
-        }
-
-        impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
-            /// Create a new [`TM1637Builder`] instance with default values.
-            ///
-            /// - `brightness`: [`Brightness::L0`]
-            /// - `delay_us`: 10
-            pub const fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
-                Self {
-                    clk,
-                    dio,
-                    delay,
-                    brightness: Brightness::L0,
-                    delay_us: 10,
-                }
-            }
-
-            /// Set the brightness level.
-            pub fn brightness(mut self, brightness: Brightness) -> Self {
-                self.brightness = brightness;
-                self
-            }
-
-            /// Set the delay in microseconds.
-            pub fn delay_us(mut self, delay_us: u32) -> Self {
-                self.delay_us = delay_us;
-                self
-            }
-
-            /// Build the [`TM1637`] instance.
-            pub fn build<const N: usize>(self) -> crate::asynch::TM1637<N, CLK, DIO, DELAY> {
-                crate::asynch::TM1637::new(
-                    self.clk,
-                    self.dio,
-                    self.delay,
-                    self.brightness,
-                    self.delay_us,
-                )
-            }
-        }
-
+        #[doc = name]
         /// `TM1637` 7-segment display driver.
         ///
         /// # Type parameters
@@ -551,6 +563,5 @@ pub mod module {
         }
     }
 
-    #[cfg(feature=feature_)]
     pub use inner::*;
 }
