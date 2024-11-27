@@ -28,7 +28,7 @@ use crate::mappings::{DigitBits, UpsideDownDigitBits};
 /// ```rust, ignore
 /// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
 ///     .brightness(Brightness::L3)
-///     .build();
+///     .build::<4>();
 ///
 /// tm.init().ok();
 ///
@@ -139,7 +139,7 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 /// ```rust, ignore
 /// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
 ///     .brightness(Brightness::L3)
-///     .build();
+///     .build::<4>();
 ///
 /// tm.init().ok();
 ///
