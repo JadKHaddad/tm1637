@@ -1,13 +1,14 @@
 //! Mappings for 7-segment display characters.
 //!
-
-//       A
-//      ---
-//  F  |   |  B
-//      -G-
-//  E  |   |  C
-//      ---
-//       D
+//! ```text
+//!      A
+//!     ---
+//! F  |   |  B
+//!     -G-
+//! E  |   |  C
+//!     ---
+//!      D
+//! ```
 
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
