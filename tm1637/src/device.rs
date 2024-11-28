@@ -411,7 +411,13 @@ pub mod module {
                 self.display(position, bytes.iter().copied().map(map)).await
             }
 
-            /// TODO:
+            /// Write the given `bytes` to the display in reversed order starting from the given `position` mapping each byte using the provided `map` function.
+            ///
+            /// # Notes
+            /// - `position` is mapped to the reversed position on the display.
+            /// - If you write to `position` 0, the bytes will be written to the last position on the display.
+            /// - If you write to `position` 1, the bytes will be written to the second last position on the display.
+            /// - And so on...
             pub async fn display_slice_rev_mapped(
                 &mut self,
                 position: usize,
@@ -431,7 +437,9 @@ pub mod module {
                 .await
             }
 
-            /// TODO
+            /// Write the given `bytes` to the display in reversed order starting from the given `position`.
+            ///
+            /// See [`TM1637::display_slice_rev_mapped`].
             pub async fn display_slice_rev(
                 &mut self,
                 position: usize,
@@ -441,7 +449,9 @@ pub mod module {
                     .await
             }
 
-            /// TODO
+            /// Write the given `bytes` to a `flipped` display starting from the given `position`.
+            ///
+            /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`].
             pub async fn display_slice_flipped(
                 &mut self,
                 position: usize,
@@ -528,7 +538,23 @@ pub mod module {
                 .await
             }
 
-            /// TODO
+            /// Write the given `str` to the display in reversed order starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            ///
+            /// See [`TM1637::display_slice_rev`] and [`TM1637::display_slice_rev_mapped`].
+            pub async fn display_str_rev(
+                &mut self,
+                position: usize,
+                str: &str,
+            ) -> Result<(), Error<ERR>> {
+                self.display_slice_rev_mapped(position, str.as_bytes(), |byte| {
+                    crate::mappings::from_ascii_byte(byte)
+                })
+                .await
+            }
+
+            /// Write the given `bytes` to a `flipped` display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            ///
+            /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`].
             pub async fn display_str_flipped(
                 &mut self,
                 position: usize,

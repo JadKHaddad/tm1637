@@ -34,9 +34,11 @@ async fn main(spawner: Spawner) {
 
     // tm.write_segments_raw_flipped(1, &bytes).await.ok();
 
-    tm.display_str_flipped(0, "HE").await.ok();
+    // tm.display_str_flipped(0, "HE").await.ok();
 
-    tm.fit_str(0, "StALIOn ", 700).await.ok();
+    // tm.fit_str(0, "StALIOn ", 700).await.ok();
+
+    tm.display_str_rev(0, "Error").await.ok();
 
     loop {}
 }
