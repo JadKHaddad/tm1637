@@ -21,7 +21,6 @@ static_cell = { version = "2.1.0", features = ["nightly"] }
 
 tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, features = [
     "ack",
-    "async",
     "demo",
 ] }
 

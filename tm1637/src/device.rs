@@ -376,6 +376,23 @@ pub mod module {
                     .await
             }
 
+            /// TODO: the position is not correct
+            pub async fn write_segments_raw_flipped(
+                &mut self,
+                position: u8,
+                bytes: &[u8],
+            ) -> Result<(), Error<ERR>> {
+                self.write_segments_raw_iter(
+                    self.num_positions() as u8 - position - bytes.len() as u8,
+                    bytes
+                        .iter()
+                        .copied()
+                        .rev()
+                        .map(crate::mappings::flip_mirror),
+                )
+                .await
+            }
+
             /// Write the given `bytes` to the display starting from the given `position`.
             ///
             /// # Notes
@@ -488,10 +505,32 @@ pub mod module {
                 position: u8,
                 ascii_str: &str,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_mapped(
+                self.write_segments_raw_iter(
                     position,
-                    ascii_str.as_bytes(),
-                    crate::mappings::from_ascii_byte,
+                    ascii_str
+                        .as_bytes()
+                        .iter()
+                        .copied()
+                        .map(crate::mappings::from_ascii_byte),
+                )
+                .await
+            }
+
+            /// TODO: the position is not correct
+            pub async fn write_ascii_str_flipped(
+                &mut self,
+                position: u8,
+                ascii_str: &str,
+            ) -> Result<(), Error<ERR>> {
+                self.write_segments_raw_iter(
+                    self.num_positions() as u8 - position - ascii_str.len() as u8,
+                    ascii_str
+                        .as_bytes()
+                        .iter()
+                        .copied()
+                        .rev()
+                        .map(crate::mappings::from_ascii_byte)
+                        .map(crate::mappings::flip_mirror),
                 )
                 .await
             }

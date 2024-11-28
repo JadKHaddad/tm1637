@@ -9,10 +9,7 @@ use esp_hal::{
     prelude::*,
 };
 use log::info;
-use tm1637_embedded_hal::{
-    asynch::{TM1637Builder, TM1637},
-    Brightness,
-};
+use tm1637_embedded_hal::{mappings::UpCharBits, Brightness, TM1637Builder};
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -30,12 +27,14 @@ async fn main(spawner: Spawner) {
 
     let mut tm = TM1637Builder::new(clk, dio, delay)
         .brightness(Brightness::L3)
-        .build::<4>();
+        .build_async::<4>();
 
     tm.init().await.unwrap();
-    tm.write_ascii_str(0, "UP  ").await.unwrap();
-    tm.write_ascii_str(0, "HO  ").await.unwrap();
-    tm.move_ascii_str(0, "HI   ", 500).await.unwrap();
+    let bytes = [UpCharBits::UpF as u8];
+
+    tm.write_segments_raw_flipped(1, &bytes).await.ok();
+
+    tm.write_ascii_str_flipped(2, "H").await.ok();
 
     loop {}
 }
