@@ -451,33 +451,27 @@ pub mod module {
                     .await
             }
 
-            /// Move the given `bytes` across the display starting and ending at `position`.
+            /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position`.
             ///
-            /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will only be written to the display.
-            ///
-            /// See [`TM1637::move_slice_mapped`].
-            pub async fn move_slice(
+            /// See [`TM1637::fit_slice_mapped`].
+            pub async fn fit_slice(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(position, bytes, delay_ms, |byte| byte)
+                self.fit_slice_mapped(position, bytes, delay_ms, |byte| byte)
                     .await
             }
 
-            /// Move the given `bytes` across the display starting and ending at `position` mapping each byte using the provided `map` function.
-            pub async fn move_slice_mapped(
+            /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position` mapping each byte using the provided `map` function.
+            pub async fn fit_slice_mapped(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                if bytes.len() <= self.num_positions() - position {
-                    return self.display_slice_mapped(position, bytes, map).await;
-                }
-
                 for i in 0..=bytes.len() {
                     let mut window = [0u8; N];
 
@@ -494,7 +488,7 @@ pub mod module {
                 Ok(())
             }
 
-            /// Write the given `ascii_str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
             ///
             /// See [`TM1637::display_slice_mapped`].
             ///
@@ -534,7 +528,7 @@ pub mod module {
                 .await
             }
 
-            /// TODO: the position is not correct
+            /// TODO
             pub async fn display_str_flipped(
                 &mut self,
                 position: usize,
@@ -546,13 +540,13 @@ pub mod module {
                 .await
             }
 
-            /// Move the given `ascii_str` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            /// Fit the given `str` on the display by moving it's bytes from left to right starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
             ///
-            /// See [`TM1637::move_slice_mapped`].
+            /// See [`TM1637::fit_slice_mapped`].
             ///
             /// # Example
             ///
-            /// Move the string `"HELLO "` across a `4-digit display`:
+            /// Fit the string `"HELLO "` on a `4-digit display`:
             ///
             /// ```rust, ignore
             /// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
@@ -561,7 +555,7 @@ pub mod module {
             ///
             /// tm.init().ok();
             ///
-            /// tm.move_str(0, "HELLO ", 500).ok();
+            /// tm.fit_str(0, "HELLO ", 500).ok();
             /// ```
             ///
             /// On a `4-digit display`, this will look like this:
@@ -595,13 +589,13 @@ pub mod module {
             /// | H | | E | | L | | L |
             /// +---+ +---+ +---+ +---+
             /// ```
-            pub async fn move_str(
+            pub async fn fit_str(
                 &mut self,
                 position: usize,
                 str: &str,
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(
+                self.fit_slice_mapped(
                     position,
                     str.as_bytes(),
                     delay_ms,
