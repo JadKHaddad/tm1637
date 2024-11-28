@@ -298,12 +298,12 @@ pub mod module {
             // Perform command 2.
             async fn write_set_segments_cmd<ITER: Iterator<Item = u8>>(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: ITER,
             ) -> Result<(), Error<ERR>> {
                 self.start().await?;
 
-                self.write_byte(0xc0 | (position & 0x03)).await?;
+                self.write_byte(0xc0 | (position as u8 & 0x03)).await?;
 
                 for byte in bytes {
                     self.write_byte(byte).await?;
@@ -356,7 +356,7 @@ pub mod module {
             /// See [`TM1637::write_segments_raw_mapped`].
             pub async fn write_segments_raw(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_iter(position, bytes.iter().copied())
@@ -368,7 +368,7 @@ pub mod module {
             /// See [`TM1637::write_segments_raw_iter`].
             pub async fn write_segments_raw_mapped(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
                 map: impl FnMut(u8) -> u8,
             ) -> Result<(), Error<ERR>> {
@@ -379,18 +379,18 @@ pub mod module {
             /// TODO:
             pub async fn write_segments_raw_rev_mapped(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
                 map: impl FnMut(u8) -> u8,
             ) -> Result<(), Error<ERR>> {
-                let bytes = if bytes.len() + position as usize > self.num_positions() {
-                    &bytes[..self.num_positions() - position as usize]
+                let bytes = if bytes.len() + position > self.num_positions() {
+                    &bytes[..self.num_positions() - position]
                 } else {
                     bytes
                 };
 
                 self.write_segments_raw_iter(
-                    self.num_positions() as u8 - position - bytes.len() as u8,
+                    self.num_positions() - position - bytes.len(),
                     bytes.iter().copied().rev().map(map),
                 )
                 .await
@@ -399,7 +399,7 @@ pub mod module {
             /// TODO
             pub async fn write_segments_raw_rev(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_rev_mapped(position, bytes, |byte| byte)
@@ -409,7 +409,7 @@ pub mod module {
             /// TODO
             pub async fn write_segments_raw_flipped(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_rev_mapped(position, bytes, crate::mappings::flip_mirror)
@@ -425,16 +425,16 @@ pub mod module {
             /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
             pub async fn write_segments_raw_iter(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: impl Iterator<Item = u8>,
             ) -> Result<(), Error<ERR>> {
                 #[cfg(not(feature = "disable-checks"))]
-                if position as usize >= self.num_positions() {
+                if position >= self.num_positions() {
                     return Ok(());
                 }
 
                 #[cfg(not(feature = "disable-checks"))]
-                let bytes = bytes.take(self.num_positions() - position as usize);
+                let bytes = bytes.take(self.num_positions() - position);
 
                 // Comm 1
                 self.write_start_segments_cmd().await?;
@@ -462,7 +462,7 @@ pub mod module {
             /// See [`TM1637::move_segments_raw_mapped`].
             pub async fn move_segments_raw(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
@@ -473,12 +473,12 @@ pub mod module {
             /// Move the given `bytes` across the display starting and ending at `position` mapping each byte using the provided `map` function.
             pub async fn move_segments_raw_mapped(
                 &mut self,
-                position: u8,
+                position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                if bytes.len() <= self.num_positions() - position as usize {
+                if bytes.len() <= self.num_positions() - position {
                     return self.write_segments_raw_mapped(position, bytes, map).await;
                 }
 
@@ -525,7 +525,7 @@ pub mod module {
             /// ```
             pub async fn write_ascii_str(
                 &mut self,
-                position: u8,
+                position: usize,
                 ascii_str: &str,
             ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_iter(
@@ -542,7 +542,7 @@ pub mod module {
             /// TODO: the position is not correct
             pub async fn write_ascii_str_flipped(
                 &mut self,
-                position: u8,
+                position: usize,
                 ascii_str: &str,
             ) -> Result<(), Error<ERR>> {
                 self.write_segments_raw_rev_mapped(position, ascii_str.as_bytes(), |byte| {
@@ -602,7 +602,7 @@ pub mod module {
             /// ```
             pub async fn move_ascii_str(
                 &mut self,
-                position: u8,
+                position: usize,
                 ascii_str: &str,
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
