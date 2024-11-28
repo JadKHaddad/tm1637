@@ -1,4 +1,4 @@
-use embedded_hal::digital::InputPin;
+use ::embedded_hal::digital::InputPin;
 
 /// Conditional input pin trait.
 ///

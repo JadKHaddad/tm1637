@@ -1,7 +1,5 @@
 //! Device definition and implementation.
 
-use duplicate::duplicate_item;
-
 use crate::Brightness;
 
 /// Identity trait.
@@ -77,10 +75,10 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
     }
 }
 
-#[duplicate_item(
+#[::duplicate::duplicate_item(
     name          module        async     await               delay_trait;
-    ["Async"]     [asynch]      [async]   [await.identity()]  [embedded_hal_async::delay::DelayNs];
-    ["Blocking"]  [blocking]    []        [identity()]        [embedded_hal::delay::DelayNs];
+    ["Async"]     [asynch]      [async]   [await.identity()]  [::embedded_hal_async::delay::DelayNs];
+    ["Blocking"]  [blocking]    []        [identity()]        [::embedded_hal::delay::DelayNs];
 )]
 pub mod module {
     //! Device definition and implementation.
@@ -88,7 +86,7 @@ pub mod module {
     mod inner {
         use super::super::Identity;
         use crate::{Brightness, ConditionalInputPin, Error, TM1637Builder};
-        use embedded_hal::digital::OutputPin;
+        use ::embedded_hal::digital::OutputPin;
 
         #[doc = name]
         /// `TM1637` 7-segment display driver.
@@ -280,7 +278,7 @@ pub mod module {
             }
 
             /// Write the `cmd` to the display.
-            async fn write_cmd_raw(&mut self, cmd: u8) -> Result<(), Error<ERR>> {
+            async fn write_cmd(&mut self, cmd: u8) -> Result<(), Error<ERR>> {
                 self.start().await?;
                 self.write_byte(cmd).await?;
                 self.stop().await?;
@@ -289,14 +287,14 @@ pub mod module {
             }
 
             // Perform command 1.
-            async fn write_start_segments_cmd(&mut self) -> Result<(), Error<ERR>> {
-                self.write_cmd_raw(0x40).await?;
+            async fn write_start_display_cmd(&mut self) -> Result<(), Error<ERR>> {
+                self.write_cmd(0x40).await?;
 
                 Ok(())
             }
 
             // Perform command 2.
-            async fn write_set_segments_cmd<ITER: Iterator<Item = u8>>(
+            async fn write_display_cmd<ITER: Iterator<Item = u8>>(
                 &mut self,
                 position: usize,
                 bytes: ITER,
@@ -319,7 +317,7 @@ pub mod module {
                 &mut self,
                 brightness: Brightness,
             ) -> Result<(), Error<ERR>> {
-                self.write_cmd_raw(brightness as u8).await
+                self.write_cmd(brightness as u8).await
             }
 
             /// Delay for [`TM1637::delay_us`] microseconds using [`TM1637::delay`] provider.
@@ -332,88 +330,33 @@ pub mod module {
             /// Clear the display and set the brightness level.
             pub async fn init(&mut self) -> Result<(), Error<ERR>> {
                 self.clear().await?;
-                self.write_cmd_raw(self.brightness as u8).await
+                self.write_cmd(self.brightness as u8).await
             }
 
             /// Turn the display on.
             pub async fn on(&mut self) -> Result<(), Error<ERR>> {
-                self.write_cmd_raw(self.brightness as u8).await
+                self.write_cmd(self.brightness as u8).await
             }
 
             /// Turn the display off.
             pub async fn off(&mut self) -> Result<(), Error<ERR>> {
-                self.write_cmd_raw(Brightness::Off as u8).await
+                self.write_cmd(Brightness::Off as u8).await
             }
 
             /// Clear the display.
             pub async fn clear(&mut self) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(0, core::iter::repeat(0).take(self.num_positions()))
+                self.display(0, ::core::iter::repeat(0).take(self.num_positions()))
                     .await
             }
 
-            /// Write the given `bytes` to the display starting from the given `position`.
-            ///
-            /// See [`TM1637::write_segments_raw_mapped`].
-            pub async fn write_segments_raw(
+            /// Set [`TM1637::brightness`] and write the brightness level to the display.
+            pub async fn write_brightness(
                 &mut self,
-                position: usize,
-                bytes: &[u8],
+                brightness: Brightness,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(position, bytes.iter().copied())
-                    .await
-            }
+                self.brightness = brightness;
 
-            /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
-            ///
-            /// See [`TM1637::write_segments_raw_iter`].
-            pub async fn write_segments_raw_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                map: impl FnMut(u8) -> u8,
-            ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(position, bytes.iter().copied().map(map))
-                    .await
-            }
-
-            /// TODO:
-            pub async fn write_segments_raw_rev_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                map: impl FnMut(u8) -> u8,
-            ) -> Result<(), Error<ERR>> {
-                let bytes = if bytes.len() + position > self.num_positions() {
-                    &bytes[..self.num_positions() - position]
-                } else {
-                    bytes
-                };
-
-                self.write_segments_raw_iter(
-                    self.num_positions() - position - bytes.len(),
-                    bytes.iter().copied().rev().map(map),
-                )
-                .await
-            }
-
-            /// TODO
-            pub async fn write_segments_raw_rev(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-            ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_rev_mapped(position, bytes, |byte| byte)
-                    .await
-            }
-
-            /// TODO
-            pub async fn write_segments_raw_flipped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-            ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_rev_mapped(position, bytes, crate::mappings::flip_mirror)
-                    .await
+                self.write_brightness_cmd(brightness).await
             }
 
             /// Write the given `bytes` to the display starting from the given `position`.
@@ -423,7 +366,7 @@ pub mod module {
             /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
             ///
             /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
-            pub async fn write_segments_raw_iter(
+            pub async fn display(
                 &mut self,
                 position: usize,
                 bytes: impl Iterator<Item = u8>,
@@ -437,41 +380,94 @@ pub mod module {
                 let bytes = bytes.take(self.num_positions() - position);
 
                 // Comm 1
-                self.write_start_segments_cmd().await?;
+                self.write_start_display_cmd().await?;
 
                 // Comm 2
-                self.write_set_segments_cmd(position, bytes).await?;
+                self.write_display_cmd(position, bytes).await?;
 
                 Ok(())
             }
 
-            /// Set [`TM1637::brightness`] and write the brightness level to the display.
-            pub async fn write_brightness(
+            /// Write the given `bytes` to the display starting from the given `position`.
+            ///
+            /// See [`TM1637::display_slice_mapped`].
+            pub async fn display_slice(
                 &mut self,
-                brightness: Brightness,
+                position: usize,
+                bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.brightness = brightness;
+                self.display(position, bytes.iter().copied()).await
+            }
 
-                self.write_brightness_cmd(brightness).await
+            /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
+            ///
+            /// See [`TM1637::display`].
+            pub async fn display_slice_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                map: impl FnMut(u8) -> u8,
+            ) -> Result<(), Error<ERR>> {
+                self.display(position, bytes.iter().copied().map(map)).await
+            }
+
+            /// TODO:
+            pub async fn display_slice_rev_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                map: impl FnMut(u8) -> u8,
+            ) -> Result<(), Error<ERR>> {
+                let bytes = if bytes.len() + position > self.num_positions() {
+                    &bytes[..self.num_positions() - position]
+                } else {
+                    bytes
+                };
+
+                self.display(
+                    self.num_positions() - position - bytes.len(),
+                    bytes.iter().copied().rev().map(map),
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn display_slice_rev(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+            ) -> Result<(), Error<ERR>> {
+                self.display_slice_rev_mapped(position, bytes, |byte| byte)
+                    .await
+            }
+
+            /// TODO
+            pub async fn display_slice_flipped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+            ) -> Result<(), Error<ERR>> {
+                self.display_slice_rev_mapped(position, bytes, crate::mappings::flip_mirror)
+                    .await
             }
 
             /// Move the given `bytes` across the display starting and ending at `position`.
             ///
             /// If the length of the bytes is less than or equal to [`TM1637::num_positions`] - `position`, the bytes will only be written to the display.
             ///
-            /// See [`TM1637::move_segments_raw_mapped`].
-            pub async fn move_segments_raw(
+            /// See [`TM1637::move_slice_mapped`].
+            pub async fn move_slice(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
-                self.move_segments_raw_mapped(position, bytes, delay_ms, |byte| byte)
+                self.move_slice_mapped(position, bytes, delay_ms, |byte| byte)
                     .await
             }
 
             /// Move the given `bytes` across the display starting and ending at `position` mapping each byte using the provided `map` function.
-            pub async fn move_segments_raw_mapped(
+            pub async fn move_slice_mapped(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
@@ -479,7 +475,7 @@ pub mod module {
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
                 if bytes.len() <= self.num_positions() - position {
-                    return self.write_segments_raw_mapped(position, bytes, map).await;
+                    return self.display_slice_mapped(position, bytes, map).await;
                 }
 
                 for i in 0..=bytes.len() {
@@ -489,7 +485,7 @@ pub mod module {
                         window[j] = bytes[(i + j) % bytes.len()];
                     }
 
-                    self.write_segments_raw_mapped(position, &window, map.clone())
+                    self.display_slice_mapped(position, &window, map.clone())
                         .await?;
 
                     self.delay.delay_ms(delay_ms).await;
@@ -500,7 +496,7 @@ pub mod module {
 
             /// Write the given `ascii_str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
             ///
-            /// See [`TM1637::write_segments_raw_mapped`].
+            /// See [`TM1637::display_slice_mapped`].
             ///
             /// # Example
             ///
@@ -513,7 +509,7 @@ pub mod module {
             ///
             /// tm.init().ok();
             ///
-            /// tm.write_ascii_str(0, "Err").ok();
+            /// tm.display_str(0, "Err").ok();
             /// ```
             ///
             /// On a `4-digit display`, this will look like this:
@@ -523,15 +519,14 @@ pub mod module {
             /// | E | | r | | r | |   |
             /// +---+ +---+ +---+ +---+
             /// ```
-            pub async fn write_ascii_str(
+            pub async fn display_str(
                 &mut self,
                 position: usize,
-                ascii_str: &str,
+                str: &str,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(
+                self.display(
                     position,
-                    ascii_str
-                        .as_bytes()
+                    str.as_bytes()
                         .iter()
                         .copied()
                         .map(crate::mappings::from_ascii_byte),
@@ -540,12 +535,12 @@ pub mod module {
             }
 
             /// TODO: the position is not correct
-            pub async fn write_ascii_str_flipped(
+            pub async fn display_str_flipped(
                 &mut self,
                 position: usize,
-                ascii_str: &str,
+                str: &str,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_rev_mapped(position, ascii_str.as_bytes(), |byte| {
+                self.display_slice_rev_mapped(position, str.as_bytes(), |byte| {
                     crate::mappings::flip_mirror(crate::mappings::from_ascii_byte(byte))
                 })
                 .await
@@ -553,7 +548,7 @@ pub mod module {
 
             /// Move the given `ascii_str` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
             ///
-            /// See [`TM1637::move_segments_raw_mapped`].
+            /// See [`TM1637::move_slice_mapped`].
             ///
             /// # Example
             ///
@@ -566,7 +561,7 @@ pub mod module {
             ///
             /// tm.init().ok();
             ///
-            /// tm.move_ascii_str(0, "HELLO ", 500).ok();
+            /// tm.move_str(0, "HELLO ", 500).ok();
             /// ```
             ///
             /// On a `4-digit display`, this will look like this:
@@ -600,15 +595,15 @@ pub mod module {
             /// | H | | E | | L | | L |
             /// +---+ +---+ +---+ +---+
             /// ```
-            pub async fn move_ascii_str(
+            pub async fn move_str(
                 &mut self,
                 position: usize,
-                ascii_str: &str,
+                str: &str,
                 delay_ms: u32,
             ) -> Result<(), Error<ERR>> {
-                self.move_segments_raw_mapped(
+                self.move_slice_mapped(
                     position,
-                    ascii_str.as_bytes(),
+                    str.as_bytes(),
                     delay_ms,
                     crate::mappings::from_ascii_byte,
                 )

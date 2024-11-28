@@ -35,13 +35,13 @@ where
     pub async fn timer(&mut self) -> Result<(), Error<ERR>> {
         for i in (0..=9).rev() {
             self.device
-                .write_segments_raw(0, &[DigitBits::from_digit(i) as u8])
+                .display_slice(0, &[DigitBits::from_digit(i) as u8])
                 .await?;
             self.delay.delay_ms(1000).await;
         }
 
         self.device
-            .write_segments_raw(
+            .display_slice(
                 0,
                 &[
                     DigitBits::Zero,

@@ -34,7 +34,7 @@ async fn main(spawner: Spawner) {
 
     // tm.write_segments_raw_flipped(1, &bytes).await.ok();
 
-    tm.write_ascii_str_flipped(0, "HE").await.ok();
+    tm.display_str_flipped(0, "HE").await.ok();
 
     loop {}
 }

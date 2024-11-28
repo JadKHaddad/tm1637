@@ -50,7 +50,7 @@ where
         all_seg_bits[4..11].copy_from_slice(&SegmentBits::all_u8()[0..7]);
         for _ in 0..11 {
             all_seg_bits.rotate_left(1);
-            self.device.write_segments_raw(0, &all_seg_bits)?;
+            self.device.display_slice(0, &all_seg_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
         }
 
@@ -63,7 +63,7 @@ where
         all_dig_bits[4..14].copy_from_slice(&DigitBits::all_u8());
         for _ in 0..14 {
             all_dig_bits.rotate_left(1);
-            self.device.write_segments_raw(0, &all_dig_bits)?;
+            self.device.display_slice(0, &all_dig_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
         }
 
@@ -73,7 +73,7 @@ where
     /// Countdown from 100 to 0.
     pub fn countdown(&mut self) -> Result<(), Error<ERR>> {
         for i in (0..100).rev() {
-            self.device.write_segments_raw(0, &i16_to_4digits(i))?;
+            self.device.display_slice(0, &i16_to_4digits(i))?;
             self.delay.delay_ms(self.moving_delay_ms / 10);
         }
 
@@ -86,7 +86,7 @@ where
         all_up_char_bits[4..19].copy_from_slice(&UpCharBits::all_u8());
         for _ in 0..19 {
             all_up_char_bits.rotate_left(1);
-            self.device.write_segments_raw(0, &all_up_char_bits)?;
+            self.device.display_slice(0, &all_up_char_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
         }
 
@@ -99,7 +99,7 @@ where
         all_lo_char_bits[4..19].copy_from_slice(&LoCharBits::all_u8());
         for _ in 0..19 {
             all_lo_char_bits.rotate_left(1);
-            self.device.write_segments_raw(0, &all_lo_char_bits)?;
+            self.device.display_slice(0, &all_lo_char_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
         }
 
@@ -112,7 +112,7 @@ where
         all_sp_char_bits[4..9].copy_from_slice(&SpecialCharBits::all_u8());
         for _ in 0..9 {
             all_sp_char_bits.rotate_left(1);
-            self.device.write_segments_raw(0, &all_sp_char_bits)?;
+            self.device.display_slice(0, &all_sp_char_bits)?;
             self.delay.delay_ms(self.moving_delay_ms);
         }
 
@@ -135,7 +135,7 @@ where
     ///
     /// Displays 19:06 with blinking dots.
     pub fn time(&mut self, cycles: u32, blink_delay_ms: u32) -> Result<(), Error<ERR>> {
-        self.device.write_segments_raw(
+        self.device.display_slice(
             0,
             &[
                 DigitBits::One as u8,
@@ -152,7 +152,7 @@ where
                 false => DigitBits::Nine as u8,
             };
 
-            self.device.write_segments_raw(1, &[byte])?;
+            self.device.display_slice(1, &[byte])?;
 
             self.delay.delay_ms(blink_delay_ms);
 
@@ -240,7 +240,7 @@ where
         let mut shapes = [shape_1, shape_2, shape_3, shape_4, shape_5, shape_6];
         for _ in 0..cycles {
             shapes.rotate_left(1);
-            self.device.write_segments_raw(0, &shapes[0..1]).unwrap();
+            self.device.display_slice(0, &shapes[0..1]).unwrap();
             self.delay.delay_ms(rotating_delay_ms);
         }
 
