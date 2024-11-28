@@ -372,12 +372,13 @@ pub mod module {
                 bytes: impl Iterator<Item = u8>,
             ) -> Result<(), Error<ERR>> {
                 #[cfg(not(feature = "disable-checks"))]
-                if position >= self.num_positions() {
-                    return Ok(());
-                }
+                let bytes = {
+                    if position >= self.num_positions() {
+                        return Ok(());
+                    }
 
-                #[cfg(not(feature = "disable-checks"))]
-                let bytes = bytes.take(self.num_positions() - position);
+                    bytes.take(self.num_positions() - position)
+                };
 
                 // Comm 1
                 self.write_start_display_cmd().await?;
