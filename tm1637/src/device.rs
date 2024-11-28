@@ -376,21 +376,44 @@ pub mod module {
                     .await
             }
 
-            /// TODO: the position is not correct
+            /// TODO:
+            pub async fn write_segments_raw_rev_mapped(
+                &mut self,
+                position: u8,
+                bytes: &[u8],
+                map: impl FnMut(u8) -> u8,
+            ) -> Result<(), Error<ERR>> {
+                let bytes = if bytes.len() + position as usize > self.num_positions() {
+                    &bytes[..self.num_positions() - position as usize]
+                } else {
+                    bytes
+                };
+
+                self.write_segments_raw_iter(
+                    self.num_positions() as u8 - position - bytes.len() as u8,
+                    bytes.iter().copied().rev().map(map),
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn write_segments_raw_rev(
+                &mut self,
+                position: u8,
+                bytes: &[u8],
+            ) -> Result<(), Error<ERR>> {
+                self.write_segments_raw_rev_mapped(position, bytes, |byte| byte)
+                    .await
+            }
+
+            /// TODO
             pub async fn write_segments_raw_flipped(
                 &mut self,
                 position: u8,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(
-                    self.num_positions() as u8 - position - bytes.len() as u8,
-                    bytes
-                        .iter()
-                        .copied()
-                        .rev()
-                        .map(crate::mappings::flip_mirror),
-                )
-                .await
+                self.write_segments_raw_rev_mapped(position, bytes, crate::mappings::flip_mirror)
+                    .await
             }
 
             /// Write the given `bytes` to the display starting from the given `position`.
@@ -522,16 +545,9 @@ pub mod module {
                 position: u8,
                 ascii_str: &str,
             ) -> Result<(), Error<ERR>> {
-                self.write_segments_raw_iter(
-                    self.num_positions() as u8 - position - ascii_str.len() as u8,
-                    ascii_str
-                        .as_bytes()
-                        .iter()
-                        .copied()
-                        .rev()
-                        .map(crate::mappings::from_ascii_byte)
-                        .map(crate::mappings::flip_mirror),
-                )
+                self.write_segments_raw_rev_mapped(position, ascii_str.as_bytes(), |byte| {
+                    crate::mappings::flip_mirror(crate::mappings::from_ascii_byte(byte))
+                })
                 .await
             }
 

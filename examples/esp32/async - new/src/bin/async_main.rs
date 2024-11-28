@@ -30,11 +30,11 @@ async fn main(spawner: Spawner) {
         .build_async::<4>();
 
     tm.init().await.unwrap();
-    let bytes = [UpCharBits::UpF as u8];
+    // let bytes = [UpCharBits::UpF as u8];
 
-    tm.write_segments_raw_flipped(1, &bytes).await.ok();
+    // tm.write_segments_raw_flipped(1, &bytes).await.ok();
 
-    tm.write_ascii_str_flipped(2, "H").await.ok();
+    tm.write_ascii_str_flipped(0, "HE").await.ok();
 
     loop {}
 }
