@@ -1,89 +1,5 @@
 //! Device definition and implementation.
 
-use crate::Brightness;
-
-/// Identity trait.
-///
-/// Used to trick the compiler while using [`duplicate_item`] to implement `async` and `blocking` versions of the same module.
-/// Using this trait, we can write normal rust code that can also be formatted by `rustfmt`.
-trait Identity: Sized {
-    fn identity(self) -> Self {
-        self
-    }
-}
-
-impl<T: Sized> Identity for T {}
-
-/// TODO
-#[derive(Debug, Clone, Copy)]
-pub enum Direction {
-    /// Move bytes from left to right.
-    LeftToRight,
-    /// Move bytes from right to left.
-    RightToLeft,
-}
-
-/// `TM1637` 7-segment display builder.
-#[derive(Debug, Clone)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct TM1637Builder<CLK, DIO, DELAY> {
-    clk: CLK,
-    dio: DIO,
-    delay: DELAY,
-    brightness: Brightness,
-    delay_us: u32,
-}
-
-impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
-    /// Create a new [`TM1637Builder`] instance with default values.
-    ///
-    /// - `brightness`: [`Brightness::L0`]
-    /// - `delay_us`: 10
-    pub const fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
-        Self {
-            clk,
-            dio,
-            delay,
-            brightness: Brightness::L0,
-            delay_us: 10,
-        }
-    }
-
-    /// Set the brightness level.
-    pub fn brightness(mut self, brightness: Brightness) -> Self {
-        self.brightness = brightness;
-        self
-    }
-
-    /// Set the delay in microseconds.
-    pub fn delay_us(mut self, delay_us: u32) -> Self {
-        self.delay_us = delay_us;
-        self
-    }
-
-    /// Build an [`AsyncTM1637`](crate::AsyncTM1637) instance.
-    pub fn build_async<const N: usize>(self) -> asynch::TM1637<N, CLK, DIO, DELAY> {
-        asynch::TM1637::new(
-            self.clk,
-            self.dio,
-            self.delay,
-            self.brightness,
-            self.delay_us,
-        )
-    }
-
-    /// Build a [`BlockingTM1637`](crate::BlockingTM1637) instance.
-    pub fn build_blocking<const N: usize>(self) -> blocking::TM1637<N, CLK, DIO, DELAY> {
-        blocking::TM1637::new(
-            self.clk,
-            self.dio,
-            self.delay,
-            self.brightness,
-            self.delay_us,
-        )
-    }
-}
-
 #[::duplicate::duplicate_item(
     name          module        async     await               delay_trait;
     ["Async"]     [asynch]      [async]   [await.identity()]  [::embedded_hal_async::delay::DelayNs];
@@ -93,8 +9,7 @@ pub mod module {
     //! Device definition and implementation.
 
     mod inner {
-        use super::super::Identity;
-        use crate::{Brightness, ConditionalInputPin, Direction, Error, TM1637Builder};
+        use crate::{Brightness, ConditionalInputPin, Direction, Error, Identity, TM1637Builder};
         use ::embedded_hal::digital::OutputPin;
 
         #[doc = name]
@@ -875,6 +790,7 @@ pub mod module {
             }
         }
 
+        // TODO: move display options to a separate module
         #[derive(Debug)]
         pub struct DisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
             device: &'d mut TM1637<N, CLK, DIO, DELAY>,
