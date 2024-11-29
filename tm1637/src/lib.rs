@@ -23,6 +23,7 @@ mod error;
 pub mod formatters;
 mod identity;
 pub mod mappings;
+mod options;
 
 pub use animitaion::AnimationStyle;
 pub use brightness::Brightness;
@@ -32,3 +33,13 @@ pub use device::{asynch::TM1637 as AsyncTM1637, blocking::TM1637 as BlockingTM16
 pub use direction::Direction;
 pub use error::Error;
 pub(crate) use identity::Identity;
+pub use options::{
+    asynch::{
+        DisplayOptions as AsyncDisplayOptions, Flipped as AsyncFlipped,
+        NotFlipped as AsyncNotFlipped,
+    },
+    blocking::{
+        DisplayOptions as BlockingDisplayOptions, Flipped as BlockingFlipped,
+        NotFlipped as BlockingNotFlipped,
+    },
+};
