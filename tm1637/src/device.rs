@@ -209,6 +209,21 @@ pub mod module {
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
         {
+            fn windows(bytes: &[u8], direction: Direction) -> impl Iterator<Item = [u8; N]> + '_ {
+                (0..=bytes.len()).map(move |i| {
+                    let mut window = [0u8; N];
+
+                    for j in 0..N {
+                        window[j] = match direction {
+                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
+                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
+                        };
+                    }
+
+                    window
+                })
+            }
+
             /// Send a byte to the display and wait for the ACK.
             async fn write_byte(&mut self, byte: u8) -> Result<(), Error<ERR>> {
                 let mut rest = byte;
@@ -541,16 +556,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for i in 0..=bytes.len() {
-                    let mut window = [0u8; N];
-
-                    for j in 0..self.num_positions() {
-                        window[j] = match direction {
-                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
-                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
-                        };
-                    }
-
+                for window in Self::windows(bytes, direction) {
                     self.display_slice_mapped_unchecked(position, &window, map.clone())
                         .await?;
 
@@ -581,16 +587,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for i in 0..=bytes.len() {
-                    let mut window = [0u8; N];
-
-                    for j in 0..self.num_positions() {
-                        window[j] = match direction {
-                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
-                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
-                        };
-                    }
-
+                for window in Self::windows(bytes, direction) {
                     self.display_slice_flipped_mapped(position, &window, map.clone())
                         .await?;
 
