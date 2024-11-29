@@ -961,21 +961,6 @@ pub mod module {
                 self
             }
 
-            pub fn map<M>(
-                mut self,
-                mut map: M,
-            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8>
-            where
-                M: FnMut(u8) -> u8 + 'static,
-            {
-                DisplayOptions {
-                    device: self.device,
-                    position: self.position,
-                    bytes: self.bytes,
-                    map: move |byte| map((self.map)(byte)),
-                }
-            }
-
             pub fn flip(
                 self,
             ) -> FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
