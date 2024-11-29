@@ -20,6 +20,7 @@ duplicate = "1.0.0"
 embedded-hal-async = { version = "1.0.0" }
 embedded-hal = { version = "1.0.0" }
 defmt = { version = "0.3.6", optional = true }
+auto_enums = "0.8.6"
 
 [package.metadata.docs.rs]
 all-features = true

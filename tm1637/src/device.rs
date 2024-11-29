@@ -209,25 +209,6 @@ pub mod module {
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
         {
-            /// TODO
-            pub fn windows_overlapping(
-                bytes: &[u8],
-                direction: Direction,
-            ) -> impl Iterator<Item = [u8; N]> + '_ {
-                (0..=bytes.len()).map(move |i| {
-                    let mut window = [0u8; N];
-
-                    for j in 0..N {
-                        window[j] = match direction {
-                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
-                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
-                        };
-                    }
-
-                    window
-                })
-            }
-
             /// Send a byte to the display and wait for the ACK.
             async fn write_byte(&mut self, byte: u8) -> Result<(), Error<ERR>> {
                 let mut rest = byte;
@@ -314,14 +295,14 @@ pub mod module {
                 Ok(())
             }
 
-            // Perform command 1.
+            /// Perform command 1.
             async fn write_start_display_cmd(&mut self) -> Result<(), Error<ERR>> {
                 self.write_cmd(0x40).await?;
 
                 Ok(())
             }
 
-            // Perform command 2.
+            /// Perform command 2.
             async fn write_display_cmd<ITER: Iterator<Item = u8>>(
                 &mut self,
                 position: usize,
@@ -570,7 +551,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for window in Self::windows_overlapping(bytes, direction) {
+                for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
                     self.display_slice_mapped_unchecked(position, &window, map.clone())
                         .await?;
 
@@ -607,7 +588,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for window in Self::windows_overlapping(bytes, direction) {
+                for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
                     self.display_slice_flipped_mapped(position, &window, map.clone())
                         .await?;
 

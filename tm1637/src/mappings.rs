@@ -10,6 +10,8 @@
 //!      D
 //! ```
 
+use crate::Direction;
+
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
@@ -540,6 +542,34 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
+/// Creates an iterator over overlapping windows of bytes.
+pub fn windows_overlapping<const N: usize>(
+    bytes: &[u8],
+    direction: Direction,
+) -> impl Iterator<Item = [u8; N]> + '_ {
+    (0..=bytes.len()).map(move |i| {
+        let mut window = [0u8; N];
+
+        for j in 0..N {
+            window[j] = match direction {
+                Direction::LeftToRight => bytes[(i + j) % bytes.len()],
+                Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
+            };
+        }
+
+        window
+    })
+}
+
+/// Creates an iterator over windows of bytes.
+#[auto_enums::auto_enum(Iterator)]
+pub fn windows<const N: usize>(bytes: &[u8], direction: Direction) -> impl Iterator<Item = &[u8]> {
+    match direction {
+        Direction::LeftToRight => bytes.windows(N),
+        Direction::RightToLeft => bytes.windows(N).rev(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -628,5 +658,51 @@ mod tests {
         let mirrored_mirrored_five = mirror(mirror(five));
 
         assert_eq!(five, mirrored_mirrored_five);
+    }
+
+    #[test]
+    fn windows_overlapping_left_to_right() {
+        let slice = b"lorem";
+        let mut iter = windows_overlapping::<3>(slice, Direction::LeftToRight);
+        assert_eq!(iter.next().unwrap(), *b"lor");
+        assert_eq!(iter.next().unwrap(), *b"ore");
+        assert_eq!(iter.next().unwrap(), *b"rem");
+        assert_eq!(iter.next().unwrap(), *b"eml");
+        assert_eq!(iter.next().unwrap(), *b"mlo");
+        assert_eq!(iter.next().unwrap(), *b"lor");
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn windows_overlapping_right_to_left() {
+        let slice = b"lorem";
+        let mut iter = windows_overlapping::<3>(slice, Direction::RightToLeft);
+        assert_eq!(iter.next().unwrap(), *b"lor");
+        assert_eq!(iter.next().unwrap(), *b"mlo");
+        assert_eq!(iter.next().unwrap(), *b"eml");
+        assert_eq!(iter.next().unwrap(), *b"rem");
+        assert_eq!(iter.next().unwrap(), *b"ore");
+        assert_eq!(iter.next().unwrap(), *b"lor");
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn windows_left_to_right() {
+        let slice = b"lorem";
+        let mut iter = windows::<3>(slice, Direction::LeftToRight);
+        assert_eq!(iter.next().unwrap(), b"lor");
+        assert_eq!(iter.next().unwrap(), b"ore");
+        assert_eq!(iter.next().unwrap(), b"rem");
+        assert!(iter.next().is_none());
+    }
+
+    #[test]
+    fn windows_right_to_left() {
+        let slice = b"lorem";
+        let mut iter = windows::<3>(slice, Direction::RightToLeft);
+        assert_eq!(iter.next().unwrap(), b"rem");
+        assert_eq!(iter.next().unwrap(), b"ore");
+        assert_eq!(iter.next().unwrap(), b"lor");
+        assert!(iter.next().is_none());
     }
 }
