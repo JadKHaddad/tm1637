@@ -79,15 +79,15 @@ async fn main(spawner: Spawner) {
         .await
         .ok();
 
-    // tm.put_str("HELLO ")
-    //     .flip()
-    //     .animate()
-    //     .delay_ms(700)
-    //     .direction(Direction::LeftToRight)
-    //     .style(AnimationStyle::ToEnd)
-    //     .display()
-    //     .await
-    //     .ok();
+    tm.put_str("HELLO ")
+        .flip()
+        .animate()
+        .delay_ms(700)
+        .direction(Direction::LeftToRight)
+        .style(AnimationStyle::ToEnd)
+        .display()
+        .await
+        .ok();
 
     loop {}
 }
