@@ -10,12 +10,13 @@
 /// - 4: Display state (0 - off, 1 - on)
 /// - 5-7: Base address
 #[repr(u8)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Brightness {
     /// Display off.
     Off = 0b10000000,
     /// Brightness level 0. Lowest brightness.
+    #[default]
     L0 = 0b10001000,
     /// Brightness level 1.
     L1 = 0b10001001,
