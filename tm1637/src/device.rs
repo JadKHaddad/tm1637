@@ -516,7 +516,7 @@ pub mod module {
 
             /// Write the given `bytes` to a `flipped` display starting from the given `position`.
             ///
-            /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`].
+            /// See [`TM1637::display_slice_flipped_mapped`].
             pub async fn display_slice_flipped(
                 &mut self,
                 position: usize,
@@ -526,7 +526,9 @@ pub mod module {
                     .await
             }
 
-            /// TODO
+            /// Write the given `bytes` to a `flipped` display starting from the given `position` mapping each byte using the provided `map` function.
+            ///
+            /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`]
             pub async fn display_slice_flipped_mapped(
                 &mut self,
                 position: usize,
@@ -539,7 +541,9 @@ pub mod module {
                 .await
             }
 
-            /// TODO
+            /// Moves the given `str` in `direction` across the display starting and ending at `position`.
+            ///
+            /// See [`TM1637::move_slice_overlapping_mapped`].
             pub async fn move_slice_overlapping(
                 &mut self,
                 position: usize,
@@ -557,7 +561,7 @@ pub mod module {
                 .await
             }
 
-            /// TODO
+            /// Moves the given `str` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
             pub async fn move_slice_overlapping_mapped(
                 &mut self,
                 position: usize,
@@ -667,7 +671,55 @@ pub mod module {
                 .await
             }
 
-            /// TODO
+            /// Moves the given `str` in `direction` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+            ///
+            /// See [`TM1637::move_slice_overlapping_mapped`].
+            ///
+            /// # Example
+            ///
+            /// Move the string `"HELLO "` on a `4-digit display`:
+            ///
+            /// ```rust, ignore
+            /// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
+            ///    .brightness(Brightness::L3)
+            ///    .build::<4>();
+            ///
+            /// tm.init().ok();
+            ///
+            /// tm.move_slice_overlapping_mapped(0, "HELLO ", 500, Direction::LeftToRight).ok();
+            /// ```
+            ///
+            /// On a `4-digit display`, this will look like this:
+            ///
+            /// ```text
+            /// +---+ +---+ +---+ +---+
+            /// | H | | E | | L | | L |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | E | | L | | L | | O |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | L | | L | | O | |   |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | L | | O | |   | | H |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | O | |   | | H | | E |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// |   | | H | | E | | L |
+            /// +---+ +---+ +---+ +---+
+            ///
+            /// +---+ +---+ +---+ +---+
+            /// | H | | E | | L | | L |
+            /// +---+ +---+ +---+ +---+
+            /// ```
             pub async fn move_str_overlapping(
                 &mut self,
                 position: usize,
