@@ -24,6 +24,6 @@ pub mod mappings;
 pub use brightness::Brightness;
 pub use conditional::ConditionalInputPin;
 pub use device::{
-    asynch::TM1637 as AsyncTM1637, blocking::TM1637 as BlockingTM1637, TM1637Builder,
+    asynch::TM1637 as AsyncTM1637, blocking::TM1637 as BlockingTM1637, Direction, TM1637Builder,
 };
 pub use error::Error;

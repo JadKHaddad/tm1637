@@ -14,6 +14,15 @@ trait Identity: Sized {
 
 impl<T: Sized> Identity for T {}
 
+/// TODO
+#[derive(Debug, Clone, Copy)]
+pub enum Direction {
+    /// Move bytes from left to right.
+    LeftToRight,
+    /// Move bytes from right to left.
+    RightToLeft,
+}
+
 /// `TM1637` 7-segment display builder.
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -85,7 +94,7 @@ pub mod module {
 
     mod inner {
         use super::super::Identity;
-        use crate::{Brightness, ConditionalInputPin, Error, TM1637Builder};
+        use crate::{Brightness, ConditionalInputPin, Direction, Error, TM1637Builder};
         use ::embedded_hal::digital::OutputPin;
 
         #[doc = name]
@@ -462,6 +471,52 @@ pub mod module {
                     .await
             }
 
+            /// TODO
+            pub async fn move_slice_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                map: impl FnMut(u8) -> u8 + Clone,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                match direction {
+                    Direction::LeftToRight => {
+                        for i in 0..=bytes.len() {
+                            let mut window = [0u8; N];
+
+                            for j in 0..self.num_positions() {
+                                window[j] = bytes[(i + j) % bytes.len()];
+                            }
+
+                            self.display_slice_mapped(position, &window, map.clone())
+                                .await?;
+
+                            self.delay.delay_ms(delay_ms).await;
+                        }
+
+                        Ok(())
+                    }
+                    // TODO
+                    Direction::RightToLeft => {
+                        for i in 0..=bytes.len() {
+                            let mut window = [0u8; N];
+
+                            for j in 0..self.num_positions() {
+                                window[j] = bytes[(bytes.len() - i + j) % bytes.len()];
+                            }
+
+                            self.display_slice_mapped(position, &window, map.clone())
+                                .await?;
+
+                            self.delay.delay_ms(delay_ms).await;
+                        }
+
+                        Ok(())
+                    }
+                }
+            }
+
             /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position`.
             ///
             /// See [`TM1637::fit_slice_mapped`].
@@ -483,20 +538,8 @@ pub mod module {
                 delay_ms: u32,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for i in 0..=bytes.len() {
-                    let mut window = [0u8; N];
-
-                    for j in 0..self.num_positions() {
-                        window[j] = bytes[(i + j) % bytes.len()];
-                    }
-
-                    self.display_slice_mapped(position, &window, map.clone())
-                        .await?;
-
-                    self.delay.delay_ms(delay_ms).await;
-                }
-
-                Ok(())
+                self.move_slice_mapped(position, bytes, delay_ms, map, Direction::LeftToRight)
+                    .await
             }
 
             /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
@@ -635,7 +678,8 @@ pub mod module {
             pub fn put_slice<'d, 'b>(
                 &'d mut self,
                 bytes: &'b [u8],
-            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8> {
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
+            {
                 DisplayOptions {
                     device: self,
                     position: 0,
@@ -648,7 +692,8 @@ pub mod module {
             pub fn put_str<'d, 'b>(
                 &'d mut self,
                 str: &'b str,
-            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8> {
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
+            {
                 DisplayOptions {
                     device: self,
                     position: 0,
@@ -671,7 +716,7 @@ pub mod module {
             CLK: OutputPin<Error = ERR>,
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
-            F: FnMut(u8) -> u8 + 'static,
+            F: FnMut(u8) -> u8 + Clone + 'static,
         {
             pub async fn display(self) -> Result<(), Error<ERR>> {
                 self.device
@@ -679,10 +724,7 @@ pub mod module {
                     .await
             }
 
-            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>>
-            where
-                F: Clone,
-            {
+            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
                     .fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
                     .await

@@ -40,9 +40,9 @@ async fn main(spawner: Spawner) {
 
     // tm.display_str_rev(0, "Error").await.ok();
 
-    tm.put_str("HEL").position(1).flip().display().await.ok();
+    // tm.put_str("HEL").fit(300).await.ok();
 
-    // tm.put_str("SUP").rev().display().await.ok();
+    tm.put_str("SUPEA HELLO ").fit(300).await.ok();
 
     loop {}
 }
