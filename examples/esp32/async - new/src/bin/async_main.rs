@@ -9,7 +9,7 @@ use esp_hal::{
     prelude::*,
 };
 use log::info;
-use tm1637_embedded_hal::{mappings::UpCharBits, Brightness, TM1637Builder};
+use tm1637_embedded_hal::{mappings::UpCharBits, Brightness, Direction, TM1637Builder};
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -42,7 +42,26 @@ async fn main(spawner: Spawner) {
 
     // tm.put_str("HEL").fit(300).await.ok();
 
-    tm.put_str("SUPEA HELLO ").display_or_fit(300).await.ok();
+    // tm.put_str("SUPEA HELLO ").display_or_fit(300).await.ok();
+
+    let bytes = [
+        UpCharBits::UpH as u8,
+        UpCharBits::UpE as u8,
+        UpCharBits::UpL as u8,
+        UpCharBits::UpL as u8,
+        UpCharBits::UpO as u8,
+        0,
+    ];
+
+    // tm.move_slice_mapped(0, &bytes, 500, |byte| byte, Direction::RightToLeft)
+    //     .await
+    //     .ok();
+
+    // tm.fit_slice_flipped(0, &bytes, 500).await.ok();
+
+    tm.put_str("HELLO ").display_or_fit(700).await.ok();
+
+    tm.put_str("HELLO ").flip().display_or_fit(700).await.ok();
 
     loop {}
 }

@@ -503,7 +503,32 @@ pub mod module {
                 position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.display_slice_rev_mapped(position, bytes, crate::mappings::flip_mirror)
+                self.display_slice_flipped_mapped(position, bytes, |byte| byte)
+                    .await
+            }
+
+            /// TODO
+            pub async fn display_slice_flipped_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                mut map: impl FnMut(u8) -> u8,
+            ) -> Result<(), Error<ERR>> {
+                self.display_slice_rev_mapped(position, bytes, |byte| {
+                    crate::mappings::flip_mirror(map(byte))
+                })
+                .await
+            }
+
+            /// TODO
+            pub async fn move_slice(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_mapped(position, bytes, delay_ms, direction, |byte| byte)
                     .await
             }
 
@@ -513,44 +538,66 @@ pub mod module {
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
+                direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                for i in 0..=bytes.len() {
+                    let mut window = [0u8; N];
+
+                    for j in 0..self.num_positions() {
+                        window[j] = match direction {
+                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
+                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
+                        };
+                    }
+
+                    self.display_slice_mapped_unchecked(position, &window, map.clone())
+                        .await?;
+
+                    self.delay.delay_ms(delay_ms).await;
+                }
+
+                Ok(())
+            }
+
+            /// TODO
+            pub async fn move_slice_flipped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
                 direction: Direction,
             ) -> Result<(), Error<ERR>> {
-                match direction {
-                    Direction::LeftToRight => {
-                        for i in 0..=bytes.len() {
-                            let mut window = [0u8; N];
+                self.move_slice_flipped_mapped(position, bytes, delay_ms, direction, |byte| byte)
+                    .await
+            }
 
-                            for j in 0..self.num_positions() {
-                                window[j] = bytes[(i + j) % bytes.len()];
-                            }
+            /// TODO
+            pub async fn move_slice_flipped_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                for i in 0..=bytes.len() {
+                    let mut window = [0u8; N];
 
-                            self.display_slice_mapped_unchecked(position, &window, map.clone())
-                                .await?;
-
-                            self.delay.delay_ms(delay_ms).await;
-                        }
-
-                        Ok(())
+                    for j in 0..self.num_positions() {
+                        window[j] = match direction {
+                            Direction::LeftToRight => bytes[(i + j) % bytes.len()],
+                            Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
+                        };
                     }
-                    // TODO
-                    Direction::RightToLeft => {
-                        for i in 0..=bytes.len() {
-                            let mut window = [0u8; N];
 
-                            for j in 0..self.num_positions() {
-                                window[j] = bytes[(bytes.len() - i + j) % bytes.len()];
-                            }
+                    self.display_slice_flipped_mapped(position, &window, map.clone())
+                        .await?;
 
-                            self.display_slice_mapped_unchecked(position, &window, map.clone())
-                                .await?;
-
-                            self.delay.delay_ms(delay_ms).await;
-                        }
-
-                        Ok(())
-                    }
+                    self.delay.delay_ms(delay_ms).await;
                 }
+
+                Ok(())
             }
 
             /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position`.
@@ -574,7 +621,7 @@ pub mod module {
                 delay_ms: u32,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(position, bytes, delay_ms, map, Direction::LeftToRight)
+                self.move_slice_mapped(position, bytes, delay_ms, Direction::LeftToRight, map)
                     .await
             }
 
@@ -604,10 +651,68 @@ pub mod module {
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
                 if bytes.len() <= self.num_positions() {
-                    self.display_slice_mapped(position, bytes, map).await
-                } else {
-                    self.fit_slice_mapped(position, bytes, delay_ms, map).await
+                    return self.display_slice_mapped(position, bytes, map).await;
                 }
+
+                self.fit_slice_mapped(position, bytes, delay_ms, map).await
+            }
+
+            /// TODO
+            pub async fn fit_slice_flipped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+            ) -> Result<(), Error<ERR>> {
+                self.fit_slice_flipped_mapped(position, bytes, delay_ms, |byte| byte)
+                    .await
+            }
+
+            /// TODO
+            pub async fn fit_slice_flipped_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_flipped_mapped(
+                    position,
+                    bytes,
+                    delay_ms,
+                    Direction::LeftToRight,
+                    map,
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn display_or_fit_slice_flipped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+            ) -> Result<(), Error<ERR>> {
+                self.display_or_fit_slice_flipped_mapped(position, bytes, delay_ms, |byte| byte)
+                    .await
+            }
+
+            /// TODO
+            pub async fn display_or_fit_slice_flipped_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                if bytes.len() <= self.num_positions() {
+                    return self
+                        .display_slice_flipped_mapped(position, bytes, map)
+                        .await;
+                }
+
+                self.fit_slice_flipped_mapped(position, bytes, delay_ms, map)
+                    .await
             }
 
             /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
@@ -759,6 +864,24 @@ pub mod module {
             }
 
             /// TODO
+            pub async fn move_str(
+                &mut self,
+                position: usize,
+                str: &str,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_mapped(
+                    position,
+                    str.as_bytes(),
+                    delay_ms,
+                    direction,
+                    crate::mappings::from_ascii_byte,
+                )
+                .await
+            }
+
+            /// TODO
             pub fn put_slice<'d, 'b>(
                 &'d mut self,
                 bytes: &'b [u8],
@@ -826,6 +949,12 @@ pub mod module {
                     .await
             }
 
+            pub async fn walk(self, delay_ms: u32, direction: Direction) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_mapped(self.position, self.bytes, delay_ms, direction, self.map)
+                    .await
+            }
+
             pub fn position(mut self, position: usize) -> Self {
                 self.position = position;
                 self
@@ -846,46 +975,66 @@ pub mod module {
                 }
             }
 
-            pub fn rev(self) -> ReversedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F> {
-                ReversedDisplayOptions {
+            pub fn flip(
+                self,
+            ) -> FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
+            {
+                FlippeddDisplayOptions {
                     device: self.device,
                     position: self.position,
                     bytes: self.bytes,
                     map: self.map,
                 }
             }
-
-            pub fn flip(
-                mut self,
-            ) -> ReversedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8>
-            {
-                ReversedDisplayOptions {
-                    device: self.device,
-                    position: self.position,
-                    bytes: self.bytes,
-                    map: move |byte| crate::mappings::flip_mirror((self.map)(byte)),
-                }
-            }
         }
 
         #[derive(Debug)]
-        pub struct ReversedDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
+        pub struct FlippeddDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
             device: &'d mut TM1637<N, CLK, DIO, DELAY>,
             position: usize,
             bytes: &'b [u8],
             map: F,
         }
 
-        impl<const N: usize, CLK, DIO, DELAY, ERR, F> ReversedDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
+        impl<const N: usize, CLK, DIO, DELAY, ERR, F> FlippeddDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
         where
             CLK: OutputPin<Error = ERR>,
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
-            F: FnMut(u8) -> u8 + 'static,
+            F: FnMut(u8) -> u8 + 'static + Clone,
         {
             pub async fn display(self) -> Result<(), Error<ERR>> {
                 self.device
-                    .display_slice_rev_mapped(self.position, self.bytes, self.map)
+                    .display_slice_flipped_mapped(self.position, self.bytes, self.map)
+                    .await
+            }
+
+            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .fit_slice_flipped_mapped(self.position, self.bytes, delay_ms, self.map)
+                    .await
+            }
+
+            pub async fn display_or_fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .display_or_fit_slice_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn walk(self, delay_ms: u32, direction: Direction) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        direction,
+                        self.map,
+                    )
                     .await
             }
         }
