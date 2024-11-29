@@ -209,7 +209,11 @@ pub mod module {
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
             DELAY: delay_trait,
         {
-            fn windows(bytes: &[u8], direction: Direction) -> impl Iterator<Item = [u8; N]> + '_ {
+            /// TODO
+            pub fn windows(
+                bytes: &[u8],
+                direction: Direction,
+            ) -> impl Iterator<Item = [u8; N]> + '_ {
                 (0..=bytes.len()).map(move |i| {
                     let mut window = [0u8; N];
 
