@@ -64,9 +64,11 @@ async fn main(spawner: Spawner) {
     //     .await
     //     .ok();
 
-    tm.put_str("HELLO ").flip().display().await.ok();
-    tm.put_str("HELLO ").display_rev().await.ok();
-    tm.put_str("HELLO ").flip().display_rev().await.ok();
+    // tm.put_str("HELLO ").flip().display().await.ok();
+    // tm.put_str("HELLO ").display_rev().await.ok();
+    // tm.put_str("HELLO ").flip().display_rev().await.ok();
+
+    tm.put_str("HELLO ").move_to_end_left(700).await.ok();
 
     loop {}
 }

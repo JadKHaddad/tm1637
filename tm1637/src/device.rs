@@ -522,7 +522,7 @@ pub mod module {
                 .await
             }
 
-            /// Moves the given `str` in `direction` across the display starting and ending at `position`.
+            /// Moves the given `bytes` in `direction` across the display starting and ending at `position`.
             ///
             /// See [`TM1637::move_slice_overlapping_mapped`].
             pub async fn move_slice_overlapping(
@@ -542,7 +542,7 @@ pub mod module {
                 .await
             }
 
-            /// Moves the given `str` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
+            /// Moves the given `bytes` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
             pub async fn move_slice_overlapping_mapped(
                 &mut self,
                 position: usize,
@@ -590,6 +590,80 @@ pub mod module {
             ) -> Result<(), Error<ERR>> {
                 for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
                     self.display_slice_flipped_mapped(position, &window, map.clone())
+                        .await?;
+
+                    self.delay.delay_ms(delay_ms).await;
+                }
+
+                Ok(())
+            }
+
+            /// TODO
+            pub async fn move_slice_to_end(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_to_end_mapped(
+                    position,
+                    bytes,
+                    delay_ms,
+                    direction,
+                    Identity::identity,
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn move_slice_to_end_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                for window in crate::mappings::windows::<N>(bytes, direction) {
+                    self.display_slice_mapped_unchecked(position, window, map.clone())
+                        .await?;
+
+                    self.delay.delay_ms(delay_ms).await;
+                }
+
+                Ok(())
+            }
+
+            /// TODO
+            pub async fn move_slice_to_end_flipped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_to_end_flipped_mapped(
+                    position,
+                    bytes,
+                    delay_ms,
+                    direction,
+                    Identity::identity,
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn move_slice_to_end_flipped_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                direction: Direction,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                for window in crate::mappings::windows::<N>(bytes, direction) {
+                    self.display_slice_flipped_mapped(position, window, map.clone())
                         .await?;
 
                     self.delay.delay_ms(delay_ms).await;
@@ -737,6 +811,42 @@ pub mod module {
             }
 
             /// TODO
+            pub async fn move_str_to_end(
+                &mut self,
+                position: usize,
+                str: &str,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_to_end_mapped(
+                    position,
+                    str.as_bytes(),
+                    delay_ms,
+                    direction,
+                    crate::mappings::from_ascii_byte,
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn move_str_to_end_flipped(
+                &mut self,
+                position: usize,
+                str: &str,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_to_end_flipped_mapped(
+                    position,
+                    str.as_bytes(),
+                    delay_ms,
+                    direction,
+                    crate::mappings::from_ascii_byte,
+                )
+                .await
+            }
+
+            /// TODO
             pub fn put_slice<'d, 'b>(
                 &'d mut self,
                 bytes: &'b [u8],
@@ -837,6 +947,46 @@ pub mod module {
                     .await
             }
 
+            pub async fn move_to_end(
+                self,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        direction,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_to_end_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::RightToLeft,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_to_end_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::LeftToRight,
+                        self.map,
+                    )
+                    .await
+            }
+
             pub fn flip(
                 self,
             ) -> FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
@@ -902,6 +1052,46 @@ pub mod module {
             pub async fn move_overlapping_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
                     .move_slice_overlapping_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::LeftToRight,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_to_end(
+                self,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        direction,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_to_end_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::RightToLeft,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_to_end_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_to_end_flipped_mapped(
                         self.position,
                         self.bytes,
                         delay_ms,
