@@ -808,6 +808,12 @@ pub mod module {
                     .await
             }
 
+            pub async fn display_unchecked(self) -> Result<(), Error<ERR>> {
+                self.device
+                    .display_unchecked(self.position, self.bytes.iter().copied().map(self.map))
+                    .await
+            }
+
             pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
                     .fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
