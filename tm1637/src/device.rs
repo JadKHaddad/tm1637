@@ -627,38 +627,6 @@ pub mod module {
             }
 
             /// TODO
-            pub async fn display_or_fit_slice(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                if bytes.len() <= self.num_positions() {
-                    return self
-                        .display_slice_mapped(position, bytes, |byte| byte)
-                        .await;
-                }
-
-                self.fit_slice_mapped(position, bytes, delay_ms, |byte| byte)
-                    .await
-            }
-
-            /// TODO
-            pub async fn display_or_fit_slice_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-                map: impl FnMut(u8) -> u8 + Clone,
-            ) -> Result<(), Error<ERR>> {
-                if bytes.len() <= self.num_positions() {
-                    return self.display_slice_mapped(position, bytes, map).await;
-                }
-
-                self.fit_slice_mapped(position, bytes, delay_ms, map).await
-            }
-
-            /// TODO
             pub async fn fit_slice_flipped(
                 &mut self,
                 position: usize,
@@ -685,35 +653,6 @@ pub mod module {
                     map,
                 )
                 .await
-            }
-
-            /// TODO
-            pub async fn display_or_fit_slice_flipped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                self.display_or_fit_slice_flipped_mapped(position, bytes, delay_ms, |byte| byte)
-                    .await
-            }
-
-            /// TODO
-            pub async fn display_or_fit_slice_flipped_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-                map: impl FnMut(u8) -> u8 + Clone,
-            ) -> Result<(), Error<ERR>> {
-                if bytes.len() <= self.num_positions() {
-                    return self
-                        .display_slice_flipped_mapped(position, bytes, map)
-                        .await;
-                }
-
-                self.fit_slice_flipped_mapped(position, bytes, delay_ms, map)
-                    .await
             }
 
             /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
@@ -849,22 +788,6 @@ pub mod module {
             }
 
             /// TODO
-            pub async fn display_or_fit_str(
-                &mut self,
-                position: usize,
-                str: &str,
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                self.display_or_fit_slice_mapped(
-                    position,
-                    str.as_bytes(),
-                    delay_ms,
-                    crate::mappings::from_ascii_byte,
-                )
-                .await
-            }
-
-            /// TODO
             pub async fn move_str(
                 &mut self,
                 position: usize,
@@ -944,12 +867,6 @@ pub mod module {
                     .await
             }
 
-            pub async fn display_or_fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .display_or_fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
-                    .await
-            }
-
             pub async fn walk(self, delay_ms: u32, direction: Direction) -> Result<(), Error<ERR>> {
                 self.device
                     .move_slice_mapped(self.position, self.bytes, delay_ms, direction, self.map)
@@ -998,17 +915,6 @@ pub mod module {
             pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
                     .fit_slice_flipped_mapped(self.position, self.bytes, delay_ms, self.map)
-                    .await
-            }
-
-            pub async fn display_or_fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .display_or_fit_slice_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        self.map,
-                    )
                     .await
             }
 
