@@ -59,9 +59,14 @@ async fn main(spawner: Spawner) {
 
     // tm.fit_slice_flipped(0, &bytes, 500).await.ok();
 
-    tm.put_str("HELLO ").display_or_fit(700).await.ok();
+    // tm.put_str("HELLO ")
+    //     .move_overlapping(700, Direction::LeftToRight)
+    //     .await
+    //     .ok();
 
-    tm.put_str("HELLO ").flip().display_or_fit(700).await.ok();
+    tm.put_str("HELLO ").flip().display().await.ok();
+    tm.put_str("HELLO ").display_rev().await.ok();
+    tm.put_str("HELLO ").flip().display_rev().await.ok();
 
     loop {}
 }

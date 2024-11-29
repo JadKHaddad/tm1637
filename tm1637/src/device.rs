@@ -210,7 +210,7 @@ pub mod module {
             DELAY: delay_trait,
         {
             /// TODO
-            pub fn windows(
+            pub fn windows_overlapping(
                 bytes: &[u8],
                 direction: Direction,
             ) -> impl Iterator<Item = [u8; N]> + '_ {
@@ -510,7 +510,7 @@ pub mod module {
                 position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.display_slice_rev_mapped(position, bytes, |byte| byte)
+                self.display_slice_rev_mapped(position, bytes, Identity::identity)
                     .await
             }
 
@@ -522,7 +522,7 @@ pub mod module {
                 position: usize,
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
-                self.display_slice_flipped_mapped(position, bytes, |byte| byte)
+                self.display_slice_flipped_mapped(position, bytes, Identity::identity)
                     .await
             }
 
@@ -540,19 +540,25 @@ pub mod module {
             }
 
             /// TODO
-            pub async fn move_slice(
+            pub async fn move_slice_overlapping(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
                 direction: Direction,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(position, bytes, delay_ms, direction, |byte| byte)
-                    .await
+                self.move_slice_overlapping_mapped(
+                    position,
+                    bytes,
+                    delay_ms,
+                    direction,
+                    Identity::identity,
+                )
+                .await
             }
 
             /// TODO
-            pub async fn move_slice_mapped(
+            pub async fn move_slice_overlapping_mapped(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
@@ -560,7 +566,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for window in Self::windows(bytes, direction) {
+                for window in Self::windows_overlapping(bytes, direction) {
                     self.display_slice_mapped_unchecked(position, &window, map.clone())
                         .await?;
 
@@ -571,19 +577,25 @@ pub mod module {
             }
 
             /// TODO
-            pub async fn move_slice_flipped(
+            pub async fn move_slice_overlapping_flipped(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
                 delay_ms: u32,
                 direction: Direction,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_flipped_mapped(position, bytes, delay_ms, direction, |byte| byte)
-                    .await
+                self.move_slice_overlapping_flipped_mapped(
+                    position,
+                    bytes,
+                    delay_ms,
+                    direction,
+                    Identity::identity,
+                )
+                .await
             }
 
             /// TODO
-            pub async fn move_slice_flipped_mapped(
+            pub async fn move_slice_overlapping_flipped_mapped(
                 &mut self,
                 position: usize,
                 bytes: &[u8],
@@ -591,7 +603,7 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
-                for window in Self::windows(bytes, direction) {
+                for window in Self::windows_overlapping(bytes, direction) {
                     self.display_slice_flipped_mapped(position, &window, map.clone())
                         .await?;
 
@@ -599,60 +611,6 @@ pub mod module {
                 }
 
                 Ok(())
-            }
-
-            /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position`.
-            ///
-            /// See [`TM1637::fit_slice_mapped`].
-            pub async fn fit_slice(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                self.fit_slice_mapped(position, bytes, delay_ms, |byte| byte)
-                    .await
-            }
-
-            /// Fit the given `bytes` on the display by moving them from left to right starting and ending at `position` mapping each byte using the provided `map` function.
-            pub async fn fit_slice_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-                map: impl FnMut(u8) -> u8 + Clone,
-            ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(position, bytes, delay_ms, Direction::LeftToRight, map)
-                    .await
-            }
-
-            /// TODO
-            pub async fn fit_slice_flipped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                self.fit_slice_flipped_mapped(position, bytes, delay_ms, |byte| byte)
-                    .await
-            }
-
-            /// TODO
-            pub async fn fit_slice_flipped_mapped(
-                &mut self,
-                position: usize,
-                bytes: &[u8],
-                delay_ms: u32,
-                map: impl FnMut(u8) -> u8 + Clone,
-            ) -> Result<(), Error<ERR>> {
-                self.move_slice_flipped_mapped(
-                    position,
-                    bytes,
-                    delay_ms,
-                    Direction::LeftToRight,
-                    map,
-                )
-                .await
             }
 
             /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
@@ -695,20 +653,6 @@ pub mod module {
                 .await
             }
 
-            /// Write the given `str` to the display in reversed order starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
-            ///
-            /// See [`TM1637::display_slice_rev`] and [`TM1637::display_slice_rev_mapped`].
-            pub async fn display_str_rev(
-                &mut self,
-                position: usize,
-                str: &str,
-            ) -> Result<(), Error<ERR>> {
-                self.display_slice_rev_mapped(position, str.as_bytes(), |byte| {
-                    crate::mappings::from_ascii_byte(byte)
-                })
-                .await
-            }
-
             /// Write the given `bytes` to a `flipped` display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
             ///
             /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`].
@@ -723,79 +667,33 @@ pub mod module {
                 .await
             }
 
-            /// Fit the given `str` on the display by moving it's bytes from left to right starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
-            ///
-            /// See [`TM1637::fit_slice_mapped`].
-            ///
-            /// # Example
-            ///
-            /// Fit the string `"HELLO "` on a `4-digit display`:
-            ///
-            /// ```rust, ignore
-            /// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
-            ///    .brightness(Brightness::L3)
-            ///    .build::<4>();
-            ///
-            /// tm.init().ok();
-            ///
-            /// tm.fit_str(0, "HELLO ", 500).ok();
-            /// ```
-            ///
-            /// On a `4-digit display`, this will look like this:
-            ///
-            /// ```text
-            /// +---+ +---+ +---+ +---+
-            /// | H | | E | | L | | L |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// | E | | L | | L | | O |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// | L | | L | | O | |   |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// | L | | O | |   | | H |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// | O | |   | | H | | E |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// |   | | H | | E | | L |
-            /// +---+ +---+ +---+ +---+
-            ///
-            /// +---+ +---+ +---+ +---+
-            /// | H | | E | | L | | L |
-            /// +---+ +---+ +---+ +---+
-            /// ```
-            pub async fn fit_str(
-                &mut self,
-                position: usize,
-                str: &str,
-                delay_ms: u32,
-            ) -> Result<(), Error<ERR>> {
-                self.fit_slice_mapped(
-                    position,
-                    str.as_bytes(),
-                    delay_ms,
-                    crate::mappings::from_ascii_byte,
-                )
-                .await
-            }
-
             /// TODO
-            pub async fn move_str(
+            pub async fn move_str_overlapping(
                 &mut self,
                 position: usize,
                 str: &str,
                 delay_ms: u32,
                 direction: Direction,
             ) -> Result<(), Error<ERR>> {
-                self.move_slice_mapped(
+                self.move_slice_overlapping_mapped(
+                    position,
+                    str.as_bytes(),
+                    delay_ms,
+                    direction,
+                    crate::mappings::from_ascii_byte,
+                )
+                .await
+            }
+
+            /// TODO
+            pub async fn move_str_overlapping_flipped(
+                &mut self,
+                position: usize,
+                str: &str,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
+                self.move_slice_overlapping_flipped_mapped(
                     position,
                     str.as_bytes(),
                     delay_ms,
@@ -815,7 +713,7 @@ pub mod module {
                     device: self,
                     position: 0,
                     bytes,
-                    map: |byte| byte,
+                    map: Identity::identity,
                 }
             }
 
@@ -849,6 +747,11 @@ pub mod module {
             DELAY: delay_trait,
             F: FnMut(u8) -> u8 + Clone + 'static,
         {
+            pub fn position(mut self, position: usize) -> Self {
+                self.position = position;
+                self
+            }
+
             pub async fn display(self) -> Result<(), Error<ERR>> {
                 self.device
                     .display(self.position, self.bytes.iter().copied().map(self.map))
@@ -861,21 +764,44 @@ pub mod module {
                     .await
             }
 
-            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+            pub async fn move_overlapping(
+                self,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
                 self.device
-                    .fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
+                    .move_slice_overlapping_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        direction,
+                        self.map,
+                    )
                     .await
             }
 
-            pub async fn walk(self, delay_ms: u32, direction: Direction) -> Result<(), Error<ERR>> {
+            pub async fn move_overlapping_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
-                    .move_slice_mapped(self.position, self.bytes, delay_ms, direction, self.map)
+                    .move_slice_overlapping_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::RightToLeft,
+                        self.map,
+                    )
                     .await
             }
 
-            pub fn position(mut self, position: usize) -> Self {
-                self.position = position;
-                self
+            pub async fn move_overlapping_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_overlapping_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::LeftToRight,
+                        self.map,
+                    )
+                    .await
             }
 
             pub fn flip(
@@ -912,19 +838,41 @@ pub mod module {
                     .await
             }
 
-            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+            pub async fn move_overlapping(
+                self,
+                delay_ms: u32,
+                direction: Direction,
+            ) -> Result<(), Error<ERR>> {
                 self.device
-                    .fit_slice_flipped_mapped(self.position, self.bytes, delay_ms, self.map)
-                    .await
-            }
-
-            pub async fn walk(self, delay_ms: u32, direction: Direction) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_flipped_mapped(
+                    .move_slice_overlapping_flipped_mapped(
                         self.position,
                         self.bytes,
                         delay_ms,
                         direction,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_overlapping_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_overlapping_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::RightToLeft,
+                        self.map,
+                    )
+                    .await
+            }
+
+            pub async fn move_overlapping_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .move_slice_overlapping_flipped_mapped(
+                        self.position,
+                        self.bytes,
+                        delay_ms,
+                        Direction::LeftToRight,
                         self.map,
                     )
                     .await
