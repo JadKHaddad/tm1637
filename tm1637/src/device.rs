@@ -630,6 +630,126 @@ pub mod module {
                 )
                 .await
             }
+
+            /// TODO
+            pub fn put_slice<'d, 'b>(
+                &'d mut self,
+                bytes: &'b [u8],
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8> {
+                DisplayOptions {
+                    device: self,
+                    position: 0,
+                    bytes,
+                    map: |byte| byte,
+                }
+            }
+
+            /// TODO
+            pub fn put_str<'d, 'b>(
+                &'d mut self,
+                str: &'b str,
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8> {
+                DisplayOptions {
+                    device: self,
+                    position: 0,
+                    bytes: str.as_bytes(),
+                    map: crate::mappings::from_ascii_byte,
+                }
+            }
+        }
+
+        #[derive(Debug)]
+        pub struct DisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
+            device: &'d mut TM1637<N, CLK, DIO, DELAY>,
+            position: usize,
+            bytes: &'b [u8],
+            map: F,
+        }
+
+        impl<'d, 'b, const N: usize, CLK, DIO, DELAY, ERR, F> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F>
+        where
+            CLK: OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+            DELAY: delay_trait,
+            F: FnMut(u8) -> u8 + 'static,
+        {
+            pub async fn display(self) -> Result<(), Error<ERR>> {
+                self.device
+                    .display(self.position, self.bytes.iter().copied().map(self.map))
+                    .await
+            }
+
+            pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>>
+            where
+                F: Clone,
+            {
+                self.device
+                    .fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
+                    .await
+            }
+
+            pub fn position(mut self, position: usize) -> Self {
+                self.position = position;
+                self
+            }
+
+            pub fn map<M>(
+                mut self,
+                mut map: M,
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8>
+            where
+                M: FnMut(u8) -> u8 + 'static,
+            {
+                DisplayOptions {
+                    device: self.device,
+                    position: self.position,
+                    bytes: self.bytes,
+                    map: move |byte| map((self.map)(byte)),
+                }
+            }
+
+            pub fn rev(self) -> ReversedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F> {
+                ReversedDisplayOptions {
+                    device: self.device,
+                    position: self.position,
+                    bytes: self.bytes,
+                    map: self.map,
+                }
+            }
+
+            pub fn flip(
+                mut self,
+            ) -> ReversedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8>
+            {
+                ReversedDisplayOptions {
+                    device: self.device,
+                    position: self.position,
+                    bytes: self.bytes,
+                    map: move |byte| crate::mappings::flip_mirror((self.map)(byte)),
+                }
+            }
+        }
+
+        #[derive(Debug)]
+        pub struct ReversedDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
+            device: &'d mut TM1637<N, CLK, DIO, DELAY>,
+            position: usize,
+            bytes: &'b [u8],
+            map: F,
+        }
+
+        impl<const N: usize, CLK, DIO, DELAY, ERR, F> ReversedDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
+        where
+            CLK: OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+            DELAY: delay_trait,
+            F: FnMut(u8) -> u8 + 'static,
+        {
+            pub async fn display(self) -> Result<(), Error<ERR>> {
+                self.device
+                    .display_slice_rev_mapped(self.position, self.bytes, self.map)
+                    .await
+            }
         }
     }
 

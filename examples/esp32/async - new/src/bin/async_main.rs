@@ -38,7 +38,11 @@ async fn main(spawner: Spawner) {
 
     // tm.fit_str(0, "StALIOn ", 700).await.ok();
 
-    tm.display_str_rev(0, "Error").await.ok();
+    // tm.display_str_rev(0, "Error").await.ok();
+
+    tm.put_str("HEL").position(1).flip().display().await.ok();
+
+    // tm.put_str("SUP").rev().display().await.ok();
 
     loop {}
 }
