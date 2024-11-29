@@ -10,6 +10,7 @@
 #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+mod animitaion;
 mod brightness;
 mod builder;
 mod conditional;
@@ -23,6 +24,7 @@ pub mod formatters;
 mod identity;
 pub mod mappings;
 
+pub use animitaion::AnimationStyle;
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
 pub(crate) use conditional::ConditionalInputPin;

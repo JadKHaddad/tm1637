@@ -9,7 +9,9 @@ use esp_hal::{
     prelude::*,
 };
 use log::info;
-use tm1637_embedded_hal::{mappings::UpCharBits, Brightness, Direction, TM1637Builder};
+use tm1637_embedded_hal::{
+    mappings::UpCharBits, AnimationStyle, Brightness, Direction, TM1637Builder,
+};
 
 #[main]
 async fn main(spawner: Spawner) {
@@ -68,7 +70,24 @@ async fn main(spawner: Spawner) {
     // tm.put_str("HELLO ").display_rev().await.ok();
     // tm.put_str("HELLO ").flip().display_rev().await.ok();
 
-    tm.put_str("HELLO ").move_to_end_left(700).await.ok();
+    tm.put_str("HEL")
+        .animate()
+        .delay_ms(700)
+        .direction(Direction::LeftToRight)
+        .style(AnimationStyle::ToEnd)
+        .display()
+        .await
+        .ok();
+
+    // tm.put_str("HELLO ")
+    //     .flip()
+    //     .animate()
+    //     .delay_ms(700)
+    //     .direction(Direction::LeftToRight)
+    //     .style(AnimationStyle::ToEnd)
+    //     .display()
+    //     .await
+    //     .ok();
 
     loop {}
 }

@@ -9,7 +9,10 @@ pub mod module {
     //! Device definition and implementation.
 
     mod inner {
-        use crate::{Brightness, ConditionalInputPin, Direction, Error, Identity, TM1637Builder};
+        use crate::{
+            AnimationStyle, Brightness, ConditionalInputPin, Direction, Error, Identity,
+            TM1637Builder,
+        };
         use ::embedded_hal::digital::OutputPin;
 
         #[doc = name]
@@ -540,6 +543,12 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
+                if bytes.len() <= N {
+                    return self
+                        .display_slice_mapped_unchecked(position, bytes, map)
+                        .await;
+                }
+
                 for window in crate::mappings::windows::<N>(bytes, direction) {
                     self.display_slice_mapped_unchecked(position, window, map.clone())
                         .await?;
@@ -577,6 +586,12 @@ pub mod module {
                 direction: Direction,
                 map: impl FnMut(u8) -> u8 + Clone,
             ) -> Result<(), Error<ERR>> {
+                if bytes.len() <= N {
+                    return self
+                        .display_slice_flipped_mapped(position, bytes, map)
+                        .await;
+                }
+
                 for window in crate::mappings::windows::<N>(bytes, direction) {
                     self.display_slice_flipped_mapped(position, window, map.clone())
                         .await?;
@@ -823,108 +838,100 @@ pub mod module {
                     .await
             }
 
-            pub async fn move_overlapping(
-                self,
-                delay_ms: u32,
-                direction: Direction,
-            ) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        direction,
-                        self.map,
-                    )
-                    .await
-            }
-
-            pub async fn move_overlapping_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::RightToLeft,
-                        self.map,
-                    )
-                    .await
-            }
-
-            pub async fn move_overlapping_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::LeftToRight,
-                        self.map,
-                    )
-                    .await
-            }
-
-            pub async fn move_to_end(
-                self,
-                delay_ms: u32,
-                direction: Direction,
-            ) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        direction,
-                        self.map,
-                    )
-                    .await
-            }
-
-            pub async fn move_to_end_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::RightToLeft,
-                        self.map,
-                    )
-                    .await
-            }
-
-            pub async fn move_to_end_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::LeftToRight,
-                        self.map,
-                    )
-                    .await
+            pub fn animate(self) -> AnimatedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F> {
+                AnimatedDisplayOptions {
+                    options: self,
+                    delay_ms: 500,
+                    direction: Default::default(),
+                    style: Default::default(),
+                }
             }
 
             pub fn flip(
                 self,
             ) -> FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone>
             {
-                FlippeddDisplayOptions {
-                    device: self.device,
-                    position: self.position,
-                    bytes: self.bytes,
-                    map: self.map,
+                FlippeddDisplayOptions { options: self }
+            }
+        }
+
+        #[derive(Debug)]
+        pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
+            options: DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F>,
+            delay_ms: u32,
+            direction: Direction,
+            style: AnimationStyle,
+        }
+
+        impl<const N: usize, CLK, DIO, DELAY, ERR, F> AnimatedDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
+        where
+            CLK: OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+            DELAY: delay_trait,
+            F: FnMut(u8) -> u8 + Clone + 'static,
+        {
+            pub fn delay_ms(mut self, delay_ms: u32) -> Self {
+                self.delay_ms = delay_ms;
+                self
+            }
+
+            pub fn direction(mut self, direction: Direction) -> Self {
+                self.direction = direction;
+                self
+            }
+
+            pub fn left(mut self) -> Self {
+                self.direction = Direction::LeftToRight;
+                self
+            }
+
+            pub fn right(mut self) -> Self {
+                self.direction = Direction::RightToLeft;
+                self
+            }
+
+            pub fn style(mut self, style: AnimationStyle) -> Self {
+                self.style = style;
+                self
+            }
+
+            pub async fn display(self) -> Result<(), Error<ERR>> {
+                match self.style {
+                    AnimationStyle::Overlapping => {
+                        self.options
+                            .device
+                            .move_slice_overlapping_mapped(
+                                self.options.position,
+                                self.options.bytes,
+                                self.delay_ms,
+                                self.direction,
+                                self.options.map,
+                            )
+                            .await
+                    }
+                    AnimationStyle::ToEnd => {
+                        self.options
+                            .device
+                            .move_slice_to_end_mapped(
+                                self.options.position,
+                                self.options.bytes,
+                                self.delay_ms,
+                                self.direction,
+                                self.options.map,
+                            )
+                            .await
+                    }
                 }
             }
         }
 
         #[derive(Debug)]
         pub struct FlippeddDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
-            device: &'d mut TM1637<N, CLK, DIO, DELAY>,
-            position: usize,
-            bytes: &'b [u8],
-            map: F,
+            options: DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F>,
         }
 
-        impl<const N: usize, CLK, DIO, DELAY, ERR, F> FlippeddDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
+        impl<'d, 'b, const N: usize, CLK, DIO, DELAY, ERR, F>
+            FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F>
         where
             CLK: OutputPin<Error = ERR>,
             DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
@@ -932,89 +939,96 @@ pub mod module {
             F: FnMut(u8) -> u8 + 'static + Clone,
         {
             pub async fn display(self) -> Result<(), Error<ERR>> {
-                self.device
-                    .display_slice_flipped_mapped(self.position, self.bytes, self.map)
-                    .await
-            }
-
-            pub async fn move_overlapping(
-                self,
-                delay_ms: u32,
-                direction: Direction,
-            ) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        direction,
-                        self.map,
+                self.options
+                    .device
+                    .display_slice_flipped_mapped(
+                        self.options.position,
+                        self.options.bytes,
+                        self.options.map,
                     )
                     .await
             }
 
-            pub async fn move_overlapping_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::RightToLeft,
-                        self.map,
-                    )
-                    .await
+            pub fn animate(self) -> AnimatedFlippedDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F> {
+                AnimatedFlippedDisplayOptions {
+                    options: self,
+                    delay_ms: 500,
+                    direction: Default::default(),
+                    style: Default::default(),
+                }
+            }
+        }
+
+        #[derive(Debug)]
+        pub struct AnimatedFlippedDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F> {
+            options: FlippeddDisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F>,
+            delay_ms: u32,
+            direction: Direction,
+            style: AnimationStyle,
+        }
+
+        impl<const N: usize, CLK, DIO, DELAY, ERR, F>
+            AnimatedFlippedDisplayOptions<'_, '_, N, CLK, DIO, DELAY, F>
+        where
+            CLK: OutputPin<Error = ERR>,
+            DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+            DELAY: delay_trait,
+            F: FnMut(u8) -> u8 + Clone + 'static,
+        {
+            pub fn delay_ms(mut self, delay_ms: u32) -> Self {
+                self.delay_ms = delay_ms;
+                self
             }
 
-            pub async fn move_overlapping_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_overlapping_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::LeftToRight,
-                        self.map,
-                    )
-                    .await
+            pub fn direction(mut self, direction: Direction) -> Self {
+                self.direction = direction;
+                self
             }
 
-            pub async fn move_to_end(
-                self,
-                delay_ms: u32,
-                direction: Direction,
-            ) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        direction,
-                        self.map,
-                    )
-                    .await
+            pub fn left(mut self) -> Self {
+                self.direction = Direction::LeftToRight;
+                self
             }
 
-            pub async fn move_to_end_left(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::RightToLeft,
-                        self.map,
-                    )
-                    .await
+            pub fn right(mut self) -> Self {
+                self.direction = Direction::RightToLeft;
+                self
             }
 
-            pub async fn move_to_end_right(self, delay_ms: u32) -> Result<(), Error<ERR>> {
-                self.device
-                    .move_slice_to_end_flipped_mapped(
-                        self.position,
-                        self.bytes,
-                        delay_ms,
-                        Direction::LeftToRight,
-                        self.map,
-                    )
-                    .await
+            pub fn style(mut self, style: AnimationStyle) -> Self {
+                self.style = style;
+                self
+            }
+
+            pub async fn display(self) -> Result<(), Error<ERR>> {
+                match self.style {
+                    AnimationStyle::Overlapping => {
+                        self.options
+                            .options
+                            .device
+                            .move_slice_overlapping_flipped_mapped(
+                                self.options.options.position,
+                                self.options.options.bytes,
+                                self.delay_ms,
+                                self.direction,
+                                self.options.options.map,
+                            )
+                            .await
+                    }
+                    AnimationStyle::ToEnd => {
+                        self.options
+                            .options
+                            .device
+                            .move_slice_to_end_flipped_mapped(
+                                self.options.options.position,
+                                self.options.options.bytes,
+                                self.delay_ms,
+                                self.direction,
+                                self.options.options.map,
+                            )
+                            .await
+                    }
+                }
             }
         }
     }
