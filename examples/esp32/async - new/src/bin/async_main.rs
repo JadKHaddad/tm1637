@@ -42,7 +42,7 @@ async fn main(spawner: Spawner) {
 
     // tm.put_str("HEL").fit(300).await.ok();
 
-    tm.put_str("SUPEA HELLO ").fit(300).await.ok();
+    tm.put_str("SUPEA HELLO ").display_or_fit(300).await.ok();
 
     loop {}
 }

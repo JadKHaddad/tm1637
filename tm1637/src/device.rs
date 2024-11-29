@@ -371,24 +371,17 @@ pub mod module {
             /// Write the given `bytes` to the display starting from the given `position`.
             ///
             /// # Notes
-            /// - Positions greater than [`TM1637::num_positions`] will be ignored.
-            /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
+            /// - Positions greater than [`TM1637::num_positions`] will be written to the display regardless.
+            /// - Bytes with index greater than [`TM1637::num_positions`] will be written to the display regardless.
             ///
             /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
-            pub async fn display(
+            ///
+            /// See [`TM1637::display`].
+            pub async fn display_unchecked(
                 &mut self,
                 position: usize,
                 bytes: impl Iterator<Item = u8>,
             ) -> Result<(), Error<ERR>> {
-                #[cfg(not(feature = "disable-checks"))]
-                let bytes = {
-                    if position >= self.num_positions() {
-                        return Ok(());
-                    }
-
-                    bytes.take(self.num_positions() - position)
-                };
-
                 // Comm 1
                 self.write_start_display_cmd().await?;
 
@@ -400,6 +393,38 @@ pub mod module {
 
             /// Write the given `bytes` to the display starting from the given `position`.
             ///
+            /// # Notes
+            /// - Positions greater than [`TM1637::num_positions`] will be ignored.
+            /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
+            ///
+            /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
+            ///
+            /// See [`TM1637::display_unchecked`].
+            pub async fn display(
+                &mut self,
+                position: usize,
+                bytes: impl Iterator<Item = u8>,
+            ) -> Result<(), Error<ERR>> {
+                if position >= self.num_positions() {
+                    return Ok(());
+                }
+
+                self.display_unchecked(position, bytes.take(self.num_positions() - position))
+                    .await
+            }
+
+            /// TODO
+            pub async fn display_slice_unchecked(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+            ) -> Result<(), Error<ERR>> {
+                self.display_unchecked(position, bytes.iter().copied())
+                    .await
+            }
+
+            /// Write the given `bytes` to the display starting from the given `position`.
+            ///
             /// See [`TM1637::display_slice_mapped`].
             pub async fn display_slice(
                 &mut self,
@@ -407,6 +432,17 @@ pub mod module {
                 bytes: &[u8],
             ) -> Result<(), Error<ERR>> {
                 self.display(position, bytes.iter().copied()).await
+            }
+
+            /// TODO
+            pub async fn display_slice_mapped_unchecked(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                map: impl FnMut(u8) -> u8,
+            ) -> Result<(), Error<ERR>> {
+                self.display_unchecked(position, bytes.iter().copied().map(map))
+                    .await
             }
 
             /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
@@ -440,7 +476,7 @@ pub mod module {
                     bytes
                 };
 
-                self.display(
+                self.display_unchecked(
                     self.num_positions() - position - bytes.len(),
                     bytes.iter().copied().rev().map(map),
                 )
@@ -489,7 +525,7 @@ pub mod module {
                                 window[j] = bytes[(i + j) % bytes.len()];
                             }
 
-                            self.display_slice_mapped(position, &window, map.clone())
+                            self.display_slice_mapped_unchecked(position, &window, map.clone())
                                 .await?;
 
                             self.delay.delay_ms(delay_ms).await;
@@ -506,7 +542,7 @@ pub mod module {
                                 window[j] = bytes[(bytes.len() - i + j) % bytes.len()];
                             }
 
-                            self.display_slice_mapped(position, &window, map.clone())
+                            self.display_slice_mapped_unchecked(position, &window, map.clone())
                                 .await?;
 
                             self.delay.delay_ms(delay_ms).await;
@@ -540,6 +576,38 @@ pub mod module {
             ) -> Result<(), Error<ERR>> {
                 self.move_slice_mapped(position, bytes, delay_ms, map, Direction::LeftToRight)
                     .await
+            }
+
+            /// TODO
+            pub async fn display_or_fit_slice(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+            ) -> Result<(), Error<ERR>> {
+                if bytes.len() <= self.num_positions() {
+                    return self
+                        .display_slice_mapped(position, bytes, |byte| byte)
+                        .await;
+                }
+
+                self.fit_slice_mapped(position, bytes, delay_ms, |byte| byte)
+                    .await
+            }
+
+            /// TODO
+            pub async fn display_or_fit_slice_mapped(
+                &mut self,
+                position: usize,
+                bytes: &[u8],
+                delay_ms: u32,
+                map: impl FnMut(u8) -> u8 + Clone,
+            ) -> Result<(), Error<ERR>> {
+                if bytes.len() <= self.num_positions() {
+                    self.display_slice_mapped(position, bytes, map).await
+                } else {
+                    self.fit_slice_mapped(position, bytes, delay_ms, map).await
+                }
             }
 
             /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
@@ -675,6 +743,22 @@ pub mod module {
             }
 
             /// TODO
+            pub async fn display_or_fit_str(
+                &mut self,
+                position: usize,
+                str: &str,
+                delay_ms: u32,
+            ) -> Result<(), Error<ERR>> {
+                self.display_or_fit_slice_mapped(
+                    position,
+                    str.as_bytes(),
+                    delay_ms,
+                    crate::mappings::from_ascii_byte,
+                )
+                .await
+            }
+
+            /// TODO
             pub fn put_slice<'d, 'b>(
                 &'d mut self,
                 bytes: &'b [u8],
@@ -727,6 +811,12 @@ pub mod module {
             pub async fn fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
                 self.device
                     .fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
+                    .await
+            }
+
+            pub async fn display_or_fit(self, delay_ms: u32) -> Result<(), Error<ERR>> {
+                self.device
+                    .display_or_fit_slice_mapped(self.position, self.bytes, delay_ms, self.map)
                     .await
             }
 
