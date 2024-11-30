@@ -186,14 +186,6 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
     {
-        fn rev_bytes(bytes: &[u8], position: usize) -> &[u8] {
-            if bytes.len() + position > N {
-                &bytes[..N - position]
-            } else {
-                bytes
-            }
-        }
-
         /// Send a byte to the display and wait for the ACK.
         async fn write_byte(&mut self, byte: u8) -> Result<(), Error<ERR>> {
             let mut rest = byte;
@@ -394,8 +386,21 @@ pub mod module {
                 .await
         }
 
+        /// High-level API for static or animated display operations.
+        pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
+            InitDisplayOptions::new(self)
+        }
+
         // After this everything must be deleted!
         // --------------------------------------------------------------------
+
+        fn rev_bytes(bytes: &[u8], position: usize) -> &[u8] {
+            if bytes.len() + position > N {
+                &bytes[..N - position]
+            } else {
+                bytes
+            }
+        }
 
         /// Write the given `bytes` to the display starting from `position`.
         ///
@@ -998,11 +1003,6 @@ pub mod module {
                 crate::mappings::from_ascii_byte,
             )
             .await
-        }
-
-        /// High-level API for static or animated display operations.
-        pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
-            InitDisplayOptions { device: self }
         }
     }
 }

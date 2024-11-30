@@ -30,7 +30,7 @@ async fn main(spawner: Spawner) {
     let dio = OutputOpenDrain::new(peripherals.GPIO19.degrade(), Level::Low, Pull::Up);
 
     let mut tm = TM1637Builder::new(clk, dio, delay)
-        .brightness(Brightness::L3)
+        .brightness(Brightness::L0)
         .build_async::<4>();
 
     tm.init().await.unwrap();
@@ -116,7 +116,13 @@ async fn main(spawner: Spawner) {
     //     .await
     //     .ok();
 
-    tm.options().put_str("HELLO").flip().display().await.ok();
+    tm.options()
+        .put_str("HELLO")
+        .set_dot(1)
+        .flip()
+        .display()
+        .await
+        .ok();
 
     // tm.options()
     //     .clock()

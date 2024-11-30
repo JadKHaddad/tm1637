@@ -599,6 +599,7 @@ pub fn windows<const N: usize>(bytes: &[u8], direction: Direction) -> impl Itera
     }
 }
 
+// TODO remove
 pub fn zip_dots<'a>(
     bytes: impl Iterator<Item = u8> + 'a,
     dots: impl Iterator<Item = bool> + 'a,
@@ -608,6 +609,13 @@ pub fn zip_dots<'a>(
             .map(|byte| byte | SegmentBits::SegPoint as u8)
             .unwrap_or(byte)
     })
+}
+
+pub fn zip_or<'a>(
+    bytes: impl Iterator<Item = u8> + 'a,
+    others: impl Iterator<Item = u8> + 'a,
+) -> impl Iterator<Item = u8> + 'a {
+    bytes.zip(others).map(|(byte, other)| byte | other)
 }
 
 #[cfg(test)]
