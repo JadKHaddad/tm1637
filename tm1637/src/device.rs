@@ -1,6 +1,9 @@
 use core::marker::PhantomData;
 
-use crate::{Brightness, TM1637Builder};
+use embedded_hal::digital::OutputPin;
+use futures::{Stream, StreamExt};
+
+use crate::{Async, Blocking, Brightness, ConditionalInputPin, Direction, Error, TM1637Builder};
 
 /// `TM1637` 7-segment display driver.
 ///
@@ -103,6 +106,66 @@ impl<const N: usize, T, CLK, DIO, DELAY> TM1637<N, T, CLK, DIO, DELAY> {
     /// Split the [`TM1637`] instance into its parts.
     pub fn into_parts(self) -> (CLK, DIO, DELAY) {
         (self.clk, self.dio, self.delay)
+    }
+}
+
+impl<const N: usize, CLK, DIO, DELAY, ERR> TM1637<N, Async, CLK, DIO, DELAY>
+where
+    CLK: OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+    DELAY: ::embedded_hal_async::delay::DelayNs,
+{
+    pub fn animate<'a>(
+        &'a mut self,
+        position: usize,
+        delay_ms: u32,
+        windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
+    ) -> impl Stream<Item = Result<(), Error<ERR>>> + 'a {
+        futures::stream::unfold(
+            (self, windows, false),
+            move |(this, mut windows, errored)| async move {
+                if errored {
+                    return None;
+                }
+
+                match windows.next() {
+                    Some(window) => match this.display_unchecked(position, window).await {
+                        Ok(_) => {
+                            this.delay.delay_ms(delay_ms).await;
+
+                            Some((Ok(()), (this, windows, false)))
+                        }
+                        Err(e) => Some((Err(e), (this, windows, true))),
+                    },
+                    None => None,
+                }
+            },
+        )
+    }
+}
+
+impl<const N: usize, CLK, DIO, DELAY, ERR> TM1637<N, Blocking, CLK, DIO, DELAY>
+where
+    CLK: OutputPin<Error = ERR>,
+    DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+    DELAY: ::embedded_hal::delay::DelayNs,
+{
+    pub fn animate<'a>(
+        &'a mut self,
+        position: usize,
+        delay_ms: u32,
+        windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
+    ) -> impl Iterator<Item = Result<(), Error<ERR>>> + 'a {
+        windows.map(
+            move |window| match self.display_unchecked(position, window) {
+                Ok(_) => {
+                    self.delay.delay_ms(delay_ms);
+
+                    Ok(())
+                }
+                Err(e) => Err(e),
+            },
+        )
     }
 }
 
@@ -330,6 +393,8 @@ pub mod module {
             self.display_unchecked(position, bytes.take(self.num_positions() - position))
                 .await
         }
+
+        // After this everything must be deleted!
 
         /// Write the given `bytes` to the display starting from `position`.
         ///

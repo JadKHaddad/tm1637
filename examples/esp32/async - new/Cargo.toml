@@ -18,7 +18,7 @@ embassy-executor = { version = "0.6.0", features = ["task-arena-size-12288"] }
 embassy-time = { version = "0.3.1", features = ["generic-queue-8"] }
 esp-hal-embassy = { version = "0.5.0", features = ["esp32"] }
 static_cell = { version = "2.1.0", features = ["nightly"] }
-
+futures = { version = "0.3.31", default-features = false }
 tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, features = [
     "ack",
     "demo",

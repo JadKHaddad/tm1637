@@ -8,9 +8,11 @@ use esp_hal::{
     gpio::{Input, Io, Level, Output, OutputOpenDrain, Pull},
     prelude::*,
 };
+use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::UpCharBits, AnimationStyle, Brightness, Direction, TM1637Builder,
+    mappings::{windows_, UpCharBits},
+    AnimationStyle, Brightness, Direction, TM1637Builder,
 };
 
 #[main]
@@ -54,6 +56,9 @@ async fn main(spawner: Spawner) {
         UpCharBits::UpO as u8,
         0,
     ];
+
+    let windows = windows_::<4>(&bytes, Direction::LeftToRight);
+    let s = tm.animate(0, 700, windows).count().await;
 
     // tm.move_slice_mapped(0, &bytes, 500, |byte| byte, Direction::RightToLeft)
     //     .await
@@ -104,31 +109,31 @@ async fn main(spawner: Spawner) {
     //     .await
     //     .ok();
 
-    tm.options()
-        .put_str("HELLO")
-        // .set_dot(1)
-        .display()
-        .await
-        .ok();
+    // tm.options()
+    //     .put_str("HELLO")
+    //     // .set_dot(1)
+    //     .display()
+    //     .await
+    //     .ok();
 
-    tm.options()
-        .put_str("HELLO")
-        .flip()
-        // .set_dot(1)
-        .display()
-        .await
-        .ok();
+    // tm.options()
+    //     .put_str("HELLO")
+    //     .flip()
+    //     // .set_dot(1)
+    //     .display()
+    //     .await
+    //     .ok();
 
-    tm.options()
-        .clock()
-        .hour(24)
-        .minute(0)
-        .finish()
-        .flip()
-        .set_dot(1)
-        .display()
-        .await
-        .ok();
+    // tm.options()
+    //     .clock()
+    //     .hour(24)
+    //     .minute(0)
+    //     .finish()
+    //     .flip()
+    //     .set_dot(1)
+    //     .display()
+    //     .await
+    //     .ok();
 
     loop {}
 }
