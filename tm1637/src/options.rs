@@ -38,14 +38,22 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         }
     }
 
-    /// Prepare to display a digital clock.
-    pub fn clock() {
-        unimplemented!()
-    }
-
     /// Prepare to display a loading animation.
     pub fn loading() {
         unimplemented!()
+    }
+}
+
+impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
+    /// Prepare to display a digital clock.
+    pub fn clock(self) -> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
+        ClockDisplayOptions {
+            device: self.device,
+            hour: 0,
+            minute: 0,
+            colon: false,
+            bytes: [0; 4],
+        }
     }
 }
 
@@ -68,6 +76,65 @@ pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F,
     delay_ms: u32,
     direction: Direction,
     style: AnimationStyle,
+}
+
+/// TODO: Flipping this will break the colon.
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
+    pub(crate) device: &'d mut TM1637<4, T, CLK, DIO, DELAY>,
+    pub(crate) hour: u8,
+    pub(crate) minute: u8,
+    pub(crate) colon: bool,
+    bytes: [u8; 4],
+}
+
+impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
+    /// Set the hour.
+    pub fn hour(mut self, hour: u8) -> Self {
+        self.hour = hour;
+        self
+    }
+
+    /// Set the minute.
+    pub fn minute(mut self, minute: u8) -> Self {
+        self.minute = minute;
+        self
+    }
+
+    /// Set the colon.
+    pub fn colon(mut self, colon: bool) -> Self {
+        self.colon = colon;
+        self
+    }
+
+    /// Set the colon to `true`.
+    pub fn set_colon(self) -> Self {
+        self.colon(true)
+    }
+
+    /// Set the colon to `false`.
+    pub fn unset_colon(self) -> Self {
+        self.colon(false)
+    }
+
+    /// Finish setting the clock and display it.
+    pub fn finish(
+        &'b mut self,
+    ) -> DisplayOptions<'d, 'b, 4, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped<T>>
+    where
+        'b: 'd,
+    {
+        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, self.colon);
+
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            bytes: &self.bytes,
+            map: Identity::identity,
+            _flip: NotFlipped::new(),
+        }
+    }
 }
 
 #[::duplicate::duplicate_item(

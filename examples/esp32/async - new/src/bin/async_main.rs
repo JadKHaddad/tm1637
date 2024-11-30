@@ -70,23 +70,34 @@ async fn main(spawner: Spawner) {
     // tm.put_str("HELLO ").display_rev().await.ok();
     // tm.put_str("HELLO ").flip().display_rev().await.ok();
 
-    tm.options()
-        .put_str("HEL")
-        .animate()
-        .delay_ms(700)
-        .direction(Direction::LeftToRight)
-        .style(AnimationStyle::NonOverlapping)
-        .display()
-        .await
-        .ok();
+    // tm.options()
+    //     .put_str("HEL")
+    //     .animate()
+    //     .delay_ms(700)
+    //     .direction(Direction::LeftToRight)
+    //     .style(AnimationStyle::NonOverlapping)
+    //     .display()
+    //     .await
+    //     .ok();
+
+    // tm.options()
+    //     .put_str("HELLO ")
+    //     .flip()
+    //     .animate()
+    //     .delay_ms(700)
+    //     .direction(Direction::LeftToRight)
+    //     .style(AnimationStyle::NonOverlapping)
+    //     .display()
+    //     .await
+    //     .ok();
 
     tm.options()
-        .put_str("HELLO ")
+        .clock()
+        .hour(24)
+        .minute(0)
+        .set_colon()
+        .finish()
         .flip()
-        .animate()
-        .delay_ms(700)
-        .direction(Direction::LeftToRight)
-        .style(AnimationStyle::NonOverlapping)
         .display()
         .await
         .ok();

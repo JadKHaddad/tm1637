@@ -217,10 +217,10 @@ pub mod module {
         }
 
         /// Perform command 2.
-        async fn write_display_cmd<ITER: Iterator<Item = u8>>(
+        async fn write_display_cmd(
             &mut self,
             position: usize,
-            bytes: ITER,
+            bytes: impl Iterator<Item = u8>,
         ) -> Result<(), Error<ERR>> {
             self.start().await?;
 
