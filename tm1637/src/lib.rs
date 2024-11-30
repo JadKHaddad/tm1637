@@ -35,11 +35,13 @@ pub use error::Error;
 pub(crate) use identity::Identity;
 pub use options::{
     asynch::{
+        AnimatedDisplayOptions as AsyncAnimatedDisplayOptions,
         DisplayOptions as AsyncDisplayOptions, Flipped as AsyncFlipped,
-        NotFlipped as AsyncNotFlipped,
+        InitDisplayOptions as AsyncInitDisplayOptions, NotFlipped as AsyncNotFlipped,
     },
     blocking::{
+        AnimatedDisplayOptions as BlockingAnimatedDisplayOptions,
         DisplayOptions as BlockingDisplayOptions, Flipped as BlockingFlipped,
-        NotFlipped as BlockingNotFlipped,
+        InitDisplayOptions as BlockingInitDisplayOptions, NotFlipped as BlockingNotFlipped,
     },
 };

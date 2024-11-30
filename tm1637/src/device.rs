@@ -2,9 +2,9 @@
 
 #[allow(async_fn_in_trait)]
 #[::duplicate::duplicate_item(
-    name          module        async     await               options                          flip                       delay_trait;
-    ["Async"]     [asynch]      [async]   [await.identity()]  [crate::AsyncDisplayOptions]     [crate::AsyncFlipped]      [::embedded_hal_async::delay::DelayNs];
-    ["Blocking"]  [blocking]    []        [identity()]        [crate::BlockingDisplayOptions]  [crate::BlockingFlipped]   [::embedded_hal::delay::DelayNs];
+    name          module        async     await               init_options                          delay_trait;
+    ["Async"]     [asynch]      [async]   [await.identity()]  [crate::AsyncInitDisplayOptions]     [::embedded_hal_async::delay::DelayNs];
+    ["Blocking"]  [blocking]    []        [identity()]        [crate::BlockingInitDisplayOptions]  [::embedded_hal::delay::DelayNs];
 )]
 pub mod module {
     //! Device definition and implementation.
@@ -775,33 +775,8 @@ pub mod module {
             }
 
             /// TODO
-            pub fn put_slice<'d, 'b>(
-                &'d mut self,
-                bytes: &'b [u8],
-            ) -> options<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, flip>
-            {
-                options {
-                    device: self,
-                    position: 0,
-                    bytes,
-                    map: Identity::identity,
-                    _flip: flip,
-                }
-            }
-
-            /// TODO
-            pub fn put_str<'d, 'b>(
-                &'d mut self,
-                str: &'b str,
-            ) -> options<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, flip>
-            {
-                options {
-                    device: self,
-                    position: 0,
-                    bytes: str.as_bytes(),
-                    map: crate::mappings::from_ascii_byte,
-                    _flip: flip,
-                }
+            pub fn options(&mut self) -> init_options<'_, N, CLK, DIO, DELAY> {
+                init_options { device: self }
             }
         }
     }

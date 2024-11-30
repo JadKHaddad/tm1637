@@ -10,8 +10,58 @@ pub mod module {
         use crate::{AnimationStyle, ConditionalInputPin, Direction, Error, Identity};
         use ::embedded_hal::digital::OutputPin;
 
+        #[derive(Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+        /// TODO
+        pub struct InitDisplayOptions<'d, const N: usize, CLK, DIO, DELAY> {
+            pub(crate) device: &'d mut crate::device_<N, CLK, DIO, DELAY>,
+        }
+
+        impl<'d, 'b, const N: usize, CLK, DIO, DELAY> InitDisplayOptions<'d, N, CLK, DIO, DELAY> {
+            /// TODO
+            pub fn put_slice(
+                self,
+                bytes: &'b [u8],
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
+            {
+                DisplayOptions {
+                    device: self.device,
+                    position: 0,
+                    bytes,
+                    map: Identity::identity,
+                    _flip: NotFlipped,
+                }
+            }
+
+            /// TODO
+            pub fn put_str(
+                self,
+                str: &'b str,
+            ) -> DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
+            {
+                DisplayOptions {
+                    device: self.device,
+                    position: 0,
+                    bytes: str.as_bytes(),
+                    map: crate::mappings::from_ascii_byte,
+                    _flip: NotFlipped,
+                }
+            }
+
+            /// TODO
+            pub fn clock() {
+                todo!()
+            }
+
+            /// TODO
+            pub fn loading() {
+                todo!()
+            }
+        }
+
         /// TODO
         #[derive(Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct DisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F, M> {
             pub(crate) device: &'d mut crate::device_<N, CLK, DIO, DELAY>,
             pub(crate) position: usize,
@@ -81,7 +131,9 @@ pub mod module {
             }
         }
 
+        /// TODO
         #[derive(Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, CLK, DIO, DELAY, F, D> {
             options: DisplayOptions<'d, 'b, N, CLK, DIO, DELAY, F, D>,
             delay_ms: u32,
@@ -98,31 +150,37 @@ pub mod module {
             F: FnMut(u8) -> u8 + Clone + 'static,
             M: MaybeFlipped<N, CLK, DIO, DELAY, ERR>,
         {
+            /// TODO
             pub fn delay_ms(mut self, delay_ms: u32) -> Self {
                 self.delay_ms = delay_ms;
                 self
             }
 
+            /// TODO
             pub fn direction(mut self, direction: Direction) -> Self {
                 self.direction = direction;
                 self
             }
 
+            /// TODO
             pub fn left(mut self) -> Self {
                 self.direction = Direction::LeftToRight;
                 self
             }
 
+            /// TODO
             pub fn right(mut self) -> Self {
                 self.direction = Direction::RightToLeft;
                 self
             }
 
+            /// TODO
             pub fn style(mut self, style: AnimationStyle) -> Self {
                 self.style = style;
                 self
             }
 
+            /// TODO
             pub async fn display(self) -> Result<(), Error<ERR>> {
                 match self.style {
                     AnimationStyle::Overlapping => {
@@ -184,6 +242,7 @@ pub mod module {
         }
 
         #[derive(Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         /// TODO
         pub struct NotFlipped;
 
@@ -230,6 +289,7 @@ pub mod module {
         }
 
         #[derive(Debug)]
+        #[cfg_attr(feature = "defmt", derive(defmt::Format))]
         /// TODO
         pub struct Flipped;
 

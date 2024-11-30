@@ -70,7 +70,8 @@ async fn main(spawner: Spawner) {
     // tm.put_str("HELLO ").display_rev().await.ok();
     // tm.put_str("HELLO ").flip().display_rev().await.ok();
 
-    tm.put_str("HEL")
+    tm.options()
+        .put_str("HEL")
         .animate()
         .delay_ms(700)
         .direction(Direction::LeftToRight)
@@ -79,7 +80,8 @@ async fn main(spawner: Spawner) {
         .await
         .ok();
 
-    tm.put_str("HELLO ")
+    tm.options()
+        .put_str("HELLO ")
         .flip()
         .animate()
         .delay_ms(700)
