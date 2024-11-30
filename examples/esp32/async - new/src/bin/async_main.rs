@@ -82,6 +82,7 @@ async fn main(spawner: Spawner) {
 
     // tm.options()
     //     .put_str("HELLO ")
+    //     .set_dot(1)
     //     .flip()
     //     .animate()
     //     .delay_ms(700)
@@ -91,13 +92,29 @@ async fn main(spawner: Spawner) {
     //     .await
     //     .ok();
 
+    // tm.set_dot(1);
+
+    // tm.options()
+    //     .clock()
+    //     .hour(24)
+    //     .minute(0)
+    //     .finish()
+    //     .flip()
+    //     .display()
+    //     .await
+    //     .ok();
+
     tm.options()
-        .clock()
-        .hour(24)
-        .minute(0)
-        .set_colon()
-        .finish()
+        .put_str("HELLO")
+        // .set_dot(1)
+        .display()
+        .await
+        .ok();
+
+    tm.options()
+        .put_str("HELLO")
         .flip()
+        // .set_dot(1)
         .display()
         .await
         .ok();

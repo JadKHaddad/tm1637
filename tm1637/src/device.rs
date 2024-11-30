@@ -123,6 +123,14 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
     {
+        fn rev_bytes(bytes: &[u8], position: usize) -> &[u8] {
+            if bytes.len() + position > N {
+                &bytes[..N - position]
+            } else {
+                bytes
+            }
+        }
+
         /// Send a byte to the display and wait for the ACK.
         async fn write_byte(&mut self, byte: u8) -> Result<(), Error<ERR>> {
             let mut rest = byte;
@@ -371,6 +379,20 @@ pub mod module {
             self.display(position, bytes.iter().copied().map(map)).await
         }
 
+        pub async fn display_slice_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            map: impl FnMut(u8) -> u8,
+        ) -> Result<(), Error<ERR>> {
+            self.display(
+                position,
+                crate::mappings::zip_dots(bytes.iter().copied().map(map), dots.iter().copied()),
+            )
+            .await
+        }
+
         /// Write the given `bytes` to the display in reversed order starting from `position` mapping each byte using the provided `map` function.
         ///
         /// # Notes
@@ -386,15 +408,30 @@ pub mod module {
             bytes: &[u8],
             map: impl FnMut(u8) -> u8,
         ) -> Result<(), Error<ERR>> {
-            let bytes = if bytes.len() + position > self.num_positions() {
-                &bytes[..self.num_positions() - position]
-            } else {
-                bytes
-            };
+            let bytes = Self::rev_bytes(bytes, position);
 
             self.display_unchecked(
                 self.num_positions() - position - bytes.len(),
                 bytes.iter().copied().rev().map(map),
+            )
+            .await
+        }
+
+        pub async fn display_slice_rev_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            map: impl FnMut(u8) -> u8,
+        ) -> Result<(), Error<ERR>> {
+            let bytes = Self::rev_bytes(bytes, position);
+
+            self.display_unchecked(
+                self.num_positions() - position - bytes.len(),
+                crate::mappings::zip_dots(
+                    bytes.iter().copied().rev().map(map),
+                    dots.iter().copied(),
+                ),
             )
             .await
         }
@@ -433,6 +470,19 @@ pub mod module {
             mut map: impl FnMut(u8) -> u8,
         ) -> Result<(), Error<ERR>> {
             self.display_slice_rev_mapped(position, bytes, |byte| {
+                crate::mappings::flip_mirror(map(byte))
+            })
+            .await
+        }
+
+        pub async fn display_slice_flipped_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            mut map: impl FnMut(u8) -> u8,
+        ) -> Result<(), Error<ERR>> {
+            self.display_slice_rev_dotted_mapped(position, bytes, dots, |byte| {
                 crate::mappings::flip_mirror(map(byte))
             })
             .await

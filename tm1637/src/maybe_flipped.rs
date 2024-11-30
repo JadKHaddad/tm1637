@@ -16,10 +16,11 @@ pub mod module {
         DELAY: DelayTrait,
     {
         /// Write the given `bytes` to the display starting from `position` mapping each byte using the provided `map` function.
-        fn display_slice_mapped(
+        fn display_slice_dotted_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             map: impl FnMut(u8) -> u8,
         ) -> Return;
 
@@ -51,13 +52,16 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
     {
-        async fn display_slice_mapped(
+        async fn display_slice_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             map: impl FnMut(u8) -> u8,
         ) -> Result<(), Error<ERR>> {
-            device.display_slice_mapped(position, bytes, map).await
+            device
+                .display_slice_dotted_mapped(position, bytes, dots, map)
+                .await
         }
 
         async fn move_slice_overlapping_mapped(
@@ -93,14 +97,15 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
     {
-        async fn display_slice_mapped(
+        async fn display_slice_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             map: impl FnMut(u8) -> u8,
         ) -> Result<(), Error<ERR>> {
             device
-                .display_slice_flipped_mapped(position, bytes, map)
+                .display_slice_flipped_dotted_mapped(position, bytes, dots, map)
                 .await
         }
 

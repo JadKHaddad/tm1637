@@ -570,6 +570,17 @@ pub fn windows<const N: usize>(bytes: &[u8], direction: Direction) -> impl Itera
     }
 }
 
+pub fn zip_dots<'a>(
+    bytes: impl Iterator<Item = u8> + 'a,
+    dots: impl Iterator<Item = bool> + 'a,
+) -> impl Iterator<Item = u8> + 'a {
+    bytes.zip(dots).map(|(byte, dot)| {
+        dot.then_some(byte)
+            .map(|byte| byte | SegmentBits::SegPoint as u8)
+            .unwrap_or(byte)
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

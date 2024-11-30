@@ -18,6 +18,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             device: self.device,
             position: 0,
             bytes,
+            dots: [false; N],
             map: Identity::identity,
             _flip: NotFlipped::new(),
         }
@@ -33,6 +34,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             device: self.device,
             position: 0,
             bytes: str.as_bytes(),
+            dots: [false; N],
             map: crate::mappings::from_ascii_byte,
             _flip: NotFlipped::new(),
         }
@@ -51,7 +53,6 @@ impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
             device: self.device,
             hour: 0,
             minute: 0,
-            colon: false,
             bytes: [0; 4],
         }
     }
@@ -64,6 +65,7 @@ pub struct DisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, M> {
     pub(crate) device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     pub(crate) position: usize,
     pub(crate) bytes: &'b [u8],
+    pub(crate) dots: [bool; N],
     pub(crate) map: F,
     pub(crate) _flip: M,
 }
@@ -85,7 +87,6 @@ pub struct ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     pub(crate) device: &'d mut TM1637<4, T, CLK, DIO, DELAY>,
     pub(crate) hour: u8,
     pub(crate) minute: u8,
-    pub(crate) colon: bool,
     bytes: [u8; 4],
 }
 
@@ -102,22 +103,6 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
         self
     }
 
-    /// Set the colon.
-    pub fn colon(mut self, colon: bool) -> Self {
-        self.colon = colon;
-        self
-    }
-
-    /// Set the colon to `true`.
-    pub fn set_colon(self) -> Self {
-        self.colon(true)
-    }
-
-    /// Set the colon to `false`.
-    pub fn unset_colon(self) -> Self {
-        self.colon(false)
-    }
-
     /// Finish setting the clock and display it.
     pub fn finish(
         &'b mut self,
@@ -125,12 +110,13 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     where
         'b: 'd,
     {
-        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, self.colon);
+        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, false);
 
         DisplayOptions {
             device: self.device,
             position: 0,
             bytes: &self.bytes,
+            dots: [false; 4],
             map: Identity::identity,
             _flip: NotFlipped::new(),
         }
@@ -160,7 +146,13 @@ pub mod module {
         /// See [`TM1637::display_unchecked`](crate::TM1637::display_unchecked).
         pub async fn display_unchecked(self) -> Result<(), Error<ERR>> {
             self.device
-                .display_unchecked(self.position, self.bytes.iter().copied().map(self.map))
+                .display_unchecked(
+                    self.position,
+                    crate::mappings::zip_dots(
+                        self.bytes.iter().copied().map(self.map),
+                        self.dots.iter().copied(),
+                    ),
+                )
                 .await
         }
     }
@@ -174,6 +166,21 @@ pub mod module {
         F: FnMut(u8) -> u8 + Clone + 'static,
         M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
     {
+        pub fn dot(mut self, position: usize, state: bool) -> Self {
+            self.dots[position] = state;
+            self
+        }
+
+        pub fn set_dot(mut self, position: usize) -> Self {
+            self.dots[position] = true;
+            self
+        }
+
+        pub fn unset_dot(mut self, position: usize) -> Self {
+            self.dots[position] = false;
+            self
+        }
+
         /// Set the position on the display from which to start displaying the bytes.
         pub fn position(mut self, position: usize) -> Self {
             self.position = position;
@@ -182,9 +189,16 @@ pub mod module {
 
         /// Display the bytes on a `flipped` or `non-flipped` display.
         ///
-        /// See [`TM1637::display_slice_mapped`](crate::TM1637::display_slice_mapped) and [`TM1637::display_slice_flipped_mapped`](crate::TM1637::display_slice_flipped_mapped).
+        /// See [`TM1637::display_slice_dotted_mapped`](crate::TM1637::display_slice_dotted_mapped) and [`TM1637::display_slice_flipped_dotted_mapped`](crate::TM1637::display_slice_flipped_dotted_mapped).
         pub async fn display(self) -> Result<(), Error<ERR>> {
-            M::display_slice_mapped(self.device, self.position, self.bytes, self.map).await
+            M::display_slice_dotted_mapped(
+                self.device,
+                self.position,
+                self.bytes,
+                &self.dots,
+                self.map,
+            )
+            .await
         }
 
         /// Use animation options.
@@ -215,6 +229,7 @@ pub mod module {
                 device: self.device,
                 position: self.position,
                 bytes: self.bytes,
+                dots: self.dots,
                 map: self.map,
                 _flip: Flipped::new(),
             }
