@@ -1,4 +1,4 @@
-use crate::{AsyncTM1637, BlockingTM1637, Brightness};
+use crate::{Async, Blocking, Brightness, TM1637};
 
 /// `TM1637` 7-segment display builder.
 #[derive(Debug, Clone)]
@@ -38,9 +38,9 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
         self
     }
 
-    /// Build an [`AsyncTM1637`] instance.
-    pub fn build_async<const N: usize>(self) -> AsyncTM1637<N, CLK, DIO, DELAY> {
-        AsyncTM1637::new(
+    /// Build an async [`TM1637`] instance.
+    pub fn build_async<const N: usize>(self) -> TM1637<N, Async, CLK, DIO, DELAY> {
+        TM1637::new(
             self.clk,
             self.dio,
             self.delay,
@@ -49,9 +49,9 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
         )
     }
 
-    /// Build a [`BlockingTM1637`] instance.
-    pub fn build_blocking<const N: usize>(self) -> BlockingTM1637<N, CLK, DIO, DELAY> {
-        BlockingTM1637::new(
+    /// Build a blocking [`TM1637`] instance.
+    pub fn build_blocking<const N: usize>(self) -> TM1637<N, Blocking, CLK, DIO, DELAY> {
+        TM1637::new(
             self.clk,
             self.dio,
             self.delay,

@@ -7,16 +7,16 @@
 //! - `demo`: enables the demo module.
 
 #![no_std]
-#![deny(unsafe_code, missing_docs, missing_debug_implementations)]
+// #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod animitaion;
 mod brightness;
 mod builder;
 mod conditional;
-#[cfg(feature = "demo")]
-#[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
-pub mod demo;
+// #[cfg(feature = "demo")]
+// #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
+// pub mod demo;
 mod device;
 mod direction;
 mod error;
@@ -24,24 +24,17 @@ pub mod formatters;
 mod identity;
 pub mod mappings;
 mod options;
+mod tokens;
 
+mod maybe_flipped;
 pub use animitaion::AnimationStyle;
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
 pub(crate) use conditional::ConditionalInputPin;
-pub use device::{asynch::TM1637 as AsyncTM1637, blocking::TM1637 as BlockingTM1637};
+pub use device::TM1637;
 pub use direction::Direction;
 pub use error::Error;
 pub(crate) use identity::Identity;
-pub use options::{
-    asynch::{
-        AnimatedDisplayOptions as AsyncAnimatedDisplayOptions,
-        DisplayOptions as AsyncDisplayOptions, Flipped as AsyncFlipped,
-        InitDisplayOptions as AsyncInitDisplayOptions, NotFlipped as AsyncNotFlipped,
-    },
-    blocking::{
-        AnimatedDisplayOptions as BlockingAnimatedDisplayOptions,
-        DisplayOptions as BlockingDisplayOptions, Flipped as BlockingFlipped,
-        InitDisplayOptions as BlockingInitDisplayOptions, NotFlipped as BlockingNotFlipped,
-    },
-};
+pub use maybe_flipped::{asynch::AsyncMaybeFlipped, blocking::BlockingMaybeFlipped};
+pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
+pub use tokens::{Async, Blocking, Flipped, NotFlipped};
