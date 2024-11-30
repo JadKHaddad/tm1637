@@ -80,7 +80,6 @@ pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F,
     style: AnimationStyle,
 }
 
-/// TODO: Flipping this will break the colon.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
@@ -279,10 +278,11 @@ pub mod module {
         pub async fn display(self) -> Result<(), Error<ERR>> {
             match self.style {
                 AnimationStyle::Overlapping => {
-                    M::move_slice_overlapping_mapped(
+                    M::move_slice_overlapping_dotted_mapped(
                         self.options.device,
                         self.options.position,
                         self.options.bytes,
+                        &self.options.dots,
                         self.delay_ms,
                         self.direction,
                         self.options.map,
@@ -290,10 +290,11 @@ pub mod module {
                     .await
                 }
                 AnimationStyle::NonOverlapping => {
-                    M::move_slice_to_end_mapped(
+                    M::move_slice_to_end_dotted_mapped(
                         self.options.device,
                         self.options.position,
                         self.options.bytes,
+                        &self.options.dots,
                         self.delay_ms,
                         self.direction,
                         self.options.map,

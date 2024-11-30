@@ -119,5 +119,16 @@ async fn main(spawner: Spawner) {
         .await
         .ok();
 
+    tm.options()
+        .clock()
+        .hour(24)
+        .minute(0)
+        .finish()
+        .flip()
+        .set_dot(1)
+        .display()
+        .await
+        .ok();
+
     loop {}
 }

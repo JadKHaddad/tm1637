@@ -25,20 +25,22 @@ pub mod module {
         ) -> Return;
 
         /// Move the given `bytes` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
-        fn move_slice_overlapping_mapped(
+        fn move_slice_overlapping_dotted_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Return;
 
         /// Move the given `bytes` in `direction` across the display starting from `position` mapping each byte using the provided `map` function.
-        fn move_slice_to_end_mapped(
+        fn move_slice_to_end_dotted_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
@@ -64,29 +66,33 @@ pub mod module {
                 .await
         }
 
-        async fn move_slice_overlapping_mapped(
+        async fn move_slice_overlapping_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Result<(), Error<ERR>> {
             device
-                .move_slice_overlapping_mapped(position, bytes, delay_ms, direction, map)
+                .move_slice_overlapping_dotted_mapped(
+                    position, bytes, dots, delay_ms, direction, map,
+                )
                 .await
         }
 
-        async fn move_slice_to_end_mapped(
+        async fn move_slice_to_end_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Result<(), Error<ERR>> {
             device
-                .move_slice_to_end_mapped(position, bytes, delay_ms, direction, map)
+                .move_slice_to_end_dotted_mapped(position, bytes, dots, delay_ms, direction, map)
                 .await
         }
     }
@@ -109,29 +115,35 @@ pub mod module {
                 .await
         }
 
-        async fn move_slice_overlapping_mapped(
+        async fn move_slice_overlapping_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Result<(), Error<ERR>> {
             device
-                .move_slice_overlapping_flipped_mapped(position, bytes, delay_ms, direction, map)
+                .move_slice_overlapping_flipped_dotted_mapped(
+                    position, bytes, dots, delay_ms, direction, map,
+                )
                 .await
         }
 
-        async fn move_slice_to_end_mapped(
+        async fn move_slice_to_end_dotted_mapped(
             device: &mut TM1637<N, Token, CLK, DIO, DELAY>,
             position: usize,
             bytes: &[u8],
+            dots: &[bool],
             delay_ms: u32,
             direction: Direction,
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Result<(), Error<ERR>> {
             device
-                .move_slice_to_end_flipped_mapped(position, bytes, delay_ms, direction, map)
+                .move_slice_to_end_flipped_dotted_mapped(
+                    position, bytes, dots, delay_ms, direction, map,
+                )
                 .await
         }
     }

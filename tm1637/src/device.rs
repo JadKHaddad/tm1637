@@ -367,6 +367,20 @@ pub mod module {
                 .await
         }
 
+        pub async fn display_slice_mapped_dotted_unchecked(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            map: impl FnMut(u8) -> u8,
+        ) -> Result<(), Error<ERR>> {
+            self.display_unchecked(
+                position,
+                crate::mappings::zip_dots(bytes.iter().copied().map(map), dots.iter().copied()),
+            )
+            .await
+        }
+
         /// Write the given `bytes` to the display starting from `position` mapping each byte using the provided `map` function.
         ///
         /// See [`TM1637::display`].
@@ -529,6 +543,25 @@ pub mod module {
             Ok(())
         }
 
+        pub async fn move_slice_overlapping_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            delay_ms: u32,
+            direction: Direction,
+            map: impl FnMut(u8) -> u8 + Clone,
+        ) -> Result<(), Error<ERR>> {
+            for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
+                self.display_slice_mapped_dotted_unchecked(position, &window, dots, map.clone())
+                    .await?;
+
+                self.delay.delay_ms(delay_ms).await;
+            }
+
+            Ok(())
+        }
+
         /// Move the given `bytes` in `direction` across a `flipped` display starting and ending at `position`.
         ///
         /// See [`TM1637::move_slice_overlapping_flipped_mapped`].
@@ -562,6 +595,25 @@ pub mod module {
         ) -> Result<(), Error<ERR>> {
             for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
                 self.display_slice_flipped_mapped(position, &window, map.clone())
+                    .await?;
+
+                self.delay.delay_ms(delay_ms).await;
+            }
+
+            Ok(())
+        }
+
+        pub async fn move_slice_overlapping_flipped_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            delay_ms: u32,
+            direction: Direction,
+            map: impl FnMut(u8) -> u8 + Clone,
+        ) -> Result<(), Error<ERR>> {
+            for window in crate::mappings::windows_overlapping::<N>(bytes, direction) {
+                self.display_slice_flipped_dotted_mapped(position, &window, dots, map.clone())
                     .await?;
 
                 self.delay.delay_ms(delay_ms).await;
@@ -611,6 +663,31 @@ pub mod module {
             Ok(())
         }
 
+        pub async fn move_slice_to_end_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            delay_ms: u32,
+            direction: Direction,
+            map: impl FnMut(u8) -> u8 + Clone,
+        ) -> Result<(), Error<ERR>> {
+            if bytes.len() <= N {
+                return self
+                    .display_slice_mapped_dotted_unchecked(position, bytes, dots, map)
+                    .await;
+            }
+
+            for window in crate::mappings::windows::<N>(bytes, direction) {
+                self.display_slice_mapped_dotted_unchecked(position, window, dots, map.clone())
+                    .await?;
+
+                self.delay.delay_ms(delay_ms).await;
+            }
+
+            Ok(())
+        }
+
         /// Move the given `bytes` in `direction` across a `flipped` display starting from `position`.
         ///
         /// See [`TM1637::move_slice_to_end_flipped_mapped`].
@@ -650,6 +727,31 @@ pub mod module {
 
             for window in crate::mappings::windows::<N>(bytes, direction) {
                 self.display_slice_flipped_mapped(position, window, map.clone())
+                    .await?;
+
+                self.delay.delay_ms(delay_ms).await;
+            }
+
+            Ok(())
+        }
+
+        pub async fn move_slice_to_end_flipped_dotted_mapped(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+            dots: &[bool],
+            delay_ms: u32,
+            direction: Direction,
+            map: impl FnMut(u8) -> u8 + Clone,
+        ) -> Result<(), Error<ERR>> {
+            if bytes.len() <= N {
+                return self
+                    .display_slice_flipped_dotted_mapped(position, bytes, dots, map)
+                    .await;
+            }
+
+            for window in crate::mappings::windows::<N>(bytes, direction) {
+                self.display_slice_flipped_dotted_mapped(position, window, dots, map.clone())
                     .await?;
 
                 self.delay.delay_ms(delay_ms).await;
