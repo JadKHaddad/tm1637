@@ -8,6 +8,7 @@ pub mod module {
 
     use crate::{ConditionalInputPin, Direction, Error, Flipped, Identity, NotFlipped, TM1637};
 
+    /// Display operations for `flipped` or `non-flipped` displays.
     pub trait Name<const N: usize, T, CLK, DIO, DELAY, ERR>
     where
         CLK: OutputPin<Error = ERR>,

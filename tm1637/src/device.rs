@@ -275,9 +275,10 @@ pub mod module {
             self.write_brightness_cmd(brightness).await
         }
 
-        /// Write the given `bytes` to the display starting from the given `position`.
+        /// Write the given `bytes` to the display starting from `position`.
         ///
         /// # Notes
+        ///
         /// - Positions greater than [`TM1637::num_positions`] will be written to the display regardless.
         /// - Bytes with index greater than [`TM1637::num_positions`] will be written to the display regardless.
         ///
@@ -298,9 +299,10 @@ pub mod module {
             Ok(())
         }
 
-        /// Write the given `bytes` to the display starting from the given `position`.
+        /// Write the given `bytes` to the display starting from `position`.
         ///
         /// # Notes
+        ///
         /// - Positions greater than [`TM1637::num_positions`] will be ignored.
         /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
         ///
@@ -320,7 +322,9 @@ pub mod module {
                 .await
         }
 
-        /// TODO
+        /// Write the given `bytes` to the display starting from `position`.
+        ///
+        /// See [`TM1637::display_unchecked`].
         pub async fn display_slice_unchecked(
             &mut self,
             position: usize,
@@ -330,7 +334,7 @@ pub mod module {
                 .await
         }
 
-        /// Write the given `bytes` to the display starting from the given `position`.
+        /// Write the given `bytes` to the display starting from `position`.
         ///
         /// See [`TM1637::display_slice_mapped`].
         pub async fn display_slice(
@@ -341,7 +345,9 @@ pub mod module {
             self.display(position, bytes.iter().copied()).await
         }
 
-        /// TODO
+        /// Write the given `bytes` to the display starting from `position` mapping each byte using the provided `map` function.
+        ///
+        /// See [`TM1637::display_unchecked`].
         pub async fn display_slice_mapped_unchecked(
             &mut self,
             position: usize,
@@ -352,7 +358,7 @@ pub mod module {
                 .await
         }
 
-        /// Write the given `bytes` to the display starting from the given `position` mapping each byte using the provided `map` function.
+        /// Write the given `bytes` to the display starting from `position` mapping each byte using the provided `map` function.
         ///
         /// See [`TM1637::display`].
         pub async fn display_slice_mapped(
@@ -364,13 +370,15 @@ pub mod module {
             self.display(position, bytes.iter().copied().map(map)).await
         }
 
-        /// Write the given `bytes` to the display in reversed order starting from the given `position` mapping each byte using the provided `map` function.
+        /// Write the given `bytes` to the display in reversed order starting from `position` mapping each byte using the provided `map` function.
         ///
         /// # Notes
         /// - `position` is mapped to the reversed position on the display.
         /// - If you write to `position` 0, the bytes will be written to the last position on the display.
         /// - If you write to `position` 1, the bytes will be written to the second last position on the display.
         /// - And so on...
+        ///
+        /// Core functionality `flipped` displays.
         pub async fn display_slice_rev_mapped(
             &mut self,
             position: usize,
@@ -390,7 +398,7 @@ pub mod module {
             .await
         }
 
-        /// Write the given `bytes` to the display in reversed order starting from the given `position`.
+        /// Write the given `bytes` to the display in reversed order starting from `position`.
         ///
         /// See [`TM1637::display_slice_rev_mapped`].
         pub async fn display_slice_rev(
@@ -402,7 +410,7 @@ pub mod module {
                 .await
         }
 
-        /// Write the given `bytes` to a `flipped` display starting from the given `position`.
+        /// Write the given `bytes` to a `flipped` display starting from `position`.
         ///
         /// See [`TM1637::display_slice_flipped_mapped`].
         pub async fn display_slice_flipped(
@@ -414,7 +422,7 @@ pub mod module {
                 .await
         }
 
-        /// Write the given `bytes` to a `flipped` display starting from the given `position` mapping each byte using the provided `map` function.
+        /// Write the given `bytes` to a `flipped` display starting from `position` mapping each byte using the provided `map` function.
         ///
         /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`]
         pub async fn display_slice_flipped_mapped(
@@ -429,7 +437,7 @@ pub mod module {
             .await
         }
 
-        /// Moves the given `bytes` in `direction` across the display starting and ending at `position`.
+        /// Move the given `bytes` in `direction` across the display starting and ending at `position`.
         ///
         /// See [`TM1637::move_slice_overlapping_mapped`].
         pub async fn move_slice_overlapping(
@@ -449,7 +457,9 @@ pub mod module {
             .await
         }
 
-        /// Moves the given `bytes` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
+        /// Move the given `bytes` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
+        ///
+        /// See [`TM1637::display_slice_mapped_unchecked`].
         pub async fn move_slice_overlapping_mapped(
             &mut self,
             position: usize,
@@ -468,7 +478,9 @@ pub mod module {
             Ok(())
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across a `flipped` display starting and ending at `position`.
+        ///
+        /// See [`TM1637::move_slice_overlapping_flipped_mapped`].
         pub async fn move_slice_overlapping_flipped(
             &mut self,
             position: usize,
@@ -486,7 +498,9 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across a `flipped` display starting and ending at `position` mapping each byte using the provided `map` function.
+        ///
+        /// See [`TM1637::display_slice_flipped_mapped`].
         pub async fn move_slice_overlapping_flipped_mapped(
             &mut self,
             position: usize,
@@ -505,7 +519,9 @@ pub mod module {
             Ok(())
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across the display starting from `position`.
+        ///
+        /// See [`TM1637::move_slice_to_end_mapped`].
         pub async fn move_slice_to_end(
             &mut self,
             position: usize,
@@ -517,7 +533,9 @@ pub mod module {
                 .await
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across the display starting from `position` mapping each byte using the provided `map` function.
+        ///
+        /// See [`TM1637::display_slice_mapped_unchecked`].
         pub async fn move_slice_to_end_mapped(
             &mut self,
             position: usize,
@@ -542,7 +560,9 @@ pub mod module {
             Ok(())
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across a `flipped` display starting from `position`.
+        ///
+        /// See [`TM1637::move_slice_to_end_flipped_mapped`].
         pub async fn move_slice_to_end_flipped(
             &mut self,
             position: usize,
@@ -560,7 +580,9 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// Move the given `bytes` in `direction` across a `flipped` display starting from `position` mapping each byte using the provided `map` function.
+        ///
+        /// See [`TM1637::display_slice_flipped_mapped`].
         pub async fn move_slice_to_end_flipped_mapped(
             &mut self,
             position: usize,
@@ -585,7 +607,7 @@ pub mod module {
             Ok(())
         }
 
-        /// Write the given `str` to the display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        /// Write the given `str` to the display starting from `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
         ///
         /// See [`TM1637::display_slice_mapped`].
         ///
@@ -621,7 +643,7 @@ pub mod module {
             .await
         }
 
-        /// Write the given `bytes` to a `flipped` display starting from the given `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        /// Write the given `bytes` to a `flipped` display starting from `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
         ///
         /// See [`TM1637::display_slice_rev_mapped`] and [`crate::mappings::flip_mirror`].
         pub async fn display_str_flipped(
@@ -635,7 +657,7 @@ pub mod module {
             .await
         }
 
-        /// Moves the given `str` in `direction` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        /// Move the given `str` in `direction` across the display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
         ///
         /// See [`TM1637::move_slice_overlapping_mapped`].
         ///
@@ -701,7 +723,9 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// Move the given `str` in `direction` across a `flipped` display starting and ending at `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        ///
+        /// See [`TM1637::move_slice_overlapping_flipped_mapped`].
         pub async fn move_str_overlapping_flipped(
             &mut self,
             position: usize,
@@ -719,7 +743,9 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// Move the given `str` in `direction` across the display starting from `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        ///
+        /// See [`TM1637::move_slice_to_end_mapped`].
         pub async fn move_str_to_end(
             &mut self,
             position: usize,
@@ -737,7 +763,9 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// Move the given `str` in `direction` across a `flipped` display starting from `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
+        ///
+        /// See [`TM1637::move_slice_to_end_flipped_mapped`].
         pub async fn move_str_to_end_flipped(
             &mut self,
             position: usize,
@@ -755,7 +783,7 @@ pub mod module {
             .await
         }
 
-        /// TODO
+        /// High-level API for static or animated display operations.
         pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
             InitDisplayOptions { device: self }
         }

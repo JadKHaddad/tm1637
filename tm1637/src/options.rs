@@ -198,7 +198,7 @@ pub mod module {
                     )
                     .await
                 }
-                AnimationStyle::ToEnd => {
+                AnimationStyle::NonOverlapping => {
                     M::move_slice_to_end_mapped(
                         self.options.device,
                         self.options.position,

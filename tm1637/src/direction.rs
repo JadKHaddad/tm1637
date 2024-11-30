@@ -1,4 +1,4 @@
-/// TODO
+/// Direction for moving bytes.
 #[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Direction {

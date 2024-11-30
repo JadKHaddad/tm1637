@@ -75,7 +75,7 @@ async fn main(spawner: Spawner) {
         .animate()
         .delay_ms(700)
         .direction(Direction::LeftToRight)
-        .style(AnimationStyle::ToEnd)
+        .style(AnimationStyle::NonOverlapping)
         .display()
         .await
         .ok();
@@ -86,7 +86,7 @@ async fn main(spawner: Spawner) {
         .animate()
         .delay_ms(700)
         .direction(Direction::LeftToRight)
-        .style(AnimationStyle::ToEnd)
+        .style(AnimationStyle::NonOverlapping)
         .display()
         .await
         .ok();
