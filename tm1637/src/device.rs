@@ -1,9 +1,9 @@
-use core::marker::PhantomData;
+use ::core::marker::PhantomData;
 
-use embedded_hal::digital::OutputPin;
-use futures::{Stream, StreamExt};
+use ::embedded_hal::digital::OutputPin;
+use ::futures::Stream;
 
-use crate::{Async, Blocking, Brightness, ConditionalInputPin, Direction, Error, TM1637Builder};
+use crate::{Async, Blocking, Brightness, ConditionalInputPin, Error, TM1637Builder};
 
 /// `TM1637` 7-segment display driver.
 ///
@@ -395,6 +395,7 @@ pub mod module {
         }
 
         // After this everything must be deleted!
+        // --------------------------------------------------------------------
 
         /// Write the given `bytes` to the display starting from `position`.
         ///

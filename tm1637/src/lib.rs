@@ -36,6 +36,6 @@ pub use device::TM1637;
 pub use direction::Direction;
 pub use error::Error;
 pub(crate) use identity::Identity;
-pub use maybe_flipped::{asynch::AsyncMaybeFlipped, blocking::BlockingMaybeFlipped};
+pub use maybe_flipped::MaybeFlipped;
 pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
 pub use tokens::{Async, Blocking, Flipped, NotFlipped};

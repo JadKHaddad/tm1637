@@ -12,7 +12,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     pub fn put_slice(
         self,
         bytes: &'b [u8],
-    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped<T>>
+    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
     {
         DisplayOptions {
             device: self.device,
@@ -20,7 +20,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             bytes,
             dots: [false; N],
             map: Identity::identity,
-            _flip: NotFlipped::new(),
+            _flip: NotFlipped,
         }
     }
 
@@ -28,7 +28,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     pub fn put_str(
         self,
         str: &'b str,
-    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped<T>>
+    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
     {
         DisplayOptions {
             device: self.device,
@@ -36,7 +36,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             bytes: str.as_bytes(),
             dots: [false; N],
             map: crate::mappings::from_ascii_byte,
-            _flip: NotFlipped::new(),
+            _flip: NotFlipped,
         }
     }
 
@@ -105,7 +105,7 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     /// Finish setting the clock and display it.
     pub fn finish(
         &'b mut self,
-    ) -> DisplayOptions<'d, 'b, 4, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped<T>>
+    ) -> DisplayOptions<'d, 'b, 4, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
     where
         'b: 'd,
     {
@@ -117,25 +117,25 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
             bytes: &self.bytes,
             dots: [false; 4],
             map: Identity::identity,
-            _flip: NotFlipped::new(),
+            _flip: NotFlipped,
         }
     }
 }
 
 #[::duplicate::duplicate_item(
-    module        async     await               Token                 FlipTrait                       DelayTrait;
-    [asynch]      [async]   [await.identity()]  [crate::Async]        [crate::AsyncMaybeFlipped]      [::embedded_hal_async::delay::DelayNs];
-    [blocking]    []        [identity()]        [crate::Blocking]     [crate::BlockingMaybeFlipped]   [::embedded_hal::delay::DelayNs];
+    module        async     await               Token             DelayTrait;
+    [asynch]      [async]   [await.identity()]  [crate::Async]    [::embedded_hal_async::delay::DelayNs];
+    [blocking]    []        [identity()]        [crate::Blocking] [::embedded_hal::delay::DelayNs];
 )]
 pub mod module {
     use crate::{
         AnimatedDisplayOptions, AnimationStyle, ConditionalInputPin, Direction, DisplayOptions,
-        Error, Flipped, Identity, NotFlipped,
+        Error, Flipped, Identity, MaybeFlipped, NotFlipped,
     };
     use ::embedded_hal::digital::OutputPin;
 
     impl<const N: usize, CLK, DIO, DELAY, ERR, F>
-        DisplayOptions<'_, '_, N, Token, CLK, DIO, DELAY, F, NotFlipped<Token>>
+        DisplayOptions<'_, '_, N, Token, CLK, DIO, DELAY, F, NotFlipped>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
@@ -163,7 +163,7 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         F: FnMut(u8) -> u8 + Clone + 'static,
-        M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
+        M: MaybeFlipped<N>,
     {
         pub fn dot(mut self, position: usize, state: bool) -> Self {
             self.dots[position] = state;
@@ -187,17 +187,13 @@ pub mod module {
         }
 
         /// Display the bytes on a `flipped` or `non-flipped` display.
-        ///
-        /// See [`TM1637::display_slice_dotted_mapped`](crate::TM1637::display_slice_dotted_mapped) and [`TM1637::display_slice_flipped_dotted_mapped`](crate::TM1637::display_slice_flipped_dotted_mapped).
         pub async fn display(self) -> Result<(), Error<ERR>> {
-            M::display_slice_dotted_mapped(
-                self.device,
+            let (position, bytes) = M::calculate(
                 self.position,
-                self.bytes,
-                &self.dots,
-                self.map,
-            )
-            .await
+                self.bytes.iter().copied().map(self.map), /* Here we can add the dots */
+            );
+
+            self.device.display(position, bytes).await
         }
 
         /// Use animation options.
@@ -213,95 +209,86 @@ pub mod module {
         /// Flip the display.
         pub fn flip(
             self,
-        ) -> DisplayOptions<
-            'd,
-            'b,
-            N,
-            Token,
-            CLK,
-            DIO,
-            DELAY,
-            impl FnMut(u8) -> u8 + Clone,
-            Flipped<Token>,
-        > {
+        ) -> DisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, Flipped>
+        {
             DisplayOptions {
                 device: self.device,
                 position: self.position,
                 bytes: self.bytes,
                 dots: self.dots,
                 map: self.map,
-                _flip: Flipped::new(),
+                _flip: Flipped,
             }
         }
     }
 
-    impl<const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        AnimatedDisplayOptions<'_, '_, N, Token, CLK, DIO, DELAY, F, M>
-    where
-        CLK: OutputPin<Error = ERR>,
-        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
-        DELAY: DelayTrait,
-        F: FnMut(u8) -> u8 + Clone + 'static,
-        M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
-    {
-        /// Set the delay in milliseconds between each animation step.
-        pub fn delay_ms(mut self, delay_ms: u32) -> Self {
-            self.delay_ms = delay_ms;
-            self
-        }
+    // impl<const N: usize, CLK, DIO, DELAY, ERR, F, M>
+    //     AnimatedDisplayOptions<'_, '_, N, Token, CLK, DIO, DELAY, F, M>
+    // where
+    //     CLK: OutputPin<Error = ERR>,
+    //     DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+    //     DELAY: DelayTrait,
+    //     F: FnMut(u8) -> u8 + Clone + 'static,
+    //     M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
+    // {
+    //     /// Set the delay in milliseconds between each animation step.
+    //     pub fn delay_ms(mut self, delay_ms: u32) -> Self {
+    //         self.delay_ms = delay_ms;
+    //         self
+    //     }
 
-        /// Set the animation direction.
-        pub fn direction(mut self, direction: Direction) -> Self {
-            self.direction = direction;
-            self
-        }
+    //     /// Set the animation direction.
+    //     pub fn direction(mut self, direction: Direction) -> Self {
+    //         self.direction = direction;
+    //         self
+    //     }
 
-        /// Set the animation direction to [`Direction::LeftToRight`].
-        pub fn left(mut self) -> Self {
-            self.direction = Direction::LeftToRight;
-            self
-        }
+    //     /// Set the animation direction to [`Direction::LeftToRight`].
+    //     pub fn left(mut self) -> Self {
+    //         self.direction = Direction::LeftToRight;
+    //         self
+    //     }
 
-        /// Set the animation direction to [`Direction::RightToLeft`].
-        pub fn right(mut self) -> Self {
-            self.direction = Direction::RightToLeft;
-            self
-        }
+    //     /// Set the animation direction to [`Direction::RightToLeft`].
+    //     pub fn right(mut self) -> Self {
+    //         self.direction = Direction::RightToLeft;
+    //         self
+    //     }
 
-        /// Set the animation style.
-        pub fn style(mut self, style: AnimationStyle) -> Self {
-            self.style = style;
-            self
-        }
+    //     /// Set the animation style.
+    //     pub fn style(mut self, style: AnimationStyle) -> Self {
+    //         self.style = style;
+    //         self
+    //     }
 
-        /// Run the animation on a `flipped` or `non-flipped` display.
-        pub async fn display(self) -> Result<(), Error<ERR>> {
-            match self.style {
-                AnimationStyle::Overlapping => {
-                    M::move_slice_overlapping_dotted_mapped(
-                        self.options.device,
-                        self.options.position,
-                        self.options.bytes,
-                        &self.options.dots,
-                        self.delay_ms,
-                        self.direction,
-                        self.options.map,
-                    )
-                    .await
-                }
-                AnimationStyle::NonOverlapping => {
-                    M::move_slice_to_end_dotted_mapped(
-                        self.options.device,
-                        self.options.position,
-                        self.options.bytes,
-                        &self.options.dots,
-                        self.delay_ms,
-                        self.direction,
-                        self.options.map,
-                    )
-                    .await
-                }
-            }
-        }
-    }
+    //     /// Run the animation on a `flipped` or `non-flipped` display.
+    //     pub async fn display(self) -> Result<(), Error<ERR>> {
+    //         match self.style {
+    //             AnimationStyle::Overlapping => {
+    //                 M::move_slice_overlapping_dotted_mapped(
+    //                     self.options.device,
+    //                     self.options.position,
+    //                     self.options.bytes,
+    //                     &self.options.dots,
+    //                     self.delay_ms,
+    //                     self.direction,
+    //                     self.options.map,
+    //                 )
+    //                 .await
+    //             }
+    //             AnimationStyle::NonOverlapping => {
+    //                 M::move_slice_to_end_dotted_mapped(
+    //                     self.options.device,
+    //                     self.options.position,
+    //                     self.options.bytes,
+    //                     &self.options.dots,
+    //                     self.delay_ms,
+    //                     self.direction,
+    //                     self.options.map,
+    //                 )
+    //                 .await
+    //             }
+    //         }
+    //     }
+    // }
 }

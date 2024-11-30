@@ -57,8 +57,8 @@ async fn main(spawner: Spawner) {
         0,
     ];
 
-    let windows = windows_::<4>(&bytes, Direction::LeftToRight);
-    let s = tm.animate(0, 700, windows).count().await;
+    // let windows = windows_::<4>(&bytes, Direction::LeftToRight);
+    // let s = tm.animate(0, 700, windows).count().await;
 
     // tm.move_slice_mapped(0, &bytes, 500, |byte| byte, Direction::RightToLeft)
     //     .await
@@ -116,13 +116,7 @@ async fn main(spawner: Spawner) {
     //     .await
     //     .ok();
 
-    // tm.options()
-    //     .put_str("HELLO")
-    //     .flip()
-    //     // .set_dot(1)
-    //     .display()
-    //     .await
-    //     .ok();
+    tm.options().put_str("HELLO").flip().display().await.ok();
 
     // tm.options()
     //     .clock()
