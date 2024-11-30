@@ -1,6 +1,6 @@
 # TM1637
 
-A platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](https://crates.io/crates/embedded-hal) and [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) traits.
+The most advanced platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](https://crates.io/crates/embedded-hal) and [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) traits.
 
 !["ruSt" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-rust.webp?raw=true)
 
