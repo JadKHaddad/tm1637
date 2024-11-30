@@ -15,6 +15,7 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
     {
+        /// Write the given `bytes` to the display starting from `position` mapping each byte using the provided `map` function.
         fn display_slice_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,
@@ -22,6 +23,7 @@ pub mod module {
             map: impl FnMut(u8) -> u8,
         ) -> Return;
 
+        /// Move the given `bytes` in `direction` across the display starting and ending at `position` mapping each byte using the provided `map` function.
         fn move_slice_overlapping_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,
@@ -31,6 +33,7 @@ pub mod module {
             map: impl FnMut(u8) -> u8 + Clone,
         ) -> Return;
 
+        /// Move the given `bytes` in `direction` across the display starting from `position` mapping each byte using the provided `map` function.
         fn move_slice_to_end_mapped(
             device: &mut TM1637<N, T, CLK, DIO, DELAY>,
             position: usize,

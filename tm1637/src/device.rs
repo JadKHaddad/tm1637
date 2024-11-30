@@ -7,6 +7,7 @@ use crate::{Brightness, TM1637Builder};
 /// # Type parameters
 ///
 /// - `N`: Number of positions on the display.
+/// - `T`: Operating mode. [`Async`](crate::Async) or [`Blocking`](crate::Blocking).
 /// - `CLK`: Clock.
 /// - `DIO`: Data input/output.
 /// - `DELAY`: Delay provider.
@@ -378,7 +379,7 @@ pub mod module {
         /// - If you write to `position` 1, the bytes will be written to the second last position on the display.
         /// - And so on...
         ///
-        /// Core functionality `flipped` displays.
+        /// Core functionality for `flipped` displays.
         pub async fn display_slice_rev_mapped(
             &mut self,
             position: usize,
@@ -608,8 +609,6 @@ pub mod module {
         }
 
         /// Write the given `str` to the display starting from `position` mapping each byte using [`from_ascii_byte`](crate::mappings::from_ascii_byte).
-        ///
-        /// See [`TM1637::display_slice_mapped`].
         ///
         /// # Example
         ///

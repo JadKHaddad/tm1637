@@ -7,7 +7,7 @@
 //! - `demo`: enables the demo module.
 
 #![no_std]
-// #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
+#![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod animitaion;

@@ -1,5 +1,6 @@
 use crate::{AnimationStyle, Direction, Identity, NotFlipped, TM1637};
 
+/// Starting point for a High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct InitDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
@@ -7,6 +8,7 @@ pub struct InitDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
 }
 
 impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
+    /// Prepare to display a slice of bytes.
     pub fn put_slice(
         self,
         bytes: &'b [u8],
@@ -21,6 +23,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         }
     }
 
+    /// Prepare to display a string.
     pub fn put_str(
         self,
         str: &'b str,
@@ -35,15 +38,18 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         }
     }
 
+    /// Prepare to display a digital clock.
     pub fn clock() {
-        todo!()
+        unimplemented!()
     }
 
+    /// Prepare to display a loading animation.
     pub fn loading() {
-        todo!()
+        unimplemented!()
     }
 }
 
+/// High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct DisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, M> {
@@ -54,6 +60,7 @@ pub struct DisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, M> {
     pub(crate) _flip: M,
 }
 
+/// High-level API for animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, D> {
@@ -83,7 +90,7 @@ pub mod module {
         DELAY: DelayTrait,
         F: FnMut(u8) -> u8 + Clone + 'static,
     {
-        /// TODO
+        /// See [`TM1637::display_unchecked`](crate::TM1637::display_unchecked).
         pub async fn display_unchecked(self) -> Result<(), Error<ERR>> {
             self.device
                 .display_unchecked(self.position, self.bytes.iter().copied().map(self.map))
@@ -100,18 +107,20 @@ pub mod module {
         F: FnMut(u8) -> u8 + Clone + 'static,
         M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
     {
-        /// TODO
+        /// Set the position on the display from which to start displaying the bytes.
         pub fn position(mut self, position: usize) -> Self {
             self.position = position;
             self
         }
 
-        /// TODO
+        /// Display the bytes on a `flipped` or `non-flipped` display.
+        ///
+        /// See [`TM1637::display_slice_mapped`](crate::TM1637::display_slice_mapped) and [`TM1637::display_slice_flipped_mapped`](crate::TM1637::display_slice_flipped_mapped).
         pub async fn display(self) -> Result<(), Error<ERR>> {
             M::display_slice_mapped(self.device, self.position, self.bytes, self.map).await
         }
 
-        /// TODO
+        /// Use animation options.
         pub fn animate(self) -> AnimatedDisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, F, M> {
             AnimatedDisplayOptions {
                 options: self,
@@ -121,7 +130,7 @@ pub mod module {
             }
         }
 
-        /// TODO
+        /// Flip the display.
         pub fn flip(
             self,
         ) -> DisplayOptions<
@@ -154,37 +163,37 @@ pub mod module {
         F: FnMut(u8) -> u8 + Clone + 'static,
         M: FlipTrait<N, Token, CLK, DIO, DELAY, ERR>,
     {
-        /// TODO
+        /// Set the delay in milliseconds between each animation step.
         pub fn delay_ms(mut self, delay_ms: u32) -> Self {
             self.delay_ms = delay_ms;
             self
         }
 
-        /// TODO
+        /// Set the animation direction.
         pub fn direction(mut self, direction: Direction) -> Self {
             self.direction = direction;
             self
         }
 
-        /// TODO
+        /// Set the animation direction to [`Direction::LeftToRight`].
         pub fn left(mut self) -> Self {
             self.direction = Direction::LeftToRight;
             self
         }
 
-        /// TODO
+        /// Set the animation direction to [`Direction::RightToLeft`].
         pub fn right(mut self) -> Self {
             self.direction = Direction::RightToLeft;
             self
         }
 
-        /// TODO
+        /// Set the animation style.
         pub fn style(mut self, style: AnimationStyle) -> Self {
             self.style = style;
             self
         }
 
-        /// TODO
+        /// Run the animation on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
             match self.style {
                 AnimationStyle::Overlapping => {
