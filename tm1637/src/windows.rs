@@ -49,6 +49,8 @@ where
                         BufferState::Full => {
                             // At this point, we shift everything to the left making space for the new byte an N - 1
                             // and then we add the new byte at the end.
+
+                            // TODO: Optimize this.
                             for i in 0..N - 1 {
                                 self.buffer[i] = self.buffer[i + 1];
                             }

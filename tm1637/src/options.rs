@@ -1,4 +1,4 @@
-use crate::{Direction, Identity, NotFlipped, WindowsStyle, TM1637};
+use crate::{Direction, NotFlipped, StrParser, WindowsStyle, TM1637};
 
 // TODO: to rework the whole thing here and use mapped iters instead of slices and a map function (for using the StrParser), we need to have a way to create the windows from iters and not from slices.
 // TODO: Impl the double ended iter and exact size iter for the StrParser.
@@ -28,7 +28,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         CLK,
         DIO,
         DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
         NotFlipped,
     > {
         DisplayOptions {
@@ -51,17 +51,13 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         CLK,
         DIO,
         DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
         NotFlipped,
     > {
         DisplayOptions {
             device: self.device,
             position: 0,
-            iter: str
-                .as_bytes()
-                .iter()
-                .copied()
-                .map(crate::mappings::from_ascii_byte),
+            iter: StrParser::new(str),
             dots: [0; N],
             _flip: NotFlipped,
         }
@@ -138,7 +134,7 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
         CLK,
         DIO,
         DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
         NotFlipped,
     >
     where
@@ -166,7 +162,7 @@ pub mod module {
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        mappings::{windows, windows_new_api, zip_or, SegmentBits},
+        mappings::{windows_new_api, zip_or, SegmentBits},
         AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
         Identity, MaybeFlipped, WindowsStyle,
     };
@@ -177,7 +173,7 @@ pub mod module {
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
@@ -235,7 +231,7 @@ pub mod module {
             CLK,
             DIO,
             DELAY,
-            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
             Flipped,
         > {
             DisplayOptions {
@@ -254,7 +250,7 @@ pub mod module {
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {

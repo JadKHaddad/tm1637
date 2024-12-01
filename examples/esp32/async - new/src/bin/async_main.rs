@@ -61,11 +61,11 @@ async fn main(spawner: Spawner) {
 
     let count = tm
         .options()
-        .put_str("ErrorS")
-        .position(1)
-        //.put_slice(&bytes)
+        .put_str("Erro.rS")
+        // .position(1)
+        // .put_slice(&bytes)
         // .set_dot(1)
-        // .flip()
+        .flip()
         .animate()
         .delay_ms(700)
         .direction(Direction::LeftToRight)
