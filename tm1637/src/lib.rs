@@ -28,6 +28,7 @@ mod maybe_flipped;
 mod options;
 mod str_parser;
 mod tokens;
+mod windows;
 
 pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;

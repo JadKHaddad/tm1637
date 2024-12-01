@@ -68,13 +68,13 @@ mod tests {
         let parser = StrParser::new("1234");
         let result: Vec<u8> = parser.collect();
         assert_eq!(
-            result,
             vec![
                 DigitBits::One as u8,
                 DigitBits::Two as u8,
                 DigitBits::Three as u8,
                 DigitBits::Four as u8
-            ]
+            ],
+            result
         );
     }
 
@@ -83,7 +83,6 @@ mod tests {
         let parser = StrParser::new("..12.3..45..............6.7");
         let result: Vec<u8> = parser.collect();
         assert_eq!(
-            result,
             vec![
                 DigitBits::One as u8,
                 DigitBits::Two as u8 | SegmentBits::Dot as u8,
@@ -92,7 +91,8 @@ mod tests {
                 DigitBits::Five as u8 | SegmentBits::Dot as u8,
                 DigitBits::Six as u8 | SegmentBits::Dot as u8,
                 DigitBits::Seven as u8
-            ]
+            ],
+            result
         );
     }
 }
