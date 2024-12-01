@@ -115,32 +115,26 @@ where
     DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
     DELAY: ::embedded_hal_async::delay::DelayNs,
 {
+    // Does not stop on error
     pub fn animate<'a>(
         &'a mut self,
         position: usize,
         delay_ms: u32,
         windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Stream<Item = Result<(), Error<ERR>>> + 'a {
-        futures::stream::unfold(
-            (self, windows, false),
-            move |(this, mut windows, errored)| async move {
-                if errored {
-                    return None;
-                }
+        futures::stream::unfold((self, windows), move |(this, mut windows)| async move {
+            match windows.next() {
+                Some(window) => match this.display(position, window).await {
+                    Ok(_) => {
+                        this.delay.delay_ms(delay_ms).await;
 
-                match windows.next() {
-                    Some(window) => match this.display(position, window).await {
-                        Ok(_) => {
-                            this.delay.delay_ms(delay_ms).await;
-
-                            Some((Ok(()), (this, windows, false)))
-                        }
-                        Err(e) => Some((Err(e), (this, windows, true))),
-                    },
-                    None => None,
-                }
-            },
-        )
+                        Some((Ok(()), (this, windows)))
+                    }
+                    Err(e) => Some((Err(e), (this, windows))),
+                },
+                None => None,
+            }
+        })
     }
 }
 
@@ -150,6 +144,7 @@ where
     DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
     DELAY: ::embedded_hal::delay::DelayNs,
 {
+    // Does not stop on error
     pub fn animate<'a>(
         &'a mut self,
         position: usize,

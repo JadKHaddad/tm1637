@@ -29,24 +29,9 @@ async fn main(spawner: Spawner) {
     let clk = Output::new(peripherals.GPIO4.degrade(), Level::Low);
     let dio = OutputOpenDrain::new(peripherals.GPIO19.degrade(), Level::Low, Pull::Up);
 
-    let mut tm = TM1637Builder::new(clk, dio, delay)
-        .brightness(Brightness::L0)
-        .build_async::<4>();
+    let mut tm = TM1637Builder::new(clk, dio, delay).build_async::<4>();
 
     tm.init().await.unwrap();
-    // let bytes = [UpCharBits::UpF as u8];
-
-    // tm.write_segments_raw_flipped(1, &bytes).await.ok();
-
-    // tm.display_str_flipped(0, "HE").await.ok();
-
-    // tm.fit_str(0, "StALIOn ", 700).await.ok();
-
-    // tm.display_str_rev(0, "Error").await.ok();
-
-    // tm.put_str("HEL").fit(300).await.ok();
-
-    // tm.put_str("SUPEA HELLO ").display_or_fit(300).await.ok();
 
     let bytes = [
         UpCharBits::UpH as u8,
@@ -57,83 +42,32 @@ async fn main(spawner: Spawner) {
         0,
     ];
 
-    // let windows = windows_::<4>(&bytes, Direction::LeftToRight);
-    // let s = tm.animate(0, 700, windows).count().await;
-
-    // tm.move_slice_mapped(0, &bytes, 500, |byte| byte, Direction::RightToLeft)
-    //     .await
-    //     .ok();
-
-    // tm.fit_slice_flipped(0, &bytes, 500).await.ok();
-
-    // tm.put_str("HELLO ")
-    //     .move_overlapping(700, Direction::LeftToRight)
-    //     .await
-    //     .ok();
-
-    // tm.put_str("HELLO ").flip().display().await.ok();
-    // tm.put_str("HELLO ").display_rev().await.ok();
-    // tm.put_str("HELLO ").flip().display_rev().await.ok();
-
-    // tm.options()
-    //     .put_str("HEL")
-    //     .animate()
-    //     .delay_ms(700)
-    //     .direction(Direction::LeftToRight)
-    //     .style(AnimationStyle::NonOverlapping)
-    //     .display()
-    //     .await
-    //     .ok();
-
-    // tm.options()
-    //     .put_str("HELLO ")
+    // let count = tm
+    //     .options()
+    //     .put_str("HELLO")
     //     .set_dot(1)
     //     .flip()
     //     .animate()
-    //     .delay_ms(700)
-    //     .direction(Direction::LeftToRight)
-    //     .style(AnimationStyle::NonOverlapping)
-    //     .display()
-    //     .await
-    //     .ok();
+    //     .run()
+    //     .await;
 
-    // tm.set_dot(1);
+    // info!("Count: {}", count);
 
-    // tm.options()
-    //     .clock()
-    //     .hour(24)
-    //     .minute(0)
-    //     .finish()
-    //     .flip()
-    //     .display()
-    //     .await
-    //     .ok();
+    let (clk, dio, delay) = tm.into_parts();
 
-    // tm.options()
-    //     .put_str("HELLO")
-    //     // .set_dot(1)
-    //     .display()
-    //     .await
-    //     .ok();
+    let mut tm = TM1637Builder::new(clk, dio, delay).build_blocking::<4>();
 
-    tm.options()
+    tm.init().unwrap();
+
+    let count = tm
+        .options()
         .put_str("HELLO")
         .set_dot(1)
         .flip()
         .animate()
-        .run()
-        .await;
+        .run();
 
-    // tm.options()
-    //     .clock()
-    //     .hour(24)
-    //     .minute(0)
-    //     .finish()
-    //     .flip()
-    //     .set_dot(1)
-    //     .display()
-    //     .await
-    //     .ok();
+    info!("Count: {}", count);
 
     loop {}
 }
