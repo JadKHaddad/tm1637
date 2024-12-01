@@ -1,4 +1,4 @@
-use crate::{AnimationStyle, Direction, Identity, NotFlipped, TM1637};
+use crate::{Direction, Identity, NotFlipped, WindowsStyle, TM1637};
 
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
@@ -81,7 +81,7 @@ pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F,
     options: DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, F, D>,
     delay_ms: u32,
     direction: Direction,
-    style: AnimationStyle,
+    style: WindowsStyle,
 }
 
 #[derive(Debug)]
@@ -134,8 +134,8 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
 pub mod module {
     use crate::{
         mappings::{zip_or, SegmentBits},
-        AnimatedDisplayOptions, AnimationStyle, ConditionalInputPin, Direction, DisplayOptions,
-        Error, Flipped, Identity, MaybeFlipped,
+        AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
+        Identity, MaybeFlipped, WindowsStyle,
     };
     use ::embedded_hal::digital::OutputPin;
 
@@ -191,7 +191,7 @@ pub mod module {
                 options: self,
                 delay_ms: 500,
                 direction: Direction::LeftToRight,
-                style: AnimationStyle::Overlapping,
+                style: WindowsStyle::Overlapping,
             }
         }
 
@@ -245,7 +245,7 @@ pub mod module {
         }
 
         /// Set the animation style.
-        pub const fn style(mut self, style: AnimationStyle) -> Self {
+        pub const fn style(mut self, style: WindowsStyle) -> Self {
             self.style = style;
             self
         }

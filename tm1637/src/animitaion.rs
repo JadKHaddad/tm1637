@@ -1,7 +1,7 @@
-/// Animation style for moving bytes.
+/// Animation style for moving windows.
 #[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum AnimationStyle {
+pub enum WindowsStyle {
     #[default]
     /// Bytes are moved in overlapping windows.
     ///

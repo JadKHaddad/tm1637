@@ -28,7 +28,7 @@ mod options;
 mod tokens;
 
 mod maybe_flipped;
-pub use animitaion::AnimationStyle;
+pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
 pub(crate) use conditional::ConditionalInputPin;

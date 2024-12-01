@@ -10,7 +10,7 @@
 //!      D
 //! ```
 
-use crate::Direction;
+use crate::{Direction, WindowsStyle};
 
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
@@ -561,10 +561,37 @@ pub fn windows_overlapping<const N: usize>(
     })
 }
 
+pub fn windows_<const N: usize>(
+    bytes: &[u8],
+    direction: Direction,
+    style: WindowsStyle,
+) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
+    #[auto_enums::enum_derive(Iterator)]
+    enum Outer<A, B> {
+        A(A),
+        B(B),
+    }
+
+    #[auto_enums::enum_derive(Iterator)]
+    enum Inner<A, B> {
+        A(A),
+        B(B),
+    }
+
+    match style {
+        WindowsStyle::Overlapping => {
+            Outer::A(windows_overlapping_::<N>(bytes, direction).map(Inner::A))
+        }
+        WindowsStyle::NonOverlapping => {
+            Outer::B(windows_non_overlapping::<N>(bytes, direction).map(Inner::B))
+        }
+    }
+}
+
 pub fn windows_overlapping_<const N: usize>(
     bytes: &[u8],
     direction: Direction,
-) -> impl Iterator<Item = impl Iterator<Item = u8>> + '_ {
+) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
     (0..=bytes.len()).map(move |i| {
         let mut window = [0u8; N];
 
@@ -580,10 +607,10 @@ pub fn windows_overlapping_<const N: usize>(
 }
 
 #[auto_enums::auto_enum(Iterator)]
-pub fn windows_<const N: usize>(
+pub fn windows_non_overlapping<const N: usize>(
     bytes: &[u8],
     direction: Direction,
-) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> {
+) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
     match direction {
         Direction::LeftToRight => bytes.windows(N).map(|window| window.iter().copied()),
         Direction::RightToLeft => bytes.windows(N).rev().map(|window| window.iter().copied()),
