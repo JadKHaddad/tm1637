@@ -12,7 +12,7 @@ use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
     mappings::{windows_, UpCharBits},
-    AnimationStyle, Brightness, Direction, TM1637Builder,
+    Brightness, Direction, TM1637Builder,
 };
 
 #[main]
@@ -120,9 +120,9 @@ async fn main(spawner: Spawner) {
         .put_str("HELLO")
         .set_dot(1)
         .flip()
-        .display()
-        .await
-        .ok();
+        .animate()
+        .run()
+        .await;
 
     // tm.options()
     //     .clock()

@@ -129,7 +129,7 @@ where
                 }
 
                 match windows.next() {
-                    Some(window) => match this.display_unchecked(position, window).await {
+                    Some(window) => match this.display(position, window).await {
                         Ok(_) => {
                             this.delay.delay_ms(delay_ms).await;
 

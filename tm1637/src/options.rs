@@ -127,17 +127,19 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
 }
 
 #[::duplicate::duplicate_item(
-    module        async     await               Token             DelayTrait;
-    [asynch]      [async]   [await.identity()]  [crate::Async]    [::embedded_hal_async::delay::DelayNs];
-    [blocking]    []        [identity()]        [crate::Blocking] [::embedded_hal::delay::DelayNs];
+    module        async     await               Token             DelayTrait                             AnimationIter;
+    [asynch]      [async]   [await.identity()]  [crate::Async]    [::embedded_hal_async::delay::DelayNs] [::futures::Stream];
+    [blocking]    []        [identity()]        [crate::Blocking] [::embedded_hal::delay::DelayNs]       [Iterator];
 )]
 pub mod module {
+    use ::embedded_hal::digital::OutputPin;
+    use ::futures::StreamExt; // hmm
+
     use crate::{
-        mappings::{zip_or, SegmentBits},
+        mappings::{windows_, zip_or, SegmentBits},
         AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
         Identity, MaybeFlipped, WindowsStyle,
     };
-    use ::embedded_hal::digital::OutputPin;
 
     impl<'d, 'b, const N: usize, CLK, DIO, DELAY, ERR, F, M>
         DisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, F, M>
@@ -145,7 +147,7 @@ pub mod module {
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: FnMut(u8) -> u8 + Clone + 'static,
+        F: FnMut(u8) -> u8 + Clone,
         M: MaybeFlipped<N>,
     {
         pub const fn dot(mut self, position: usize, state: bool) -> Self {
@@ -217,7 +219,7 @@ pub mod module {
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: FnMut(u8) -> u8 + Clone + 'static,
+        F: FnMut(u8) -> u8 + Clone,
         M: MaybeFlipped<N>,
     {
         /// Set the delay in milliseconds between each animation step.
@@ -250,34 +252,20 @@ pub mod module {
             self
         }
 
-        //     /// Run the animation on a `flipped` or `non-flipped` display.
-        //     pub async fn display(self) -> Result<(), Error<ERR>> {
-        //         match self.style {
-        //             AnimationStyle::Overlapping => {
-        //                 M::move_slice_overlapping_dotted_mapped(
-        //                     self.options.device,
-        //                     self.options.position,
-        //                     self.options.bytes,
-        //                     &self.options.dots,
-        //                     self.delay_ms,
-        //                     self.direction,
-        //                     self.options.map,
-        //                 )
-        //                 .await
-        //             }
-        //             AnimationStyle::NonOverlapping => {
-        //                 M::move_slice_to_end_dotted_mapped(
-        //                     self.options.device,
-        //                     self.options.position,
-        //                     self.options.bytes,
-        //                     &self.options.dots,
-        //                     self.delay_ms,
-        //                     self.direction,
-        //                     self.options.map,
-        //                 )
-        //                 .await
-        //             }
-        //         }
-        //     }
+        pub fn steps(&mut self) -> impl AnimationIter<Item = Result<(), Error<ERR>>> + '_ {
+            let dots = self.options.dots.iter().copied();
+            let map = self.options.map.clone();
+
+            let windows = windows_::<N>(self.options.bytes, self.direction, self.style)
+                .map(move |window| zip_or(window.map(map.clone()), dots.clone()));
+
+            self.options
+                .device
+                .animate(self.options.position, self.delay_ms, windows)
+        }
+
+        pub async fn run(mut self) -> usize {
+            self.steps().count().await
+        }
     }
 }
