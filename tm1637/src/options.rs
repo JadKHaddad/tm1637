@@ -152,7 +152,7 @@ pub mod module {
     {
         pub const fn dot(mut self, position: usize, state: bool) -> Self {
             self.dots[position] = match state {
-                true => SegmentBits::SegPoint as u8,
+                true => SegmentBits::Dot as u8,
                 false => 0,
             };
 
@@ -160,7 +160,7 @@ pub mod module {
         }
 
         pub const fn set_dot(mut self, position: usize) -> Self {
-            self.dots[position] = SegmentBits::SegPoint as u8;
+            self.dots[position] = SegmentBits::Dot as u8;
             self
         }
 

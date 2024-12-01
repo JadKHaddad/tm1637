@@ -31,11 +31,13 @@ pub enum SegmentBits {
     SegF = 0b00100000,
     /// G segment
     SegG = 0b01000000,
-    /// Double point
+    /// Double point or dot
     ///
-    /// ## Usage
-    /// `Or` this bit with the bit responsible for displaying the double point. Often second position.
-    SegPoint = 0b10000000,
+    /// # Usage
+    ///
+    /// - `Or` this bit with the other bits to display the dot.
+    /// - `Or` this bit with the bit responsible for displaying the double point. Often second position on a 4-digit display.
+    Dot = 0b10000000,
 }
 
 impl SegmentBits {
@@ -49,7 +51,7 @@ impl SegmentBits {
             SegmentBits::SegE,
             SegmentBits::SegF,
             SegmentBits::SegG,
-            SegmentBits::SegPoint,
+            SegmentBits::Dot,
         ]
     }
 
@@ -63,7 +65,7 @@ impl SegmentBits {
             SegmentBits::SegE as u8,
             SegmentBits::SegF as u8,
             SegmentBits::SegG as u8,
-            SegmentBits::SegPoint as u8,
+            SegmentBits::Dot as u8,
         ]
     }
 }
