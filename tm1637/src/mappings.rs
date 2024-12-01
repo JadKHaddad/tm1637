@@ -542,26 +542,7 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
-/// Creates an iterator over overlapping windows of bytes.
-pub fn windows_overlapping<const N: usize>(
-    bytes: &[u8],
-    direction: Direction,
-) -> impl Iterator<Item = [u8; N]> + '_ {
-    (0..=bytes.len()).map(move |i| {
-        let mut window = [0u8; N];
-
-        for j in 0..N {
-            window[j] = match direction {
-                Direction::LeftToRight => bytes[(i + j) % bytes.len()],
-                Direction::RightToLeft => bytes[(bytes.len() - i + j) % bytes.len()],
-            };
-        }
-
-        window
-    })
-}
-
-pub fn windows_<const N: usize>(
+pub fn windows<const N: usize>(
     bytes: &[u8],
     direction: Direction,
     style: WindowsStyle,
@@ -580,7 +561,7 @@ pub fn windows_<const N: usize>(
 
     match style {
         WindowsStyle::Overlapping => {
-            Outer::A(windows_overlapping_::<N>(bytes, direction).map(Inner::A))
+            Outer::A(windows_overlapping::<N>(bytes, direction).map(Inner::A))
         }
         WindowsStyle::NonOverlapping => {
             Outer::B(windows_non_overlapping::<N>(bytes, direction).map(Inner::B))
@@ -588,7 +569,7 @@ pub fn windows_<const N: usize>(
     }
 }
 
-pub fn windows_overlapping_<const N: usize>(
+pub fn windows_overlapping<const N: usize>(
     bytes: &[u8],
     direction: Direction,
 ) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
@@ -615,27 +596,6 @@ pub fn windows_non_overlapping<const N: usize>(
         Direction::LeftToRight => bytes.windows(N).map(|window| window.iter().copied()),
         Direction::RightToLeft => bytes.windows(N).rev().map(|window| window.iter().copied()),
     }
-}
-
-/// Creates an iterator over windows of bytes.
-#[auto_enums::auto_enum(Iterator)]
-pub fn windows<const N: usize>(bytes: &[u8], direction: Direction) -> impl Iterator<Item = &[u8]> {
-    match direction {
-        Direction::LeftToRight => bytes.windows(N),
-        Direction::RightToLeft => bytes.windows(N).rev(),
-    }
-}
-
-// TODO remove
-pub fn zip_dots<'a>(
-    bytes: impl Iterator<Item = u8> + 'a,
-    dots: impl Iterator<Item = bool> + 'a,
-) -> impl Iterator<Item = u8> + 'a {
-    bytes.zip(dots).map(|(byte, dot)| {
-        dot.then_some(byte)
-            .map(|byte| byte | SegmentBits::SegPoint as u8)
-            .unwrap_or(byte)
-    })
 }
 
 pub fn zip_or<'a>(
@@ -735,49 +695,77 @@ mod tests {
         assert_eq!(five, mirrored_mirrored_five);
     }
 
+    extern crate std;
+    use std::vec;
+    use std::vec::Vec;
+
     #[test]
     fn windows_overlapping_left_to_right() {
         let slice = b"lorem";
-        let mut iter = windows_overlapping::<3>(slice, Direction::LeftToRight);
-        assert_eq!(iter.next().unwrap(), *b"lor");
-        assert_eq!(iter.next().unwrap(), *b"ore");
-        assert_eq!(iter.next().unwrap(), *b"rem");
-        assert_eq!(iter.next().unwrap(), *b"eml");
-        assert_eq!(iter.next().unwrap(), *b"mlo");
-        assert_eq!(iter.next().unwrap(), *b"lor");
-        assert!(iter.next().is_none());
+        let iter = windows_overlapping::<3>(slice, Direction::LeftToRight);
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+
+        assert_eq!(
+            collected,
+            vec![
+                vec![b'l', b'o', b'r'],
+                vec![b'o', b'r', b'e'],
+                vec![b'r', b'e', b'm'],
+                vec![b'e', b'm', b'l'],
+                vec![b'm', b'l', b'o'],
+                vec![b'l', b'o', b'r'],
+            ]
+        );
     }
 
     #[test]
     fn windows_overlapping_right_to_left() {
         let slice = b"lorem";
-        let mut iter = windows_overlapping::<3>(slice, Direction::RightToLeft);
-        assert_eq!(iter.next().unwrap(), *b"lor");
-        assert_eq!(iter.next().unwrap(), *b"mlo");
-        assert_eq!(iter.next().unwrap(), *b"eml");
-        assert_eq!(iter.next().unwrap(), *b"rem");
-        assert_eq!(iter.next().unwrap(), *b"ore");
-        assert_eq!(iter.next().unwrap(), *b"lor");
-        assert!(iter.next().is_none());
+        let iter = windows_overlapping::<3>(slice, Direction::RightToLeft);
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+
+        assert_eq!(
+            collected,
+            vec![
+                vec![b'l', b'o', b'r'],
+                vec![b'm', b'l', b'o'],
+                vec![b'e', b'm', b'l'],
+                vec![b'r', b'e', b'm'],
+                vec![b'o', b'r', b'e'],
+                vec![b'l', b'o', b'r'],
+            ]
+        );
     }
 
     #[test]
-    fn windows_left_to_right() {
+    fn windows_non_overlapping_left_to_right() {
         let slice = b"lorem";
-        let mut iter = windows::<3>(slice, Direction::LeftToRight);
-        assert_eq!(iter.next().unwrap(), b"lor");
-        assert_eq!(iter.next().unwrap(), b"ore");
-        assert_eq!(iter.next().unwrap(), b"rem");
-        assert!(iter.next().is_none());
+        let iter = windows_non_overlapping::<3>(slice, Direction::LeftToRight);
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+
+        assert_eq!(
+            collected,
+            vec![
+                vec![b'l', b'o', b'r'],
+                vec![b'o', b'r', b'e'],
+                vec![b'r', b'e', b'm'],
+            ]
+        );
     }
 
     #[test]
-    fn windows_right_to_left() {
+    fn windows_non_overlapping_right_to_left() {
         let slice = b"lorem";
-        let mut iter = windows::<3>(slice, Direction::RightToLeft);
-        assert_eq!(iter.next().unwrap(), b"rem");
-        assert_eq!(iter.next().unwrap(), b"ore");
-        assert_eq!(iter.next().unwrap(), b"lor");
-        assert!(iter.next().is_none());
+        let iter = windows_non_overlapping::<3>(slice, Direction::RightToLeft);
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+
+        assert_eq!(
+            collected,
+            vec![
+                vec![b'r', b'e', b'm'],
+                vec![b'o', b'r', b'e'],
+                vec![b'l', b'o', b'r'],
+            ]
+        );
     }
 }

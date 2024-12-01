@@ -136,7 +136,7 @@ pub mod module {
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        mappings::{windows_, zip_or, SegmentBits},
+        mappings::{windows, zip_or, SegmentBits},
         AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
         Identity, MaybeFlipped, WindowsStyle,
     };
@@ -256,7 +256,7 @@ pub mod module {
             let dots = self.options.dots.iter().copied();
             let map = self.options.map.clone();
 
-            let windows = windows_::<N>(self.options.bytes, self.direction, self.style)
+            let windows = windows::<N>(self.options.bytes, self.direction, self.style)
                 .map(move |window| zip_or(window.map(map.clone()), dots.clone()));
 
             self.options
