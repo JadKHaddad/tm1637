@@ -156,16 +156,14 @@ where
         delay_ms: u32,
         windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Iterator<Item = Result<(), Error<ERR>>> + 'a {
-        windows.map(
-            move |window| match self.display_unchecked(position, window) {
-                Ok(_) => {
-                    self.delay.delay_ms(delay_ms);
+        windows.map(move |window| match self.display(position, window) {
+            Ok(_) => {
+                self.delay.delay_ms(delay_ms);
 
-                    Ok(())
-                }
-                Err(e) => Err(e),
-            },
-        )
+                Ok(())
+            }
+            Err(e) => Err(e),
+        })
     }
 }
 
