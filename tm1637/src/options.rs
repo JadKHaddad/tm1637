@@ -1,5 +1,7 @@
 use crate::{Direction, Identity, NotFlipped, WindowsStyle, TM1637};
 
+// TODO: to rework the whole thing here and use mapped iters instead of slices and a map function (for using the StrParser), we need to have a way to create the windows from iters and not from slices.
+
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]

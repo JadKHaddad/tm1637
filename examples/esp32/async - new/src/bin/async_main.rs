@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{windows_, UpCharBits},
+    mappings::{windows, UpCharBits},
     Brightness, Direction, TM1637Builder,
 };
 
