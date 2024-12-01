@@ -3,9 +3,7 @@ use crate::{Direction, Identity, NotFlipped, WindowsStyle, TM1637};
 // TODO: to rework the whole thing here and use mapped iters instead of slices and a map function (for using the StrParser), we need to have a way to create the windows from iters and not from slices.
 // TODO: Impl the double ended iter and exact size iter for the StrParser.
 // put it here
-// if it works. We dont need the dots anymore, so we can then change the windows api to impl Iterator<Item = [u8; N]>
-// if we change the windows api we have to change the animate api to impl Iterator<Item = [u8; N]> and then we can use the display unchecked method with slices. we have to make it. we dont have it.
-// but what about the mapping for the windows [u8;N]?. the whole iter is mapped before creating the windows.
+// if it works. We dont need the dots anymore.
 
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
@@ -291,12 +289,18 @@ pub mod module {
         }
 
         pub fn steps(&mut self) -> impl AnimationIter<Item = Result<(), Error<ERR>>> + '_ {
-            let (position, bytes) = M::calculate(self.options.position, &mut self.options.iter);
+            let original_position = self.options.position;
+
+            let (position, _) = M::calculate(original_position, &mut self.options.iter);
 
             let dots = self.options.dots.iter().copied();
 
-            let windows = windows_new_api::<N>(bytes, self.direction, self.style)
-                .map(move |window| zip_or(window, dots.clone()));
+            let windows = windows_new_api::<N>(&mut self.options.iter, self.direction, self.style)
+                .map(move |window| {
+                    let (_, bytes) = M::calculate(original_position, window);
+
+                    zip_or(bytes, dots.clone())
+                });
 
             self.options
                 .device

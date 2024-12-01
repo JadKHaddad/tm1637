@@ -59,16 +59,20 @@ async fn main(spawner: Spawner) {
 
     tm.init().unwrap();
 
-    tm.options()
-        // .put_str("ErrorS")
-        .put_slice(&bytes)
-        .set_dot(1)
-        .flip()
+    let count = tm
+        .options()
+        .put_str("ErrorS")
+        .position(1)
+        //.put_slice(&bytes)
+        // .set_dot(1)
+        // .flip()
         .animate()
         .delay_ms(700)
         .direction(Direction::LeftToRight)
         .style(WindowsStyle::NonOverlapping)
         .run();
+
+    info!("Count: {}", count);
 
     loop {}
 }

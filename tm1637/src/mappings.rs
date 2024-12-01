@@ -548,7 +548,7 @@ pub fn windows_new_api<const N: usize>(
     iter: impl Iterator<Item = u8>,
     direction: Direction,
     style: WindowsStyle,
-) -> impl Iterator<Item = impl Iterator<Item = u8>> {
+) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>> {
     match direction {
         Direction::LeftToRight => match style {
             WindowsStyle::Overlapping => unimplemented!(),
