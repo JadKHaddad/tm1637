@@ -24,10 +24,11 @@ mod error;
 pub mod formatters;
 mod identity;
 pub mod mappings;
+mod maybe_flipped;
 mod options;
+mod str_parser;
 mod tokens;
 
-mod maybe_flipped;
 pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
@@ -38,4 +39,5 @@ pub use error::Error;
 pub(crate) use identity::Identity;
 pub use maybe_flipped::MaybeFlipped;
 pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
+pub use str_parser::StrParser;
 pub use tokens::{Async, Blocking, Flipped, NotFlipped};
