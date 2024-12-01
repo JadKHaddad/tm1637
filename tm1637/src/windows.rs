@@ -4,6 +4,7 @@ enum BufferState {
     Full,
 }
 
+// None overlapping left to right windows.
 #[derive(Debug)]
 pub struct Windows<const N: usize, I> {
     buffer: [u8; N],

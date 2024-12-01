@@ -12,7 +12,7 @@ use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
     mappings::{windows, UpCharBits},
-    Brightness, Direction, TM1637Builder,
+    Brightness, Direction, TM1637Builder, WindowsStyle,
 };
 
 #[main]
@@ -59,15 +59,16 @@ async fn main(spawner: Spawner) {
 
     tm.init().unwrap();
 
-    let count = tm
-        .options()
-        .put_str("HELLO")
+    tm.options()
+        // .put_str("ErrorS")
+        .put_slice(&bytes)
         .set_dot(1)
         .flip()
         .animate()
+        .delay_ms(700)
+        .direction(Direction::LeftToRight)
+        .style(WindowsStyle::NonOverlapping)
         .run();
-
-    info!("Count: {}", count);
 
     loop {}
 }

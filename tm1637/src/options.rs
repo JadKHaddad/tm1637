@@ -1,6 +1,11 @@
 use crate::{Direction, Identity, NotFlipped, WindowsStyle, TM1637};
 
 // TODO: to rework the whole thing here and use mapped iters instead of slices and a map function (for using the StrParser), we need to have a way to create the windows from iters and not from slices.
+// TODO: Impl the double ended iter and exact size iter for the StrParser.
+// put it here
+// if it works. We dont need the dots anymore, so we can then change the windows api to impl Iterator<Item = [u8; N]>
+// if we change the windows api we have to change the animate api to impl Iterator<Item = [u8; N]> and then we can use the display unchecked method with slices. we have to make it. we dont have it.
+// but what about the mapping for the windows [u8;N]?. the whole iter is mapped before creating the windows.
 
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
@@ -18,14 +23,21 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     pub fn put_slice(
         self,
         bytes: &'b [u8],
-    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
-    {
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        NotFlipped,
+    > {
         DisplayOptions {
             device: self.device,
             position: 0,
-            bytes,
+            iter: bytes.iter().copied(),
             dots: [0; N],
-            map: Identity::identity,
             _flip: NotFlipped,
         }
     }
@@ -34,14 +46,25 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     pub fn put_str(
         self,
         str: &'b str,
-    ) -> DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
-    {
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        NotFlipped,
+    > {
         DisplayOptions {
             device: self.device,
             position: 0,
-            bytes: str.as_bytes(),
+            iter: str
+                .as_bytes()
+                .iter()
+                .copied()
+                .map(crate::mappings::from_ascii_byte),
             dots: [0; N],
-            map: crate::mappings::from_ascii_byte,
             _flip: NotFlipped,
         }
     }
@@ -67,20 +90,19 @@ impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
 /// High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct DisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, M> {
+pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, M> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     position: usize,
-    bytes: &'b [u8],
+    iter: F,
     dots: [u8; N],
-    map: F,
     _flip: M,
 }
 
 /// High-level API for animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct AnimatedDisplayOptions<'d, 'b, const N: usize, T, CLK, DIO, DELAY, F, D> {
-    options: DisplayOptions<'d, 'b, N, T, CLK, DIO, DELAY, F, D>,
+pub struct AnimatedDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, D>,
     delay_ms: u32,
     direction: Direction,
     style: WindowsStyle,
@@ -111,7 +133,16 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     /// Finish setting the clock and display it.
     pub fn finish(
         &'b mut self,
-    ) -> DisplayOptions<'d, 'b, 4, T, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, NotFlipped>
+    ) -> DisplayOptions<
+        'd,
+        4,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> + 'b,
+        NotFlipped,
+    >
     where
         'b: 'd,
     {
@@ -120,9 +151,8 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
         DisplayOptions {
             device: self.device,
             position: 0,
-            bytes: &self.bytes,
+            iter: self.bytes.iter().copied(),
             dots: [0; 4],
-            map: Identity::identity,
             _flip: NotFlipped,
         }
     }
@@ -138,18 +168,19 @@ pub mod module {
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        mappings::{windows, zip_or, SegmentBits},
+        mappings::{windows, windows_new_api, zip_or, SegmentBits},
         AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
         Identity, MaybeFlipped, WindowsStyle,
     };
 
-    impl<'d, 'b, const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        DisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, F, M>
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
+        DisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: FnMut(u8) -> u8 + Clone,
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+        for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
         pub const fn dot(mut self, position: usize, state: bool) -> Self {
@@ -179,8 +210,7 @@ pub mod module {
 
         /// Display the bytes on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
-            let (position, bytes) =
-                M::calculate(self.position, self.bytes.iter().copied().map(self.map));
+            let (position, bytes) = M::calculate(self.position, self.iter);
 
             self.device
                 .display(position, zip_or(bytes, self.dots.iter().copied()))
@@ -188,9 +218,7 @@ pub mod module {
         }
 
         /// Use animation options.
-        pub const fn animate(
-            self,
-        ) -> AnimatedDisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, F, M> {
+        pub const fn animate(self) -> AnimatedDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
             AnimatedDisplayOptions {
                 options: self,
                 delay_ms: 500,
@@ -202,26 +230,34 @@ pub mod module {
         /// Flip the display.
         pub fn flip(
             self,
-        ) -> DisplayOptions<'d, 'b, N, Token, CLK, DIO, DELAY, impl FnMut(u8) -> u8 + Clone, Flipped>
-        {
+        ) -> DisplayOptions<
+            'd,
+            N,
+            Token,
+            CLK,
+            DIO,
+            DELAY,
+            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+            Flipped,
+        > {
             DisplayOptions {
                 device: self.device,
                 position: self.position,
-                bytes: self.bytes,
+                iter: self.iter,
                 dots: self.dots,
-                map: self.map,
                 _flip: Flipped,
             }
         }
     }
 
     impl<const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        AnimatedDisplayOptions<'_, '_, N, Token, CLK, DIO, DELAY, F, M>
+        AnimatedDisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: FnMut(u8) -> u8 + Clone,
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+        for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
         /// Set the delay in milliseconds between each animation step.
@@ -255,15 +291,16 @@ pub mod module {
         }
 
         pub fn steps(&mut self) -> impl AnimationIter<Item = Result<(), Error<ERR>>> + '_ {
-            let dots = self.options.dots.iter().copied();
-            let map = self.options.map.clone();
+            let (position, bytes) = M::calculate(self.options.position, &mut self.options.iter);
 
-            let windows = windows::<N>(self.options.bytes, self.direction, self.style)
-                .map(move |window| zip_or(window.map(map.clone()), dots.clone()));
+            let dots = self.options.dots.iter().copied();
+
+            let windows = windows_new_api::<N>(bytes, self.direction, self.style)
+                .map(move |window| zip_or(window, dots.clone()));
 
             self.options
                 .device
-                .animate(self.options.position, self.delay_ms, windows)
+                .animate(position, self.delay_ms, windows)
         }
 
         pub async fn run(mut self) -> usize {

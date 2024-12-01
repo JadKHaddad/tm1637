@@ -10,7 +10,7 @@
 //!      D
 //! ```
 
-use crate::{Direction, WindowsStyle};
+use crate::{Direction, Windows, WindowsStyle};
 
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
@@ -544,6 +544,23 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
+pub fn windows_new_api<const N: usize>(
+    iter: impl Iterator<Item = u8>,
+    direction: Direction,
+    style: WindowsStyle,
+) -> impl Iterator<Item = impl Iterator<Item = u8>> {
+    match direction {
+        Direction::LeftToRight => match style {
+            WindowsStyle::Overlapping => unimplemented!(),
+            WindowsStyle::NonOverlapping => {
+                Windows::<N, _>::new(iter).map(|window| window.into_iter())
+            }
+        },
+        Direction::RightToLeft => unimplemented!(),
+    }
+}
+
+// TODO: remove after refactor/options/iter replace with windows_new_api
 pub fn windows<const N: usize>(
     bytes: &[u8],
     direction: Direction,

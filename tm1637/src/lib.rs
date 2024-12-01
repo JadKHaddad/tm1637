@@ -42,3 +42,4 @@ pub use maybe_flipped::MaybeFlipped;
 pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
 pub use str_parser::StrParser;
 pub use tokens::{Async, Blocking, Flipped, NotFlipped};
+pub use windows::Windows;
