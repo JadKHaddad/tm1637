@@ -617,13 +617,6 @@ pub fn windows_non_overlapping<const N: usize>(
     }
 }
 
-pub fn zip_or<'a>(
-    bytes: impl Iterator<Item = u8> + 'a,
-    others: impl Iterator<Item = u8> + 'a,
-) -> impl Iterator<Item = u8> + 'a {
-    bytes.zip(others).map(|(byte, other)| byte | other)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

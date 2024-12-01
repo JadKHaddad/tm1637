@@ -35,7 +35,6 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             device: self.device,
             position: 0,
             iter: bytes.iter().copied(),
-            dots: [0; N],
             _flip: NotFlipped,
         }
     }
@@ -58,7 +57,6 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             device: self.device,
             position: 0,
             iter: StrParser::new(str),
-            dots: [0; N],
             _flip: NotFlipped,
         }
     }
@@ -72,12 +70,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
 impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
     /// Prepare to display a digital clock.
     pub fn clock(self) -> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
-        ClockDisplayOptions {
-            device: self.device,
-            hour: 0,
-            minute: 0,
-            bytes: [0; 4],
-        }
+        ClockDisplayOptions::new(self.device)
     }
 }
 
@@ -88,7 +81,6 @@ pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, M> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     position: usize,
     iter: F,
-    dots: [u8; N],
     _flip: M,
 }
 
@@ -108,10 +100,21 @@ pub struct ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     device: &'d mut TM1637<4, T, CLK, DIO, DELAY>,
     hour: u8,
     minute: u8,
+    dot: bool,
     bytes: [u8; 4],
 }
 
 impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
+    pub fn new(device: &'d mut TM1637<4, T, CLK, DIO, DELAY>) -> Self {
+        Self {
+            device,
+            hour: 0,
+            minute: 0,
+            dot: false,
+            bytes: [0; 4],
+        }
+    }
+
     /// Set the hour.
     pub const fn hour(mut self, hour: u8) -> Self {
         self.hour = hour;
@@ -121,6 +124,21 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     /// Set the minute.
     pub const fn minute(mut self, minute: u8) -> Self {
         self.minute = minute;
+        self
+    }
+
+    pub const fn dot(mut self, dot: bool) -> Self {
+        self.dot = dot;
+        self
+    }
+
+    pub const fn set_dot(mut self) -> Self {
+        self.dot = true;
+        self
+    }
+
+    pub const fn unset_dot(mut self) -> Self {
+        self.dot = false;
         self
     }
 
@@ -140,13 +158,12 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
     where
         'b: 'd,
     {
-        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, false);
+        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, self.dot);
 
         DisplayOptions {
             device: self.device,
             position: 0,
             iter: self.bytes.iter().copied(),
-            dots: [0; 4],
             _flip: NotFlipped,
         }
     }
@@ -162,9 +179,8 @@ pub mod module {
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        mappings::{windows_new_api, zip_or, SegmentBits},
-        AnimatedDisplayOptions, ConditionalInputPin, Direction, DisplayOptions, Error, Flipped,
-        Identity, MaybeFlipped, WindowsStyle,
+        mappings::windows_new_api, AnimatedDisplayOptions, ConditionalInputPin, Direction,
+        DisplayOptions, Error, Flipped, Identity, MaybeFlipped, WindowsStyle,
     };
 
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
@@ -177,25 +193,6 @@ pub mod module {
         for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
-        pub const fn dot(mut self, position: usize, state: bool) -> Self {
-            self.dots[position] = match state {
-                true => SegmentBits::Dot as u8,
-                false => 0,
-            };
-
-            self
-        }
-
-        pub const fn set_dot(mut self, position: usize) -> Self {
-            self.dots[position] = SegmentBits::Dot as u8;
-            self
-        }
-
-        pub const fn unset_dot(mut self, position: usize) -> Self {
-            self.dots[position] = 0;
-            self
-        }
-
         /// Set the position on the display from which to start displaying the bytes.
         pub const fn position(mut self, position: usize) -> Self {
             self.position = position;
@@ -206,9 +203,7 @@ pub mod module {
         pub async fn display(self) -> Result<(), Error<ERR>> {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
-            self.device
-                .display(position, zip_or(bytes, self.dots.iter().copied()))
-                .await
+            self.device.display(position, bytes).await
         }
 
         /// Use animation options.
@@ -238,7 +233,6 @@ pub mod module {
                 device: self.device,
                 position: self.position,
                 iter: self.iter,
-                dots: self.dots,
                 _flip: Flipped,
             }
         }
@@ -289,13 +283,11 @@ pub mod module {
 
             let (position, _) = M::calculate(original_position, &mut self.options.iter);
 
-            let dots = self.options.dots.iter().copied();
-
             let windows = windows_new_api::<N>(&mut self.options.iter, self.direction, self.style)
                 .map(move |window| {
                     let (_, bytes) = M::calculate(original_position, window);
 
-                    zip_or(bytes, dots.clone())
+                    bytes
                 });
 
             self.options

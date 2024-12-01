@@ -64,7 +64,6 @@ async fn main(spawner: Spawner) {
         .put_str("Erro.rS")
         // .position(1)
         // .put_slice(&bytes)
-        // .set_dot(1)
         .flip()
         .animate()
         .delay_ms(700)
