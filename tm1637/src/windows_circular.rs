@@ -26,7 +26,8 @@ impl<const N: usize, I> CircularWindows<N, I> {
     }
 }
 
-fn combine<const N: usize>(first: [u8; N], last: [u8; N], index: usize) -> [u8; N] {
+/// Shifts the last item to the left and inserts firt[index] at the end.
+fn shift_left<const N: usize>(first: &[u8; N], last: &[u8; N], index: usize) -> [u8; N] {
     let mut buffer = [0; N];
 
     buffer[..(N - 1)].copy_from_slice(&last[1..((N - 1) + 1)]);
@@ -66,7 +67,7 @@ where
                 WindowsState::First(first_item) => Some(first_item),
                 WindowsState::FirstAndLast(first_item, last_item) => {
                     if self.counter < N {
-                        let item = combine(first_item, last_item, self.counter);
+                        let item = shift_left(&first_item, &last_item, self.counter);
 
                         self.counter += 1;
 
@@ -90,6 +91,7 @@ mod test {
 
     use super::*;
 
+    // TODO: tests
     #[test]
     fn test() {
         let iter = b"lorem".iter().copied();
@@ -108,6 +110,6 @@ mod test {
         let first = [b'l', b'o', b'r'];
         let last = [b'r', b'e', b'm'];
 
-        assert_eq!([b'e', b'm', b'l'], combine(first, last, 0));
+        assert_eq!([b'e', b'm', b'l'], shift_left(&first, &last, 0));
     }
 }
