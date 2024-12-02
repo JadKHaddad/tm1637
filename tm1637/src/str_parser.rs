@@ -143,7 +143,7 @@ mod tests {
     }
 
     #[test]
-    fn back_no_dots() {
+    fn no_dots_rev() {
         let parser = StrParser::new("1234");
         let result: Vec<u8> = parser.rev().collect();
 
@@ -160,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn back_dots() {
+    fn dots_rev() {
         let parser = StrParser::new("..12.3..45..............6.7");
         let result: Vec<u8> = parser.rev().collect();
 

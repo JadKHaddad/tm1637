@@ -1,11 +1,12 @@
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 enum BufferState {
     Filling(usize),
     Full,
 }
 
-// None overlapping left to right windows.
 #[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Windows<const N: usize, I> {
     buffer: [u8; N],
     state: BufferState,
@@ -22,6 +23,7 @@ impl<const N: usize, I> Windows<N, I> {
     }
 }
 
+// None overlapping left to right windows.
 impl<const N: usize, I> Iterator for Windows<N, I>
 where
     I: Iterator<Item = u8>,
@@ -75,6 +77,56 @@ where
     }
 }
 
+// None overlapping right to left windows.
+impl<const N: usize, I> DoubleEndedIterator for Windows<N, I>
+where
+    I: DoubleEndedIterator<Item = u8>,
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        loop {
+            match self.iter.next_back() {
+                Some(byte) => match self.state {
+                    BufferState::Filling(counter) => {
+                        for i in (1..=counter).rev() {
+                            self.buffer[i] = self.buffer[i - 1];
+                        }
+
+                        self.buffer[0] = byte;
+
+                        let counter = counter + 1;
+
+                        if counter == N {
+                            self.state = BufferState::Full;
+
+                            return Some(self.buffer);
+                        }
+
+                        self.state = BufferState::Filling(counter);
+                    }
+                    BufferState::Full => {
+                        for i in (1..N).rev() {
+                            self.buffer[i] = self.buffer[i - 1];
+                        }
+
+                        self.buffer[0] = byte;
+
+                        return Some(self.buffer);
+                    }
+                },
+                None => {
+                    if matches!(self.state, BufferState::Filling(_)) {
+                        self.state = BufferState::Full;
+
+                        return Some(self.buffer);
+                    }
+
+                    return None;
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     extern crate std;
@@ -89,6 +141,7 @@ mod test {
         let windows = Windows::<4, _>::new(iter);
 
         let collected = windows.collect::<Vec<_>>();
+
         assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
     }
 
@@ -98,6 +151,7 @@ mod test {
         let windows = Windows::<4, _>::new(iter);
 
         let collected = windows.collect::<Vec<_>>();
+
         assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
     }
 
@@ -116,5 +170,43 @@ mod test {
             ],
             collected
         );
+    }
+
+    #[test]
+    fn less_than_n_rev() {
+        let iter = b"123".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
+    }
+
+    #[test]
+    fn equals_n_rev() {
+        let iter = b"1234".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+    }
+
+    #[test]
+    fn greater_than_n_rev() {
+        let iter = b"123456".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        let mut expected = vec![
+            [b'1', b'2', b'3', b'4'],
+            [b'2', b'3', b'4', b'5'],
+            [b'3', b'4', b'5', b'6'],
+        ];
+
+        expected.reverse();
+
+        assert_eq!(expected, collected);
     }
 }

@@ -545,18 +545,65 @@ pub const fn from_char(c: char) -> u8 {
 }
 
 pub fn windows_new_api<const N: usize>(
-    iter: impl Iterator<Item = u8>,
+    iter: impl DoubleEndedIterator<Item = u8>,
     direction: Direction,
     style: WindowsStyle,
 ) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator> {
-    match direction {
-        Direction::LeftToRight => match style {
-            WindowsStyle::Overlapping => unimplemented!(),
-            WindowsStyle::NonOverlapping => {
-                Windows::<N, _>::new(iter).map(|window| window.into_iter())
+    #[auto_enums::enum_derive(Iterator)]
+    enum Outer<A, B> {
+        A(A),
+        B(B),
+    }
+
+    #[auto_enums::enum_derive(Iterator)]
+    enum Inner<A, B> {
+        A(A),
+        B(B),
+    }
+
+    impl<A: DoubleEndedIterator<Item = u8>, B: DoubleEndedIterator<Item = u8>> DoubleEndedIterator
+        for Inner<A, B>
+    {
+        fn next_back(&mut self) -> Option<Self::Item> {
+            match self {
+                Inner::A(a) => a.next_back(),
+                Inner::B(b) => b.next_back(),
             }
-        },
-        Direction::RightToLeft => unimplemented!(),
+        }
+    }
+
+    impl<A: ExactSizeIterator<Item = u8>, B: ExactSizeIterator<Item = u8>> ExactSizeIterator
+        for Inner<A, B>
+    {
+        fn len(&self) -> usize {
+            match self {
+                Inner::A(a) => a.len(),
+                Inner::B(b) => b.len(),
+            }
+        }
+    }
+
+    match style {
+        WindowsStyle::Overlapping => {
+            // TODO
+            Outer::A(windows_non_overlapping_new_api::<N>(iter, direction).map(Inner::A))
+        }
+        WindowsStyle::NonOverlapping => {
+            Outer::B(windows_non_overlapping_new_api::<N>(iter, direction).map(Inner::B))
+        }
+    }
+}
+
+#[auto_enums::auto_enum(Iterator)]
+pub fn windows_non_overlapping_new_api<const N: usize>(
+    iter: impl DoubleEndedIterator<Item = u8>,
+    direction: Direction,
+) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator> {
+    match direction {
+        Direction::LeftToRight => Windows::<N, _>::new(iter).map(|window| window.into_iter()),
+        Direction::RightToLeft => Windows::<N, _>::new(iter)
+            .rev()
+            .map(|window| window.into_iter()),
     }
 }
 

@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{windows, UpCharBits},
+    mappings::{windows, windows_non_overlapping, DigitBits, UpCharBits},
     Brightness, Direction, TM1637Builder, WindowsStyle,
 };
 
@@ -61,17 +61,30 @@ async fn main(spawner: Spawner) {
 
     let count = tm
         .options()
-        .put_str("Erro.rS")
+        .put_str("123456")
         // .position(1)
         // .put_slice(&bytes)
         .flip()
         .animate()
         .delay_ms(700)
-        .direction(Direction::LeftToRight)
+        .direction(Direction::RightToLeft)
         .style(WindowsStyle::NonOverlapping)
         .run();
 
     info!("Count: {}", count);
+
+    // let slice = &[
+    //     DigitBits::One as u8,
+    //     DigitBits::Two as u8,
+    //     DigitBits::Three as u8,
+    //     DigitBits::Four as u8,
+    //     DigitBits::Five as u8,
+    //     DigitBits::Six as u8,
+    // ];
+
+    // let iter = windows_non_overlapping::<4>(slice, Direction::RightToLeft);
+
+    // tm.animate(0, 700, iter).count();
 
     loop {}
 }
