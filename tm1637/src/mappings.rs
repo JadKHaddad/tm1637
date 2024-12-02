@@ -10,7 +10,7 @@
 //!      D
 //! ```
 
-use crate::{Direction, Windows, WindowsStyle};
+use crate::{CircularWindows, CircularWindowsReversed, Direction, Windows, WindowsStyle};
 
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
@@ -546,23 +546,26 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
+#[auto_enums::auto_enum(Iterator)]
 pub fn windows_new_api<const N: usize>(
     iter: impl DoubleEndedIterator<Item = u8>,
     direction: Direction,
     style: WindowsStyle,
 ) -> impl Iterator<Item = [u8; N]> {
-    #[auto_enums::enum_derive(Iterator)]
-    enum Outer<A, B> {
-        A(A),
-        B(B),
-    }
-
     match style {
-        WindowsStyle::Circular => {
-            // TODO
-            Outer::A(windows_linear::<N>(iter, direction))
-        }
-        WindowsStyle::Linear => Outer::B(windows_linear::<N>(iter, direction)),
+        WindowsStyle::Circular => windows_circular::<N>(iter, direction),
+        WindowsStyle::Linear => windows_linear::<N>(iter, direction),
+    }
+}
+
+#[auto_enums::auto_enum(Iterator)]
+pub fn windows_circular<const N: usize>(
+    iter: impl DoubleEndedIterator<Item = u8>,
+    direction: Direction,
+) -> impl Iterator<Item = [u8; N]> {
+    match direction {
+        Direction::LeftToRight => CircularWindows::<N, _>::new(iter),
+        Direction::RightToLeft => CircularWindowsReversed::<N, _>::new(iter),
     }
 }
 

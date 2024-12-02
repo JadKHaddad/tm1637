@@ -45,3 +45,4 @@ pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
 pub use str_parser::StrParser;
 pub use tokens::{Async, Blocking, Flipped, NotFlipped};
 pub use windows::Windows;
+pub use windows_circular::{CircularWindows, CircularWindowsReversed};
