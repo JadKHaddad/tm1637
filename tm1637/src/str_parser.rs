@@ -7,6 +7,7 @@ use crate::mappings::{from_ascii_byte, SegmentBits};
 pub struct StrParser<'a> {
     bytes: Bytes<'a>,
     current: Option<u8>,
+    // TODO: We still have to know hoe to handle dps.
     /// While reading backwards, we need to know if we have read a dot.
     ///
     /// - `0`: No dot has been read.
