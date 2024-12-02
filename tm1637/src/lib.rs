@@ -29,6 +29,7 @@ mod options;
 mod str_parser;
 mod tokens;
 mod windows;
+mod windows_circular;
 
 pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;

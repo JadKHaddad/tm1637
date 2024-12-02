@@ -68,7 +68,7 @@ async fn main(spawner: Spawner) {
         .animate()
         .delay_ms(700)
         .direction(Direction::RightToLeft)
-        .style(WindowsStyle::NonOverlapping)
+        .style(WindowsStyle::Linear)
         .run();
 
     info!("Count: {}", count);
