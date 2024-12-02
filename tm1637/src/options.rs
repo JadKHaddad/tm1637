@@ -58,8 +58,11 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
 
     /// Prepare to display a loading animation.
     pub fn loading() {
+        // TODO
         unimplemented!()
     }
+
+    // TODO: all formatters go here
 }
 
 impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
