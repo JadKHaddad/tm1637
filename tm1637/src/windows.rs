@@ -137,9 +137,26 @@ mod test {
 
     #[test]
     fn less_than_n() {
+        let iter = b"".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[0, 0, 0, 0],], collected);
+
+        let iter = b"1".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', 0, 0, 0],], collected);
+
+        let iter = b"12".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', 0, 0],], collected);
+
         let iter = b"123".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
@@ -149,7 +166,6 @@ mod test {
     fn equals_n() {
         let iter = b"1234".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
@@ -159,7 +175,6 @@ mod test {
     fn greater_than_n() {
         let iter = b"123456".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(
@@ -174,9 +189,26 @@ mod test {
 
     #[test]
     fn less_than_n_rev() {
+        let iter = b"".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        assert_eq!(vec![[0, 0, 0, 0],], collected);
+
+        let iter = b"1".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', 0, 0, 0],], collected);
+
+        let iter = b"12".iter().copied();
+        let windows = Windows::<4, _>::new(iter);
+        let collected = windows.rev().collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', 0, 0],], collected);
+
         let iter = b"123".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
@@ -186,7 +218,6 @@ mod test {
     fn equals_n_rev() {
         let iter = b"1234".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
@@ -196,7 +227,6 @@ mod test {
     fn greater_than_n_rev() {
         let iter = b"123456".iter().copied();
         let windows = Windows::<4, _>::new(iter);
-
         let collected = windows.rev().collect::<Vec<_>>();
 
         let mut expected = vec![

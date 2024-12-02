@@ -64,7 +64,7 @@ where
             },
             None => match self.state {
                 WindowsState::Init => None,
-                WindowsState::First(first_item) => Some(first_item),
+                WindowsState::First(_) => None,
                 WindowsState::FirstAndLast(first_item, last_item) => {
                     if self.counter < N {
                         let item = shift_left(&first_item, &last_item, self.counter);
@@ -91,25 +91,70 @@ mod test {
 
     use super::*;
 
-    // TODO: tests
     #[test]
-    fn test() {
-        let iter = b"lorem".iter().copied();
-        let windows = CircularWindows::<3, _>::new(iter);
-
-        for item in windows {
-            std::println!(
-                "{:?}",
-                item.into_iter().map(|b| b as char).collect::<Vec<_>>()
-            );
-        }
-    }
-
-    #[test]
-    fn combine_test() {
+    fn shift_left_test() {
         let first = [b'l', b'o', b'r'];
         let last = [b'r', b'e', b'm'];
 
         assert_eq!([b'e', b'm', b'l'], shift_left(&first, &last, 0));
+    }
+
+    #[test]
+    fn less_than_n() {
+        let iter = b"".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[0, 0, 0, 0],], collected);
+
+        let iter = b"1".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', 0,0, 0],], collected);
+
+        let iter = b"12".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2',0, 0],], collected);
+
+        let iter = b"123".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
+    }
+
+    #[test]
+    fn equals_n() {
+        let iter = b"1234".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+    }
+
+    #[test]
+    fn greater_than_n() {
+        let iter = b"12345678".iter().copied();
+        let windows = CircularWindows::<4, _>::new(iter);
+        let collected = windows.collect::<Vec<_>>();
+
+        assert_eq!(
+            vec![
+                [b'1', b'2', b'3', b'4'],
+                [b'2', b'3', b'4', b'5'],
+                [b'3', b'4', b'5', b'6'],
+                [b'4', b'5', b'6', b'7'],
+                [b'5', b'6', b'7', b'8'],
+                // N times shifted
+                [b'6', b'7', b'8', b'1'],
+                [b'7', b'8', b'1', b'2'],
+                [b'8', b'1', b'2', b'3'],
+                [b'1', b'2', b'3', b'4'],
+            ],
+            collected
+        );
     }
 }
