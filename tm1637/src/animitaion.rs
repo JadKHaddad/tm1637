@@ -3,7 +3,7 @@
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum WindowsStyle {
     #[default]
-    /// Bytes are moved in overlapping windows.
+    /// Bytes are moved in circular overlapping windows.
     ///
     /// # Example
     ///
@@ -38,8 +38,8 @@ pub enum WindowsStyle {
     /// | H | | E | | L | | L |
     /// +---+ +---+ +---+ +---+
     /// ```
-    Overlapping,
-    /// Bytes are moved in non-overlapping windows.
+    Circular,
+    /// Bytes are moved in windows.
     ///
     /// # Example
     ///
@@ -58,5 +58,5 @@ pub enum WindowsStyle {
     /// | L | | L | | O | |   |
     /// +---+ +---+ +---+ +---+
     /// ```
-    NonOverlapping,
+    Linear,
 }

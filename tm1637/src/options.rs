@@ -210,7 +210,7 @@ pub mod module {
                 options: self,
                 delay_ms: 500,
                 direction: Direction::LeftToRight,
-                style: WindowsStyle::Overlapping,
+                style: WindowsStyle::Circular,
             }
         }
 

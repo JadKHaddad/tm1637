@@ -23,7 +23,7 @@ impl<const N: usize, I> Windows<N, I> {
     }
 }
 
-// None overlapping left to right windows.
+// Linear left to right.
 impl<const N: usize, I> Iterator for Windows<N, I>
 where
     I: Iterator<Item = u8>,
@@ -77,7 +77,7 @@ where
     }
 }
 
-// None overlapping right to left windows.
+// Linear right to left.
 impl<const N: usize, I> DoubleEndedIterator for Windows<N, I>
 where
     I: DoubleEndedIterator<Item = u8>,

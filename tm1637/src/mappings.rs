@@ -586,18 +586,16 @@ pub fn windows_new_api<const N: usize>(
     }
 
     match style {
-        WindowsStyle::Overlapping => {
+        WindowsStyle::Circular => {
             // TODO
-            Outer::A(windows_non_overlapping_new_api::<N>(iter, direction).map(Inner::A))
+            Outer::A(windows_linear::<N>(iter, direction).map(Inner::A))
         }
-        WindowsStyle::NonOverlapping => {
-            Outer::B(windows_non_overlapping_new_api::<N>(iter, direction).map(Inner::B))
-        }
+        WindowsStyle::Linear => Outer::B(windows_linear::<N>(iter, direction).map(Inner::B)),
     }
 }
 
 #[auto_enums::auto_enum(Iterator)]
-pub fn windows_non_overlapping_new_api<const N: usize>(
+pub fn windows_linear<const N: usize>(
     iter: impl DoubleEndedIterator<Item = u8>,
     direction: Direction,
 ) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator> {
@@ -628,10 +626,10 @@ pub fn windows<const N: usize>(
     }
 
     match style {
-        WindowsStyle::Overlapping => {
+        WindowsStyle::Circular => {
             Outer::A(windows_overlapping::<N>(bytes, direction).map(Inner::A))
         }
-        WindowsStyle::NonOverlapping => {
+        WindowsStyle::Linear => {
             Outer::B(windows_non_overlapping::<N>(bytes, direction).map(Inner::B))
         }
     }
