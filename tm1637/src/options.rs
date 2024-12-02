@@ -1,4 +1,4 @@
-use crate::{Direction, NotFlipped, StrParser, WindowsStyle, TM1637};
+use crate::{formatters::clock_to_4digits, Direction, NotFlipped, StrParser, WindowsStyle, TM1637};
 
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
@@ -56,6 +56,11 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         }
     }
 
+    /// Prepare to display a digital clock.
+    pub fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
+        ClockDisplayOptions::new(self.device)
+    }
+
     /// Prepare to display a loading animation.
     pub fn loading() {
         // TODO
@@ -63,13 +68,6 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     }
 
     // TODO: all formatters go here
-}
-
-impl<'d, T, CLK, DIO, DELAY> InitDisplayOptions<'d, 4, T, CLK, DIO, DELAY> {
-    /// Prepare to display a digital clock.
-    pub fn clock(self) -> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
-        ClockDisplayOptions::new(self.device)
-    }
 }
 
 /// High-level API for display operations.
@@ -94,22 +92,20 @@ pub struct AnimatedDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> 
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
-    device: &'d mut TM1637<4, T, CLK, DIO, DELAY>,
+pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
+    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     hour: u8,
     minute: u8,
     dot: bool,
-    bytes: [u8; 4],
 }
 
-impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
-    pub fn new(device: &'d mut TM1637<4, T, CLK, DIO, DELAY>) -> Self {
+impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
+    pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
         Self {
             device,
             hour: 0,
             minute: 0,
             dot: false,
-            bytes: [0; 4],
         }
     }
 
@@ -142,26 +138,20 @@ impl<'d, 'b, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, T, CLK, DIO, DELAY> {
 
     /// Finish setting the clock and display it.
     pub fn finish(
-        &'b mut self,
+        &mut self,
     ) -> DisplayOptions<
-        'd,
-        4,
+        N,
         T,
         CLK,
         DIO,
         DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         NotFlipped,
-    >
-    where
-        'b: 'd,
-    {
-        self.bytes = crate::formatters::clock_to_4digits(self.hour, self.minute, self.dot);
-
+    > {
         DisplayOptions {
             device: self.device,
             position: 0,
-            iter: self.bytes.iter().copied(),
+            iter: clock_to_4digits(self.hour, self.minute, self.dot).into_iter(),
             _flip: NotFlipped,
         }
     }
