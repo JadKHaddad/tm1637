@@ -30,6 +30,7 @@ mod str_parser;
 mod tokens;
 mod windows;
 mod windows_circular;
+mod windows_reverse;
 
 pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;
