@@ -550,47 +550,19 @@ pub fn windows_new_api<const N: usize>(
     iter: impl DoubleEndedIterator<Item = u8>,
     direction: Direction,
     style: WindowsStyle,
-) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator> {
+) -> impl Iterator<Item = [u8; N]> {
     #[auto_enums::enum_derive(Iterator)]
     enum Outer<A, B> {
         A(A),
         B(B),
     }
 
-    #[auto_enums::enum_derive(Iterator)]
-    enum Inner<A, B> {
-        A(A),
-        B(B),
-    }
-
-    impl<A: DoubleEndedIterator<Item = u8>, B: DoubleEndedIterator<Item = u8>> DoubleEndedIterator
-        for Inner<A, B>
-    {
-        fn next_back(&mut self) -> Option<Self::Item> {
-            match self {
-                Inner::A(a) => a.next_back(),
-                Inner::B(b) => b.next_back(),
-            }
-        }
-    }
-
-    impl<A: ExactSizeIterator<Item = u8>, B: ExactSizeIterator<Item = u8>> ExactSizeIterator
-        for Inner<A, B>
-    {
-        fn len(&self) -> usize {
-            match self {
-                Inner::A(a) => a.len(),
-                Inner::B(b) => b.len(),
-            }
-        }
-    }
-
     match style {
         WindowsStyle::Circular => {
             // TODO
-            Outer::A(windows_linear::<N>(iter, direction).map(Inner::A))
+            Outer::A(windows_linear::<N>(iter, direction))
         }
-        WindowsStyle::Linear => Outer::B(windows_linear::<N>(iter, direction).map(Inner::B)),
+        WindowsStyle::Linear => Outer::B(windows_linear::<N>(iter, direction)),
     }
 }
 
@@ -598,16 +570,14 @@ pub fn windows_new_api<const N: usize>(
 pub fn windows_linear<const N: usize>(
     iter: impl DoubleEndedIterator<Item = u8>,
     direction: Direction,
-) -> impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator> {
+) -> impl Iterator<Item = [u8; N]> {
     match direction {
-        Direction::LeftToRight => Windows::<N, _>::new(iter).map(|window| window.into_iter()),
-        Direction::RightToLeft => Windows::<N, _>::new(iter)
-            .rev()
-            .map(|window| window.into_iter()),
+        Direction::LeftToRight => Windows::<N, _>::new(iter),
+        Direction::RightToLeft => Windows::<N, _>::new(iter).rev(),
     }
 }
 
-// TODO: remove after refactor/options/iter replace with windows_new_api
+// Old api keep, it's more performant
 pub fn windows<const N: usize>(
     bytes: &[u8],
     direction: Direction,
@@ -626,19 +596,24 @@ pub fn windows<const N: usize>(
     }
 
     match style {
-        WindowsStyle::Circular => {
-            Outer::A(windows_overlapping::<N>(bytes, direction).map(Inner::A))
-        }
-        WindowsStyle::Linear => {
-            Outer::B(windows_non_overlapping::<N>(bytes, direction).map(Inner::B))
-        }
+        WindowsStyle::Circular => Outer::A(
+            windows_overlapping::<N>(bytes, direction)
+                .map(|w| w.into_iter())
+                .map(Inner::A),
+        ),
+        WindowsStyle::Linear => Outer::B(
+            windows_non_overlapping::<N>(bytes, direction)
+                .map(|w| w.iter().copied())
+                .map(Inner::B),
+        ),
     }
 }
 
+// Old api keep, it's more performant
 pub fn windows_overlapping<const N: usize>(
     bytes: &[u8],
     direction: Direction,
-) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
+) -> impl Iterator<Item = [u8; N]> + '_ {
     (0..=bytes.len()).map(move |i| {
         let mut window = [0u8; N];
 
@@ -649,18 +624,19 @@ pub fn windows_overlapping<const N: usize>(
             };
         }
 
-        window.into_iter()
+        window
     })
 }
 
+// Old api keep, it's more performant
 #[auto_enums::auto_enum(Iterator)]
 pub fn windows_non_overlapping<const N: usize>(
     bytes: &[u8],
     direction: Direction,
-) -> impl Iterator<Item = impl Iterator<Item = u8> + '_> + '_ {
+) -> impl Iterator<Item = &[u8]> + '_ {
     match direction {
-        Direction::LeftToRight => bytes.windows(N).map(|window| window.iter().copied()),
-        Direction::RightToLeft => bytes.windows(N).rev().map(|window| window.iter().copied()),
+        Direction::LeftToRight => bytes.windows(N),
+        Direction::RightToLeft => bytes.windows(N).rev(),
     }
 }
 
@@ -762,7 +738,7 @@ mod tests {
     fn windows_overlapping_left_to_right() {
         let slice = b"lorem";
         let iter = windows_overlapping::<3>(slice, Direction::LeftToRight);
-        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.into_iter().collect()).collect();
 
         assert_eq!(
             collected,
@@ -781,7 +757,7 @@ mod tests {
     fn windows_overlapping_right_to_left() {
         let slice = b"lorem";
         let iter = windows_overlapping::<3>(slice, Direction::RightToLeft);
-        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.into_iter().collect()).collect();
 
         assert_eq!(
             collected,
@@ -800,7 +776,7 @@ mod tests {
     fn windows_non_overlapping_left_to_right() {
         let slice = b"lorem";
         let iter = windows_non_overlapping::<3>(slice, Direction::LeftToRight);
-        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.to_vec()).collect();
 
         assert_eq!(
             collected,
@@ -816,7 +792,7 @@ mod tests {
     fn windows_non_overlapping_right_to_left() {
         let slice = b"lorem";
         let iter = windows_non_overlapping::<3>(slice, Direction::RightToLeft);
-        let collected: Vec<Vec<u8>> = iter.map(|i| i.collect()).collect();
+        let collected: Vec<Vec<u8>> = iter.map(|i| i.to_vec()).collect();
 
         assert_eq!(
             collected,

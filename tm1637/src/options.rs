@@ -283,7 +283,7 @@ pub mod module {
 
             let windows = windows_new_api::<N>(&mut self.options.iter, self.direction, self.style)
                 .map(move |window| {
-                    let (_, bytes) = M::calculate(original_position, window);
+                    let (_, bytes) = M::calculate(original_position, window.into_iter());
 
                     bytes
                 });
