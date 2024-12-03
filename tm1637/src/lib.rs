@@ -11,7 +11,6 @@
 // #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-mod animitaion;
 mod brightness;
 mod builder;
 mod conditional;
@@ -19,25 +18,23 @@ mod conditional;
 // #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
 // pub mod demo;
 mod device;
-mod direction;
 mod error;
 pub mod formatters;
 mod identity;
 pub mod mappings;
 mod maybe_flipped;
 mod options;
+pub mod scroll;
 mod str_parser;
 pub mod tokens;
 pub mod windows;
 
-pub use animitaion::WindowsStyle;
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
 pub(crate) use conditional::ConditionalInputPin;
 pub use device::TM1637;
-pub use direction::Direction;
 pub use error::Error;
 pub(crate) use identity::Identity;
 pub use maybe_flipped::MaybeFlipped;
-pub use options::{AnimatedDisplayOptions, DisplayOptions, InitDisplayOptions};
+pub use options::{DisplayOptions, InitDisplayOptions, ScrollDisplayOptions};
 pub use str_parser::StrParser;

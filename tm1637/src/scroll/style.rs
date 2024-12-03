@@ -1,7 +1,7 @@
-/// Animation style for moving windows.
+/// Style for scrolling bytes.
 #[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum WindowsStyle {
+pub enum ScrollStyle {
     #[default]
     /// Bytes are moved in circular overlapping windows.
     ///

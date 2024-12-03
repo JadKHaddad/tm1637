@@ -119,21 +119,21 @@ where
     DELAY: ::embedded_hal_async::delay::DelayNs,
 {
     // Does not stop on error
-    pub fn animate<'a>(
+    pub fn scroll<'a>(
         &'a mut self,
         position: usize,
         delay_ms: u32,
-        windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
+        iter: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Stream<Item = Result<(), Error<ERR>>> + 'a {
-        futures::stream::unfold((self, windows), move |(this, mut windows)| async move {
-            match windows.next() {
+        futures::stream::unfold((self, iter), move |(this, mut inner_iter)| async move {
+            match inner_iter.next() {
                 Some(window) => match this.display(position, window).await {
                     Ok(_) => {
                         this.delay.delay_ms(delay_ms).await;
 
-                        Some((Ok(()), (this, windows)))
+                        Some((Ok(()), (this, inner_iter)))
                     }
-                    Err(e) => Some((Err(e), (this, windows))),
+                    Err(e) => Some((Err(e), (this, inner_iter))),
                 },
                 None => None,
             }
@@ -148,13 +148,13 @@ where
     DELAY: ::embedded_hal::delay::DelayNs,
 {
     // Does not stop on error
-    pub fn animate<'a>(
+    pub fn scroll<'a>(
         &'a mut self,
         position: usize,
         delay_ms: u32,
-        windows: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
+        iter: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Iterator<Item = Result<(), Error<ERR>>> + 'a {
-        windows.map(move |window| match self.display(position, window) {
+        iter.map(move |inner_iter| match self.display(position, inner_iter) {
             Ok(_) => {
                 self.delay.delay_ms(delay_ms);
 

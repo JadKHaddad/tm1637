@@ -1,5 +1,8 @@
 use crate::{
-    formatters::clock_to_4digits, tokens::NotFlipped, Direction, StrParser, WindowsStyle, TM1637,
+    formatters::clock_to_4digits,
+    scroll::{ScrollDirection, ScrollStyle},
+    tokens::NotFlipped,
+    StrParser, TM1637,
 };
 
 /// Starting point for a High-level API for display operations.
@@ -15,7 +18,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     }
 
     /// Prepare to display a slice of bytes.
-    pub fn put_slice(
+    pub fn slice(
         self,
         bytes: &'b [u8],
     ) -> DisplayOptions<
@@ -37,7 +40,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     }
 
     /// Prepare to display a string.
-    pub fn put_str(
+    pub fn str(
         self,
         str: &'b str,
     ) -> DisplayOptions<
@@ -82,14 +85,14 @@ pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, M> {
     _flip: M,
 }
 
-/// High-level API for animations.
+/// High-level API for scroll animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct AnimatedDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
+pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
     options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, D>,
     delay_ms: u32,
-    direction: Direction,
-    style: WindowsStyle,
+    direction: ScrollDirection,
+    style: ScrollStyle,
 }
 
 #[derive(Debug)]
@@ -169,8 +172,10 @@ pub mod module {
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        tokens::Flipped, windows::windows_new_api, AnimatedDisplayOptions, ConditionalInputPin,
-        Direction, DisplayOptions, Error, Identity, MaybeFlipped, WindowsStyle,
+        scroll::{ScrollDirection, ScrollStyle},
+        tokens::Flipped,
+        windows::windows_new_api,
+        ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped, ScrollDisplayOptions,
     };
 
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
@@ -196,13 +201,13 @@ pub mod module {
             self.device.display(position, bytes).await
         }
 
-        /// Use animation options.
-        pub const fn animate(self) -> AnimatedDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
-            AnimatedDisplayOptions {
+        /// Use scroll animation options.
+        pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
+            ScrollDisplayOptions {
                 options: self,
                 delay_ms: 500,
-                direction: Direction::LeftToRight,
-                style: WindowsStyle::Circular,
+                direction: ScrollDirection::LeftToRight,
+                style: ScrollStyle::Circular,
             }
         }
 
@@ -229,7 +234,7 @@ pub mod module {
     }
 
     impl<const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        AnimatedDisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
+        ScrollDisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
@@ -245,25 +250,25 @@ pub mod module {
         }
 
         /// Set the animation direction.
-        pub const fn direction(mut self, direction: Direction) -> Self {
+        pub const fn direction(mut self, direction: ScrollDirection) -> Self {
             self.direction = direction;
             self
         }
 
         /// Set the animation direction to [`Direction::LeftToRight`].
         pub const fn left(mut self) -> Self {
-            self.direction = Direction::LeftToRight;
+            self.direction = ScrollDirection::LeftToRight;
             self
         }
 
         /// Set the animation direction to [`Direction::RightToLeft`].
         pub const fn right(mut self) -> Self {
-            self.direction = Direction::RightToLeft;
+            self.direction = ScrollDirection::RightToLeft;
             self
         }
 
         /// Set the animation style.
-        pub const fn style(mut self, style: WindowsStyle) -> Self {
+        pub const fn style(mut self, style: ScrollStyle) -> Self {
             self.style = style;
             self
         }
@@ -280,9 +285,7 @@ pub mod module {
                     bytes
                 });
 
-            self.options
-                .device
-                .animate(position, self.delay_ms, windows)
+            self.options.device.scroll(position, self.delay_ms, windows)
         }
 
         pub async fn run(mut self) -> usize {
