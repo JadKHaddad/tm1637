@@ -1,4 +1,6 @@
-use crate::{formatters::clock_to_4digits, Direction, NotFlipped, StrParser, WindowsStyle, TM1637};
+use crate::{
+    formatters::clock_to_4digits, tokens::NotFlipped, Direction, StrParser, WindowsStyle, TM1637,
+};
 
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
@@ -159,16 +161,16 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
 
 #[::duplicate::duplicate_item(
     module        async     await               Token             DelayTrait                             AnimationIter;
-    [asynch]      [async]   [await.identity()]  [crate::Async]    [::embedded_hal_async::delay::DelayNs] [::futures::Stream];
-    [blocking]    []        [identity()]        [crate::Blocking] [::embedded_hal::delay::DelayNs]       [Iterator];
+    [asynch]      [async]   [await.identity()]  [crate::tokens::Async]    [::embedded_hal_async::delay::DelayNs] [::futures::Stream];
+    [blocking]    []        [identity()]        [crate::tokens::Blocking] [::embedded_hal::delay::DelayNs]       [Iterator];
 )]
 pub mod module {
     use ::embedded_hal::digital::OutputPin;
     use ::futures::StreamExt; // hmm
 
     use crate::{
-        mappings::windows_new_api, AnimatedDisplayOptions, ConditionalInputPin, Direction,
-        DisplayOptions, Error, Flipped, Identity, MaybeFlipped, WindowsStyle,
+        tokens::Flipped, windows::windows_new_api, AnimatedDisplayOptions, ConditionalInputPin,
+        Direction, DisplayOptions, Error, Identity, MaybeFlipped, WindowsStyle,
     };
 
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>

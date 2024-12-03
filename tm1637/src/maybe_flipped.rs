@@ -1,4 +1,4 @@
-use crate::{Flipped, NotFlipped};
+use crate::tokens::{Flipped, NotFlipped};
 
 pub trait MaybeFlipped<const N: usize> {
     fn calculate(

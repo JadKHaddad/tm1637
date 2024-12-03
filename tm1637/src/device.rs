@@ -3,14 +3,17 @@ use ::core::marker::PhantomData;
 use ::embedded_hal::digital::OutputPin;
 use ::futures::Stream;
 
-use crate::{Async, Blocking, Brightness, ConditionalInputPin, Error, TM1637Builder};
+use crate::{
+    tokens::{Async, Blocking},
+    Brightness, ConditionalInputPin, Error, TM1637Builder,
+};
 
 /// `TM1637` 7-segment display driver.
 ///
 /// # Type parameters
 ///
 /// - `N`: Number of positions on the display.
-/// - `T`: Operating mode. [`Async`](crate::Async) or [`Blocking`](crate::Blocking).
+/// - `T`: Operating mode. [`Async`](crate::tokens::Async) or [`Blocking`](crate::tokens::Blocking).
 /// - `CLK`: Clock.
 /// - `DIO`: Data input/output.
 /// - `DELAY`: Delay provider.
@@ -164,8 +167,8 @@ where
 
 #[::duplicate::duplicate_item(
     module        async     await               Token                 DelayTrait;
-    [asynch]      [async]   [await.identity()]  [crate::Async]        [::embedded_hal_async::delay::DelayNs];
-    [blocking]    []        [identity()]        [crate::Blocking]     [::embedded_hal::delay::DelayNs];
+    [asynch]      [async]   [await.identity()]  [crate::tokens::Async]        [::embedded_hal_async::delay::DelayNs];
+    [blocking]    []        [identity()]        [crate::tokens::Blocking]     [::embedded_hal::delay::DelayNs];
 )]
 pub mod module {
     use crate::{Brightness, ConditionalInputPin, Error, Identity, InitDisplayOptions, TM1637};

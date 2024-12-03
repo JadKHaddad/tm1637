@@ -1,4 +1,4 @@
-use crate::{windows_reverse::ReverseWindows, Windows};
+use super::{reverse::ReverseWindows, LinearWindows};
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -12,7 +12,7 @@ enum WindowsState<const N: usize> {
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CircularWindows<const N: usize, I> {
     state: WindowsState<N>,
-    iter: Windows<N, I>,
+    iter: LinearWindows<N, I>,
     counter: usize,
 }
 
@@ -20,7 +20,7 @@ impl<const N: usize, I> CircularWindows<N, I> {
     pub const fn new(iter: I) -> Self {
         Self {
             state: WindowsState::<N>::Init,
-            iter: Windows::<N, I>::new(iter),
+            iter: LinearWindows::<N, I>::new(iter),
             counter: 0,
         }
     }

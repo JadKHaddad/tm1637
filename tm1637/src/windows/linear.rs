@@ -7,13 +7,13 @@ enum BufferState {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct Windows<const N: usize, I> {
+pub struct LinearWindows<const N: usize, I> {
     buffer: [u8; N],
     state: BufferState,
     iter: I,
 }
 
-impl<const N: usize, I> Windows<N, I> {
+impl<const N: usize, I> LinearWindows<N, I> {
     pub const fn new(iter: I) -> Self {
         Self {
             buffer: [0; N],
@@ -24,7 +24,7 @@ impl<const N: usize, I> Windows<N, I> {
 }
 
 // Linear left to right.
-impl<const N: usize, I> Iterator for Windows<N, I>
+impl<const N: usize, I> Iterator for LinearWindows<N, I>
 where
     I: Iterator<Item = u8>,
 {
@@ -78,7 +78,7 @@ where
 }
 
 // Linear right to left.
-impl<const N: usize, I> DoubleEndedIterator for Windows<N, I>
+impl<const N: usize, I> DoubleEndedIterator for LinearWindows<N, I>
 where
     I: DoubleEndedIterator<Item = u8>,
 {
@@ -138,25 +138,25 @@ mod test {
     #[test]
     fn less_than_n() {
         let iter = b"".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[0, 0, 0, 0],], collected);
 
         let iter = b"1".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', 0, 0, 0],], collected);
 
         let iter = b"12".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', 0, 0],], collected);
 
         let iter = b"123".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
@@ -165,7 +165,7 @@ mod test {
     #[test]
     fn equals_n() {
         let iter = b"1234".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
@@ -174,7 +174,7 @@ mod test {
     #[test]
     fn greater_than_n() {
         let iter = b"123456".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
         assert_eq!(
@@ -190,25 +190,25 @@ mod test {
     #[test]
     fn less_than_n_rev() {
         let iter = b"".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[0, 0, 0, 0],], collected);
 
         let iter = b"1".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', 0, 0, 0],], collected);
 
         let iter = b"12".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', 0, 0],], collected);
 
         let iter = b"123".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', 0],], collected);
@@ -217,7 +217,7 @@ mod test {
     #[test]
     fn equals_n_rev() {
         let iter = b"1234".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
@@ -226,7 +226,7 @@ mod test {
     #[test]
     fn greater_than_n_rev() {
         let iter = b"123456".iter().copied();
-        let windows = Windows::<4, _>::new(iter);
+        let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
         let mut expected = vec![

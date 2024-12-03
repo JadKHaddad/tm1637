@@ -1,4 +1,7 @@
-use crate::{Async, Blocking, Brightness, TM1637};
+use crate::{
+    tokens::{Async, Blocking},
+    Brightness, TM1637,
+};
 
 /// `TM1637` 7-segment display builder.
 #[derive(Debug, Clone)]
