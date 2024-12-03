@@ -5,6 +5,8 @@ pub trait MaybeFlipped<const N: usize> {
         position: usize,
         bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
     ) -> (usize, impl Iterator<Item = u8>);
+
+    fn position(position: usize, len: usize) -> usize;
 }
 
 impl<const N: usize> MaybeFlipped<N> for NotFlipped {
@@ -14,8 +16,13 @@ impl<const N: usize> MaybeFlipped<N> for NotFlipped {
     ) -> (usize, impl Iterator<Item = u8>) {
         (position, bytes)
     }
+
+    fn position(position: usize, _: usize) -> usize {
+        position
+    }
 }
 
+// TODO: fix the flip
 impl<const N: usize> MaybeFlipped<N> for Flipped {
     fn calculate(
         position: usize,
@@ -34,6 +41,168 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
 
         let bytes = calculate_bytes::<N>(bytes, position);
 
-        (0, bytes.map(crate::mappings::flip_mirror))
+        (
+            <Flipped as MaybeFlipped<N>>::position(position, bytes.len()),
+            bytes.map(crate::mappings::flip_mirror),
+        )
+    }
+
+    fn position(position: usize, len: usize) -> usize {
+        if len + position > N {
+            N - len
+        } else {
+            position
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate std;
+    use std::vec;
+    use std::vec::Vec;
+
+    use crate::mappings::{DigitBits, UpCharBits};
+
+    use super::*;
+
+    #[test]
+    fn flipped() {
+        // less 2
+        let iter = [DigitBits::Zero as u8].iter().copied();
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(0, iter.clone());
+        let bytes = bytes.collect::<Vec<u8>>();
+
+        assert_eq!(position, 2);
+        assert_eq!(bytes, vec![DigitBits::Zero as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(1, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 1);
+        assert_eq!(bytes, vec![DigitBits::Zero as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(2, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![DigitBits::Zero as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(3, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![]);
+
+        // less 1
+        let iter = [DigitBits::Zero as u8, DigitBits::Eight as u8]
+            .iter()
+            .copied();
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(0, iter.clone());
+        let bytes = bytes.collect::<Vec<u8>>();
+
+        assert_eq!(position, 1);
+        assert_eq!(bytes, vec![DigitBits::Eight as u8, DigitBits::Zero as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(1, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![DigitBits::Eight as u8, DigitBits::Zero as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(2, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![DigitBits::Eight as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(3, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![]);
+
+        // exact
+        let iter = [
+            DigitBits::Zero as u8,
+            DigitBits::Eight as u8,
+            DigitBits::Three as u8,
+        ]
+        .iter()
+        .copied();
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(0, iter.clone());
+        let bytes = bytes.collect::<Vec<u8>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(
+            bytes,
+            vec![
+                UpCharBits::UpE as u8,
+                DigitBits::Eight as u8,
+                DigitBits::Zero as u8
+            ]
+        );
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(1, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![UpCharBits::UpE as u8, DigitBits::Eight as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(2, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![UpCharBits::UpE as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(3, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![]);
+
+        // greater
+        let iter = [
+            DigitBits::Zero as u8,
+            DigitBits::Eight as u8,
+            DigitBits::Three as u8,
+            DigitBits::Eight as u8,
+        ]
+        .iter()
+        .copied();
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(0, iter.clone());
+        let bytes = bytes.collect::<Vec<u8>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(
+            bytes,
+            vec![
+                DigitBits::Eight as u8,
+                DigitBits::Three as u8,
+                DigitBits::Eight as u8
+            ]
+        );
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(1, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 1);
+        assert_eq!(bytes, vec![DigitBits::Eight as u8, DigitBits::Three as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(2, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![DigitBits::Eight as u8]);
+
+        let (position, bytes) = <Flipped as MaybeFlipped<3>>::calculate(3, iter.clone());
+        let bytes = bytes.collect::<Vec<_>>();
+
+        assert_eq!(position, 0);
+        assert_eq!(bytes, vec![]);
     }
 }

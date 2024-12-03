@@ -97,6 +97,24 @@ pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct RepeatDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, D>,
+    delay_ms: u32,
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
+    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    inner_iter_len: usize,
+    position: usize,
+    delay_ms: u32,
+    iter: I,
+    _flip: M,
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     hour: u8,
@@ -178,6 +196,8 @@ pub mod module {
         ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped, ScrollDisplayOptions,
     };
 
+    use super::{RepeatDisplayOptions, Scroller};
+
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
         DisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
     where
@@ -185,7 +205,6 @@ pub mod module {
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
         /// Set the position on the display from which to start displaying the bytes.
@@ -211,6 +230,13 @@ pub mod module {
             }
         }
 
+        pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
+            RepeatDisplayOptions {
+                options: self,
+                delay_ms: 500,
+            }
+        }
+
         /// Flip the display.
         pub fn flip(
             self,
@@ -233,14 +259,41 @@ pub mod module {
         }
     }
 
-    impl<const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        ScrollDisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M, InI>
+        Scroller<'d, N, Token, CLK, DIO, DELAY, I, M>
+    where
+        CLK: OutputPin<Error = ERR>,
+        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+        DELAY: DelayTrait,
+        I: Iterator<Item = InI> + 'd,
+        InI: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M: MaybeFlipped<N>,
+    {
+        pub fn steps(self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + 'd {
+            let original_position = self.position;
+
+            let iter = self.iter.map(move |item| {
+                let (_, bytes) = M::calculate(original_position, item.into_iter());
+
+                bytes
+            });
+
+            let position = M::position(original_position, self.inner_iter_len);
+            self.device.scroll(position, self.delay_ms, iter)
+        }
+
+        pub async fn run(self) -> usize {
+            self.steps().count().await
+        }
+    }
+
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
+        ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        for<'a> &'a mut F: Iterator<Item = u8>,
         M: MaybeFlipped<N>,
     {
         /// Set the delay in milliseconds between each animation step.
@@ -273,23 +326,69 @@ pub mod module {
             self
         }
 
-        pub fn steps(&mut self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + '_ {
-            let original_position = self.options.position;
+        pub fn finish(
+            self,
+        ) -> Scroller<
+            'd,
+            N,
+            Token,
+            CLK,
+            DIO,
+            DELAY,
+            impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
+            M,
+        > {
+            let iter = windows_iter::<N>(self.options.iter, self.direction, self.style)
+                .map(|i| i.into_iter());
 
-            let (position, _) = M::calculate(original_position, &mut self.options.iter);
+            Scroller {
+                device: self.options.device,
+                inner_iter_len: N,
+                position: self.options.position,
+                delay_ms: self.delay_ms,
+                iter,
+                _flip: self.options._flip,
+            }
+        }
+    }
 
-            let windows = windows_iter::<N>(&mut self.options.iter, self.direction, self.style)
-                .map(move |window| {
-                    let (_, bytes) = M::calculate(original_position, window.into_iter());
-
-                    bytes
-                });
-
-            self.options.device.scroll(position, self.delay_ms, windows)
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
+        RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
+    where
+        CLK: OutputPin<Error = ERR>,
+        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
+        DELAY: DelayTrait,
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M: MaybeFlipped<N>,
+    {
+        /// Set the delay in milliseconds between each animation step.
+        pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
+            self.delay_ms = delay_ms;
+            self
         }
 
-        pub async fn run(mut self) -> usize {
-            self.steps().count().await
+        pub fn finish(
+            self,
+        ) -> Scroller<
+            'd,
+            N,
+            Token,
+            CLK,
+            DIO,
+            DELAY,
+            impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
+            M,
+        > {
+            let iter = self.options.iter.map(move |i| [i]).map(|i| i.into_iter());
+
+            Scroller {
+                device: self.options.device,
+                inner_iter_len: 1,
+                position: self.options.position,
+                delay_ms: self.delay_ms,
+                iter,
+                _flip: self.options._flip,
+            }
         }
     }
 }

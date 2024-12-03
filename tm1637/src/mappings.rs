@@ -435,6 +435,129 @@ impl SpecialCharBits {
     }
 }
 
+/// Circle bits.
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum CircleBits {
+    /// ```text
+    ///   ---
+    ///  |   |
+    ///  |
+    ///   ---
+    ///```
+    A = SegmentBits::SegB as u8
+        | SegmentBits::SegA as u8
+        | SegmentBits::SegF as u8
+        | SegmentBits::SegE as u8
+        | SegmentBits::SegD as u8,
+    /// ```text
+    ///   ---
+    ///  |
+    ///  |   |
+    ///   ---
+    ///```
+    B = SegmentBits::SegA as u8
+        | SegmentBits::SegF as u8
+        | SegmentBits::SegE as u8
+        | SegmentBits::SegD as u8
+        | SegmentBits::SegC as u8,
+    /// ```text
+    ///   
+    ///  |   |
+    ///  |   |
+    ///   ---
+    ///```
+    C = SegmentBits::SegF as u8
+        | SegmentBits::SegE as u8
+        | SegmentBits::SegD as u8
+        | SegmentBits::SegC as u8
+        | SegmentBits::SegB as u8,
+    /// ```text
+    ///   ---
+    ///      |
+    ///  |   |
+    ///   ---
+    ///```
+    D = SegmentBits::SegE as u8
+        | SegmentBits::SegD as u8
+        | SegmentBits::SegC as u8
+        | SegmentBits::SegB as u8
+        | SegmentBits::SegA as u8,
+    /// ```text
+    ///   ---
+    ///  |   |
+    ///      |
+    ///   ---
+    ///```
+    E = SegmentBits::SegD as u8
+        | SegmentBits::SegC as u8
+        | SegmentBits::SegB as u8
+        | SegmentBits::SegA as u8
+        | SegmentBits::SegF as u8,
+    /// ```text
+    ///   ---
+    ///  |   |
+    ///  |   |
+    ///   
+    ///```
+    F = SegmentBits::SegC as u8
+        | SegmentBits::SegB as u8
+        | SegmentBits::SegA as u8
+        | SegmentBits::SegF as u8
+        | SegmentBits::SegE as u8,
+}
+
+impl CircleBits {
+    /// Returns all circle bits.
+    pub const fn all() -> [CircleBits; 6] {
+        [
+            CircleBits::A,
+            CircleBits::B,
+            CircleBits::C,
+            CircleBits::D,
+            CircleBits::E,
+            CircleBits::F,
+        ]
+    }
+
+    /// Resturns all circle bits reversed.
+    pub const fn all_reversed() -> [CircleBits; 6] {
+        [
+            CircleBits::F,
+            CircleBits::E,
+            CircleBits::D,
+            CircleBits::C,
+            CircleBits::B,
+            CircleBits::A,
+        ]
+    }
+
+    /// Returns all circle bits as [`u8`].
+    pub const fn all_u8() -> [u8; 6] {
+        [
+            CircleBits::A as u8,
+            CircleBits::B as u8,
+            CircleBits::C as u8,
+            CircleBits::D as u8,
+            CircleBits::E as u8,
+            CircleBits::F as u8,
+        ]
+    }
+
+    /// Resturns all circle bits reversed as [`u8`].
+    pub const fn all_u8_reversed() -> [u8; 6] {
+        [
+            CircleBits::F as u8,
+            CircleBits::E as u8,
+            CircleBits::D as u8,
+            CircleBits::C as u8,
+            CircleBits::B as u8,
+            CircleBits::A as u8,
+        ]
+    }
+}
+
 /// Flips the segments of a byte upside down.
 ///
 /// Swaps the segments:

@@ -62,17 +62,20 @@ async fn main(spawner: Spawner) {
 
     let count = tm
         .options()
-        .str("123456")
-        // .position(1)
+        .str("1234")
+        //.position(0)
         // .put_slice(&bytes)
         .flip()
-        .scroll()
-        .delay_ms(700)
-        .direction(ScrollDirection::RightToLeft)
-        .style(ScrollStyle::Linear)
-        .run();
+        .display()
+        .ok();
+    // .scroll()
+    // .delay_ms(700)
+    // .direction(ScrollDirection::RightToLeft)
+    // .style(ScrollStyle::Linear)
+    // .finish()
+    // .run();
 
-    info!("Count: {}", count);
+    info!("Count: {:?}", count);
 
     // let slice = &[
     //     DigitBits::One as u8,
