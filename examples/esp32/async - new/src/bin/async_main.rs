@@ -11,8 +11,9 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{windows, windows_non_overlapping, DigitBits, UpCharBits},
-    Brightness, Direction, TM1637Builder, WindowsStyle,
+    mappings::{DigitBits, UpCharBits},
+    scroll::{ScrollDirection, ScrollStyle},
+    Brightness, TM1637Builder,
 };
 
 #[main]
@@ -61,14 +62,14 @@ async fn main(spawner: Spawner) {
 
     let count = tm
         .options()
-        .put_str("123456")
+        .str("123456")
         // .position(1)
         // .put_slice(&bytes)
         .flip()
-        .animate()
+        .scroll()
         .delay_ms(700)
-        .direction(Direction::RightToLeft)
-        .style(WindowsStyle::Linear)
+        .direction(ScrollDirection::RightToLeft)
+        .style(ScrollStyle::Linear)
         .run();
 
     info!("Count: {}", count);
