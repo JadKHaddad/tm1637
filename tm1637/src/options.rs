@@ -163,7 +163,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
 }
 
 #[::duplicate::duplicate_item(
-    module        async     await               Token             DelayTrait                             AnimationIter;
+    module        async     await               Token                     DelayTrait                             ScrollIter;
     [asynch]      [async]   [await.identity()]  [crate::tokens::Async]    [::embedded_hal_async::delay::DelayNs] [::futures::Stream];
     [blocking]    []        [identity()]        [crate::tokens::Blocking] [::embedded_hal::delay::DelayNs]       [Iterator];
 )]
@@ -255,13 +255,13 @@ pub mod module {
             self
         }
 
-        /// Set the animation direction to [`Direction::LeftToRight`].
+        /// Set the animation direction to [`ScrollDirection::LeftToRight`].
         pub const fn left(mut self) -> Self {
             self.direction = ScrollDirection::LeftToRight;
             self
         }
 
-        /// Set the animation direction to [`Direction::RightToLeft`].
+        /// Set the animation direction to [`ScrollDirection::RightToLeft`].
         pub const fn right(mut self) -> Self {
             self.direction = ScrollDirection::RightToLeft;
             self
@@ -273,7 +273,7 @@ pub mod module {
             self
         }
 
-        pub fn steps(&mut self) -> impl AnimationIter<Item = Result<(), Error<ERR>>> + '_ {
+        pub fn steps(&mut self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + '_ {
             let original_position = self.options.position;
 
             let (position, _) = M::calculate(original_position, &mut self.options.iter);

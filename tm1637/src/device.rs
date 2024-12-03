@@ -166,7 +166,7 @@ where
 }
 
 #[::duplicate::duplicate_item(
-    module        async     await               Token                 DelayTrait;
+    module        async     await               Token                         DelayTrait;
     [asynch]      [async]   [await.identity()]  [crate::tokens::Async]        [::embedded_hal_async::delay::DelayNs];
     [blocking]    []        [identity()]        [crate::tokens::Blocking]     [::embedded_hal::delay::DelayNs];
 )]

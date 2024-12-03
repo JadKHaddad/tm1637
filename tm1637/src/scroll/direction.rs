@@ -1,4 +1,4 @@
-/// Direction for moving bytes.
+/// Direction for scrolling bytes.
 #[derive(Debug, Default, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum ScrollDirection {
