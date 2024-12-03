@@ -62,8 +62,8 @@ async fn main(spawner: Spawner) {
 
     let count = tm
         .options()
-        .str("1234")
-        //.position(0)
+        .str("123456")
+        .position(1)
         // .put_slice(&bytes)
         .flip()
         .display()
