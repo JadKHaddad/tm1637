@@ -74,6 +74,15 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     }
 
     // TODO: all formatters go here
+    // TODO: maybe rotating circle over 2 cells 3 or 4 cells etc..
+    //  --- ---
+    // |       |
+    // |       |
+    //  --- ---
+    //  --- --- ---
+    // |           |
+    // |           |
+    //  --- --- ---
 }
 
 /// High-level API for display operations.
