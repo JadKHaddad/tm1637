@@ -174,7 +174,7 @@ pub mod module {
     use crate::{
         scroll::{ScrollDirection, ScrollStyle},
         tokens::Flipped,
-        windows::windows_new_api,
+        windows::windows_iter,
         ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped, ScrollDisplayOptions,
     };
 
@@ -278,7 +278,7 @@ pub mod module {
 
             let (position, _) = M::calculate(original_position, &mut self.options.iter);
 
-            let windows = windows_new_api::<N>(&mut self.options.iter, self.direction, self.style)
+            let windows = windows_iter::<N>(&mut self.options.iter, self.direction, self.style)
                 .map(move |window| {
                     let (_, bytes) = M::calculate(original_position, window.into_iter());
 
