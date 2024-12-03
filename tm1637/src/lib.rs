@@ -27,6 +27,7 @@ mod identity;
 pub mod mappings;
 mod maybe_flipped;
 mod options;
+mod rotating_circle;
 pub mod scroll;
 pub mod tokens;
 pub mod windows;

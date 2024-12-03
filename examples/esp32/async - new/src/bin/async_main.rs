@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{CircleBits, DigitBits, UpCharBits},
+    mappings::{DigitBits, RotatingCircleBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     Brightness, TM1637Builder,
 };
@@ -76,17 +76,25 @@ async fn main(spawner: Spawner) {
     // .style(ScrollStyle::Linear)
     // .finish()
     // .run();
-    let cricles = CircleBits::all_u8();
+    // let cricles = RotatingCircleBits::all_u8();
+    // let count = tm
+    //     .options()
+    //     .slice(&cricles)
+    //     .position(0)
+    //     // .flip()
+    //     .repeat()
+    //     .finish()
+    //     .run();
+
     let count = tm
         .options()
-        .slice(&cricles)
-        .position(0)
+        .rotating_circle()
+        .position(1)
+        .delay_ms(70)
         // .flip()
-        .repeat()
-        .finish()
         .run();
 
-    info!("Count: {:?}", count);
+    // info!("Count: {:?}", count);
 
     // let slice = &[
     //     DigitBits::One as u8,

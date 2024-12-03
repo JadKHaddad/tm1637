@@ -439,7 +439,7 @@ impl SpecialCharBits {
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub enum CircleBits {
+pub enum RotatingCircleBits {
     /// ```text
     ///   ---
     ///  |   |
@@ -508,52 +508,52 @@ pub enum CircleBits {
         | SegmentBits::SegE as u8,
 }
 
-impl CircleBits {
+impl RotatingCircleBits {
     /// Returns all circle bits.
-    pub const fn all() -> [CircleBits; 6] {
+    pub const fn all() -> [RotatingCircleBits; 6] {
         [
-            CircleBits::A,
-            CircleBits::B,
-            CircleBits::C,
-            CircleBits::D,
-            CircleBits::E,
-            CircleBits::F,
+            RotatingCircleBits::A,
+            RotatingCircleBits::B,
+            RotatingCircleBits::C,
+            RotatingCircleBits::D,
+            RotatingCircleBits::E,
+            RotatingCircleBits::F,
         ]
     }
 
     /// Resturns all circle bits reversed.
-    pub const fn all_reversed() -> [CircleBits; 6] {
+    pub const fn all_reversed() -> [RotatingCircleBits; 6] {
         [
-            CircleBits::F,
-            CircleBits::E,
-            CircleBits::D,
-            CircleBits::C,
-            CircleBits::B,
-            CircleBits::A,
+            RotatingCircleBits::F,
+            RotatingCircleBits::E,
+            RotatingCircleBits::D,
+            RotatingCircleBits::C,
+            RotatingCircleBits::B,
+            RotatingCircleBits::A,
         ]
     }
 
     /// Returns all circle bits as [`u8`].
     pub const fn all_u8() -> [u8; 6] {
         [
-            CircleBits::A as u8,
-            CircleBits::B as u8,
-            CircleBits::C as u8,
-            CircleBits::D as u8,
-            CircleBits::E as u8,
-            CircleBits::F as u8,
+            RotatingCircleBits::A as u8,
+            RotatingCircleBits::B as u8,
+            RotatingCircleBits::C as u8,
+            RotatingCircleBits::D as u8,
+            RotatingCircleBits::E as u8,
+            RotatingCircleBits::F as u8,
         ]
     }
 
     /// Resturns all circle bits reversed as [`u8`].
     pub const fn all_u8_reversed() -> [u8; 6] {
         [
-            CircleBits::F as u8,
-            CircleBits::E as u8,
-            CircleBits::D as u8,
-            CircleBits::C as u8,
-            CircleBits::B as u8,
-            CircleBits::A as u8,
+            RotatingCircleBits::F as u8,
+            RotatingCircleBits::E as u8,
+            RotatingCircleBits::D as u8,
+            RotatingCircleBits::C as u8,
+            RotatingCircleBits::B as u8,
+            RotatingCircleBits::A as u8,
         ]
     }
 }
