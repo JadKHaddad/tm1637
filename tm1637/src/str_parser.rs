@@ -2,6 +2,7 @@ use core::str::Bytes;
 
 use crate::mappings::{from_ascii_byte, SegmentBits};
 
+// Broken. see tests
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct StrParser<'a> {
@@ -15,6 +16,8 @@ pub struct StrParser<'a> {
     ///
     /// We or this value with the found digit on the next call to next_back.
     or: u8,
+    count: usize,
+    total_count: usize,
 }
 
 impl<'a> StrParser<'a> {
@@ -23,6 +26,8 @@ impl<'a> StrParser<'a> {
             bytes: str.bytes(),
             current: None,
             or: 0,
+            count: 0,
+            total_count: str.bytes().filter(|byte| *byte != b'.').count(),
         }
     }
 }
@@ -42,6 +47,8 @@ impl Iterator for StrParser<'_> {
                 Some(byte) => match byte {
                     b'.' => match self.current.take() {
                         Some(current) => {
+                            self.count += 1;
+
                             return Some(from_ascii_byte(current) | SegmentBits::Dot as u8);
                         }
 
@@ -49,6 +56,8 @@ impl Iterator for StrParser<'_> {
                     },
                     byte => match self.current.replace(byte) {
                         Some(current) => {
+                            self.count += 1;
+
                             return Some(from_ascii_byte(current));
                         }
 
@@ -56,17 +65,27 @@ impl Iterator for StrParser<'_> {
                     },
                 },
 
-                None => return self.current.take().map(from_ascii_byte),
+                None => match self.current.take().map(from_ascii_byte) {
+                    Some(current) => {
+                        self.count += 1;
+
+                        return Some(current);
+                    }
+
+                    None => return None,
+                },
             }
         }
     }
-}
 
-impl ExactSizeIterator for StrParser<'_> {
-    fn len(&self) -> usize {
-        self.bytes.clone().filter(|byte| *byte != b'.').count()
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.total_count - self.count;
+
+        (len, Some(len))
     }
 }
+
+impl ExactSizeIterator for StrParser<'_> {}
 
 impl DoubleEndedIterator for StrParser<'_> {
     fn next_back(&mut self) -> Option<Self::Item> {
@@ -99,7 +118,7 @@ mod tests {
     use std::vec;
     use std::vec::Vec;
 
-    use crate::mappings::DigitBits;
+    use crate::mappings::{DigitBits, UpCharBits};
 
     use super::*;
 
@@ -116,13 +135,54 @@ mod tests {
             ],
             result
         );
+
+        // This is broken!
+        let parser = StrParser::new("HELLO");
+        let result: Vec<u8> = parser.take(3).rev().collect();
+        assert_eq!(
+            vec![
+                UpCharBits::UpH as u8,
+                UpCharBits::UpE as u8,
+                UpCharBits::UpL as u8,
+                UpCharBits::UpL as u8,
+                UpCharBits::UpO as u8,
+            ]
+            .into_iter()
+            .rev()
+            .collect::<Vec<_>>(),
+            result
+        );
     }
 
     #[test]
     fn len() {
-        let parser = StrParser::new("..12.3..45..............6.7");
+        let mut parser = StrParser::new("..12.3..45..............6.7");
 
         assert_eq!(7, parser.len());
+
+        parser.next();
+        assert_eq!(6, parser.len());
+
+        parser.next();
+        assert_eq!(5, parser.len());
+
+        parser.next();
+        assert_eq!(4, parser.len());
+
+        parser.next();
+        assert_eq!(3, parser.len());
+
+        parser.next();
+        assert_eq!(2, parser.len());
+
+        parser.next();
+        assert_eq!(1, parser.len());
+
+        parser.next();
+        assert_eq!(0, parser.len());
+
+        assert_eq!(None, parser.next());
+        assert_eq!(0, parser.len());
     }
 
     #[test]

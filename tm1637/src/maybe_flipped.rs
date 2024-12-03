@@ -39,11 +39,16 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
             }
         }
 
+        let position_ = match bytes.len() + position > N {
+            true => 0,
+            false => N - bytes.len() - position,
+        };
+
         let bytes = calculate_bytes::<N>(bytes, position);
 
         (
             // Assertion is failing on esp!
-            N - (bytes.len() + position),
+            position_,
             bytes.map(crate::mappings::flip_mirror),
         )
     }

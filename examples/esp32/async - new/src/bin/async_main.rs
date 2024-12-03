@@ -60,14 +60,16 @@ async fn main(spawner: Spawner) {
 
     tm.init().unwrap();
 
-    let count = tm
-        .options()
-        .str("123")
-        .position(2)
-        // .put_slice(&bytes)
-        .flip()
-        .display()
-        .ok();
+    let bytes = [
+        UpCharBits::UpH as u8,
+        UpCharBits::UpE as u8,
+        UpCharBits::UpL as u8,
+        UpCharBits::UpL as u8,
+        UpCharBits::UpO as u8,
+    ];
+
+    let count = tm.options().str("HELLO").position(2).flip().display().ok();
+    // let count = tm.options().slice(&bytes).position(1).flip().display().ok();
     // .scroll()
     // .delay_ms(700)
     // .direction(ScrollDirection::RightToLeft)

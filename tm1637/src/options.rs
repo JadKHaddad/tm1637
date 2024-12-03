@@ -1,8 +1,9 @@
 use crate::{
     formatters::clock_to_4digits,
+    mappings::from_ascii_byte,
     scroll::{ScrollDirection, ScrollStyle},
     tokens::NotFlipped,
-    StrParser, TM1637,
+    TM1637,
 };
 
 /// Starting point for a High-level API for display operations.
@@ -56,7 +57,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
         DisplayOptions {
             device: self.device,
             position: 0,
-            iter: StrParser::new(str),
+            iter: str.as_bytes().iter().copied().map(from_ascii_byte),
             _flip: NotFlipped,
         }
     }

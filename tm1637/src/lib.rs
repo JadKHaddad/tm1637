@@ -11,6 +11,9 @@
 // #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[cfg(test)]
+mod test;
+
 mod brightness;
 mod builder;
 mod conditional;
@@ -37,4 +40,3 @@ pub use error::Error;
 pub(crate) use identity::Identity;
 pub use maybe_flipped::MaybeFlipped;
 pub use options::{DisplayOptions, InitDisplayOptions, ScrollDisplayOptions};
-pub use str_parser::StrParser;
