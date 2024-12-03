@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{DigitBits, UpCharBits},
+    mappings::{CircleBits, DigitBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     Brightness, TM1637Builder,
 };
@@ -68,7 +68,7 @@ async fn main(spawner: Spawner) {
         UpCharBits::UpO as u8,
     ];
 
-    let count = tm.options().str("HELLO").position(2).flip().display().ok();
+    // let count = tm.options().str("HELLO").position(2).flip().display().ok();
     // let count = tm.options().slice(&bytes).position(1).flip().display().ok();
     // .scroll()
     // .delay_ms(700)
@@ -76,6 +76,15 @@ async fn main(spawner: Spawner) {
     // .style(ScrollStyle::Linear)
     // .finish()
     // .run();
+    let cricles = CircleBits::all_u8();
+    let count = tm
+        .options()
+        .slice(&cricles)
+        .position(0)
+        // .flip()
+        .repeat()
+        .finish()
+        .run();
 
     info!("Count: {:?}", count);
 

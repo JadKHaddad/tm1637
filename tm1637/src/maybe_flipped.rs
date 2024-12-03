@@ -33,28 +33,31 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
             bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
             position: usize,
         ) -> impl ExactSizeIterator<Item = u8> {
+            if position > N {
+                return core::iter::empty();
+            }
+
             match bytes.len() + position > N {
                 true => bytes.take(N - position).rev(),
                 false => bytes.rev(),
             }
         }
 
-        let position_ = match bytes.len() + position > N {
+        let new_position = match bytes.len() + position > N {
             true => 0,
             false => N - bytes.len() - position,
         };
 
         let bytes = calculate_bytes::<N>(bytes, position);
 
-        (
-            // Assertion is failing on esp!
-            position_,
-            bytes.map(crate::mappings::flip_mirror),
-        )
+        (new_position, bytes.map(crate::mappings::flip_mirror))
     }
 
-    fn position(_: usize, _: usize) -> usize {
-        0
+    fn position(position: usize, len: usize) -> usize {
+        match len + position > N {
+            true => 0,
+            false => N - len - position,
+        }
     }
 }
 
