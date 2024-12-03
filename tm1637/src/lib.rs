@@ -28,7 +28,6 @@ pub mod mappings;
 mod maybe_flipped;
 mod options;
 pub mod scroll;
-mod str_parser;
 pub mod tokens;
 pub mod windows;
 
