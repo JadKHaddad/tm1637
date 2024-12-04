@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{self, DigitBits, RotatingCircleBits, UpCharBits},
+    mappings::{self, DigitBits, RotatingCircleBits, SegmentBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     Brightness, TM1637Builder,
 };
@@ -110,10 +110,25 @@ async fn main(spawner: Spawner) {
     // tm.animate(0, 700, iter).count();
 
     tm.options()
-        .slice(b"HELLO")
-        .map(mappings::from_ascii_byte)
+        .iter(
+            b"HELLO"
+                .iter()
+                .copied()
+                .map(mappings::from_ascii_byte)
+                .enumerate()
+                .map(move |(i, b)| {
+                    if i == 1 {
+                        b | SegmentBits::Dot as u8
+                    } else {
+                        b
+                    }
+                }),
+        )
+        .flip()
         .display()
         .ok();
+
+    tm.options().str("HELL").dot(1).flip().display().ok();
 
     // tm.options()
     //     .clock()

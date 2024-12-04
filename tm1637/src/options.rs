@@ -7,6 +7,7 @@ use crate::{
     TM1637,
 };
 
+// TODO: dots with flip are buggy
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
 
 /// Starting point for a High-level API for display operations.
@@ -61,6 +62,62 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
             device: self.device,
             position: 0,
             iter: str.as_bytes().iter().copied().map(from_ascii_byte),
+            _flip: NotFlipped,
+        }
+    }
+
+    /// Prepare to display an iterator of bytes.
+    ///
+    /// # Example
+    ///
+    /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///     .iter(
+    ///         b"HELLO"
+    ///             .iter()
+    ///             .copied()
+    ///             .map(mappings::from_ascii_byte)
+    ///             .enumerate()
+    ///             .map(move |(i, b)| {
+    ///                 if i == 1 {
+    ///                     b | SegmentBits::Dot as u8
+    ///                 } else {
+    ///                     b
+    ///                 }
+    ///             }),
+    ///     )
+    ///     .display()
+    ///     .ok();
+    /// ```
+    ///
+    /// This example is equivalent to
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///    .str("HELLO")
+    ///    .dot(1)
+    ///    .display()
+    ///    .ok();
+    /// ```
+    pub fn iter<It: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
+        self,
+        iter: It,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        NotFlipped,
+    > {
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            iter,
             _flip: NotFlipped,
         }
     }
@@ -349,63 +406,6 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK,
             device: self.device,
             position: self.position,
             iter: self.iter.map(f),
-            _flip: self._flip,
-        }
-    }
-
-    /// Map the whole iterator using the provided function.
-    ///
-    /// # Example
-    ///
-    /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
-    ///
-    /// ```rust, ignore
-    /// tm.options()
-    ///     .slice(b"HELLO")
-    ///     .iter(|iter| {
-    ///         iter.map(mappings::from_ascii_byte)
-    ///             .enumerate()
-    ///             .map(move |(i, b)| {
-    ///                 if i == 1 {
-    ///                     b | SegmentBits::Dot as u8
-    ///                 } else {
-    ///                     b
-    ///                 }
-    ///             })
-    ///     })
-    ///     .display()
-    ///     .ok();
-    /// ```
-    ///
-    /// This example is equivalent to
-    ///
-    /// ```rust, ignore
-    /// tm.options()
-    ///    .str("HELLO")
-    ///    .dot(1)
-    ///    .display()
-    ///    .ok();
-    /// ```
-    pub fn iter<F: FnMut(I) -> D, D: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
-        self,
-        mut f: F,
-    ) -> DisplayOptions<
-        'd,
-        N,
-        T,
-        CLK,
-        DIO,
-        DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M,
-    >
-    where
-        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-    {
-        DisplayOptions {
-            device: self.device,
-            position: self.position,
-            iter: f(self.iter),
             _flip: self._flip,
         }
     }
