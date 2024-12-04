@@ -90,18 +90,18 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
 /// High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, M> {
+pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     position: usize,
-    iter: F,
+    iter: I,
     _flip: M,
 }
 
 /// High-level API for scroll animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
-    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, D>,
+pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
     delay_ms: u32,
     direction: ScrollDirection,
     style: ScrollStyle,
@@ -109,8 +109,8 @@ pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct RepeatDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, F, D> {
-    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, D>,
+pub struct RepeatDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
     delay_ms: u32,
 }
 
@@ -133,7 +133,7 @@ pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
     minute: u8,
 }
 
-impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
     /// Set the position on the display from which to start displaying the bytes.
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
@@ -141,7 +141,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
     }
 
     /// Use scroll animation options.
-    pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+    pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         ScrollDisplayOptions {
             options: self,
             delay_ms: 500,
@@ -150,7 +150,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         }
     }
 
-    pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+    pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         RepeatDisplayOptions {
             options: self,
             delay_ms: 500,
@@ -176,7 +176,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         M,
     >
     where
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     {
         DisplayOptions {
             device: self.device,
@@ -207,7 +207,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         M,
     >
     where
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     {
         DisplayOptions {
             device: self.device,
@@ -215,6 +215,42 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
             iter: self.iter.enumerate().map(move |(i, b)| {
                 if i == position {
                     b & !(SegmentBits::Dot as u8)
+                } else {
+                    b
+                }
+            }),
+            _flip: self._flip,
+        }
+    }
+
+    /// Set the dot at the specified position.
+    pub fn set_dot(
+        self,
+        position: usize,
+        dot: bool,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.enumerate().map(move |(i, b)| {
+                if i == position {
+                    if dot {
+                        b | SegmentBits::Dot as u8
+                    } else {
+                        b & !(SegmentBits::Dot as u8)
+                    }
                 } else {
                     b
                 }
@@ -237,7 +273,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         M,
     >
     where
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     {
         DisplayOptions {
             device: self.device,
@@ -261,12 +297,115 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         M,
     >
     where
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     {
         DisplayOptions {
             device: self.device,
             position: self.position,
             iter: self.iter.map(|b| b & !(SegmentBits::Dot as u8)),
+            _flip: self._flip,
+        }
+    }
+
+    /// Map the bytes using the provided function.
+    ///
+    ///  # Example
+    ///
+    /// Manually map each byte in a slice into a human readable character.
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///     .slice(b"HELLO")
+    ///     .map(mappings::from_ascii_byte)
+    ///     .display()
+    ///     .ok();
+    /// ```
+    ///
+    /// This example is equivalent to
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///    .str("HELLO")
+    ///    .display()
+    ///    .ok();
+    /// ```
+    pub fn map<F: FnMut(u8) -> u8>(
+        self,
+        f: F,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.map(f),
+            _flip: self._flip,
+        }
+    }
+
+    /// Map the whole iterator using the provided function.
+    ///
+    /// # Example
+    ///
+    /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///     .slice(b"HELLO")
+    ///     .iter(|iter| {
+    ///         iter.map(mappings::from_ascii_byte)
+    ///             .enumerate()
+    ///             .map(move |(i, b)| {
+    ///                 if i == 1 {
+    ///                     b | SegmentBits::Dot as u8
+    ///                 } else {
+    ///                     b
+    ///                 }
+    ///             })
+    ///     })
+    ///     .display()
+    ///     .ok();
+    /// ```
+    ///
+    /// This example is equivalent to
+    ///
+    /// ```rust, ignore
+    /// tm.options()
+    ///    .str("HELLO")
+    ///    .dot(1)
+    ///    .display()
+    ///    .ok();
+    /// ```
+    pub fn iter<F: FnMut(I) -> D, D: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
+        self,
+        mut f: F,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: f(self.iter),
             _flip: self._flip,
         }
     }
@@ -285,7 +424,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK,
         Flipped,
     >
     where
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     {
         DisplayOptions {
             device: self.device,
@@ -410,12 +549,12 @@ pub mod module {
 
     use super::{RepeatDisplayOptions, RotatingCircleOptions, Scroller};
 
-    impl<const N: usize, CLK, DIO, DELAY, ERR, F, M> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
+    impl<const N: usize, CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, I, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
         /// Display the bytes on a `flipped` or `non-flipped` display.
@@ -454,13 +593,13 @@ pub mod module {
         }
     }
 
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M>
+        ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, I, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
         /// Set the delay in milliseconds between each animation step.
@@ -519,13 +658,13 @@ pub mod module {
         }
     }
 
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
+    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M>
+        RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, I, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
-        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
         /// Set the delay in milliseconds between each animation step.

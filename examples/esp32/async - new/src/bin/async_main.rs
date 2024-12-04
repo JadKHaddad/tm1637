@@ -11,7 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{DigitBits, RotatingCircleBits, UpCharBits},
+    mappings::{self, DigitBits, RotatingCircleBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     Brightness, TM1637Builder,
 };
@@ -96,37 +96,34 @@ async fn main(spawner: Spawner) {
 
     // info!("Count: {:?}", count);
 
-    // let slice = &[
-    //     DigitBits::One as u8,
-    //     DigitBits::Two as u8,
-    //     DigitBits::Three as u8,
-    //     DigitBits::Four as u8,
-    //     DigitBits::Five as u8,
-    //     DigitBits::Six as u8,
-    // ];
+    let slice = &[
+        DigitBits::One as u8,
+        DigitBits::Two as u8,
+        DigitBits::Three as u8,
+        DigitBits::Four as u8,
+        DigitBits::Five as u8,
+        DigitBits::Six as u8,
+    ];
 
     // let iter = windows_non_overlapping::<4>(slice, Direction::RightToLeft);
 
     // tm.animate(0, 700, iter).count();
 
-    let count = tm
-        .options()
-        .str("HELLO")
-        .dot(1)
-        .dot(2)
-        .scroll()
-        .finish()
-        .run();
-
     tm.options()
-        .clock()
-        .hour(13)
-        .minute(5)
-        .finish()
-        .dot(1)
-        .remove_dot(1)
+        .slice(b"HELLO")
+        .map(mappings::from_ascii_byte)
         .display()
         .ok();
+
+    // tm.options()
+    //     .clock()
+    //     .hour(13)
+    //     .minute(5)
+    //     .finish()
+    //     .dot(1)
+    //     .remove_dot(1)
+    //     .display()
+    //     .ok();
 
     loop {}
 }
