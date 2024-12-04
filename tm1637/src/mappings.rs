@@ -667,6 +667,192 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
+pub const fn str_from_byte(byte: u8) -> &'static str {
+    if byte == SegmentBits::Dot as u8 {
+        "."
+    } else if byte == DigitBits::Zero as u8 {
+        "0"
+    } else if byte == DigitBits::One as u8 {
+        "1"
+    } else if byte == DigitBits::Two as u8 {
+        "2"
+    } else if byte == DigitBits::Three as u8 {
+        "3"
+    } else if byte == DigitBits::Four as u8 {
+        "4"
+    } else if byte == DigitBits::Five as u8 {
+        "5"
+    } else if byte == DigitBits::Six as u8 {
+        "6"
+    } else if byte == DigitBits::Seven as u8 {
+        "7"
+    } else if byte == DigitBits::Eight as u8 {
+        "8"
+    } else if byte == DigitBits::Nine as u8 {
+        "9"
+    } else if byte == UpCharBits::UpA as u8 {
+        "A"
+    } else if byte == UpCharBits::UpB as u8 {
+        "B"
+    } else if byte == UpCharBits::UpC as u8 {
+        "C"
+    } else if byte == UpCharBits::UpE as u8 {
+        "E"
+    } else if byte == UpCharBits::UpF as u8 {
+        "F"
+    } else if byte == UpCharBits::UpG as u8 {
+        "G"
+    } else if byte == UpCharBits::UpH as u8 {
+        "H"
+    } else if byte == UpCharBits::UpI as u8 {
+        "I"
+    } else if byte == UpCharBits::UpJ as u8 {
+        "J"
+    } else if byte == UpCharBits::UpL as u8 {
+        "L"
+    } else if byte == UpCharBits::UpO as u8 {
+        "O"
+    } else if byte == UpCharBits::UpP as u8 {
+        "P"
+    } else if byte == UpCharBits::UpS as u8 {
+        "S"
+    } else if byte == UpCharBits::UpU as u8 {
+        "U"
+    } else if byte == UpCharBits::UpZ as u8 {
+        "Z"
+    } else if byte == LoCharBits::LoA as u8 {
+        "a"
+    } else if byte == LoCharBits::LoB as u8 {
+        "b"
+    } else if byte == LoCharBits::LoC as u8 {
+        "c"
+    } else if byte == LoCharBits::LoD as u8 {
+        "d"
+    } else if byte == LoCharBits::LoE as u8 {
+        "e"
+    } else if byte == LoCharBits::LoG as u8 {
+        "g"
+    } else if byte == LoCharBits::LoH as u8 {
+        "h"
+    } else if byte == LoCharBits::LoI as u8 {
+        "i"
+    } else if byte == LoCharBits::LoN as u8 {
+        "n"
+    } else if byte == LoCharBits::LoO as u8 {
+        "o"
+    } else if byte == LoCharBits::LoQ as u8 {
+        "q"
+    } else if byte == LoCharBits::LoR as u8 {
+        "r"
+    } else if byte == LoCharBits::LoT as u8 {
+        "t"
+    } else if byte == LoCharBits::LoU as u8 {
+        "u"
+    } else if byte == LoCharBits::LoY as u8 {
+        "y"
+    } else if byte == SpecialCharBits::Space as u8 {
+        " "
+    } else if byte == SpecialCharBits::Minus as u8 {
+        "-"
+    } else if byte == SpecialCharBits::Underscore as u8 {
+        "_"
+    } else if byte == SpecialCharBits::Equals as u8 {
+        "="
+    } else if byte == SpecialCharBits::QuestionMark as u8 {
+        "?"
+    } else if byte == DigitBits::Zero as u8 | SegmentBits::Dot as u8 {
+        "0."
+    } else if byte == DigitBits::One as u8 | SegmentBits::Dot as u8 {
+        "1."
+    } else if byte == DigitBits::Two as u8 | SegmentBits::Dot as u8 {
+        "2."
+    } else if byte == DigitBits::Three as u8 | SegmentBits::Dot as u8 {
+        "3."
+    } else if byte == DigitBits::Four as u8 | SegmentBits::Dot as u8 {
+        "4."
+    } else if byte == DigitBits::Five as u8 | SegmentBits::Dot as u8 {
+        "5."
+    } else if byte == DigitBits::Six as u8 | SegmentBits::Dot as u8 {
+        "6."
+    } else if byte == DigitBits::Seven as u8 | SegmentBits::Dot as u8 {
+        "7."
+    } else if byte == DigitBits::Eight as u8 | SegmentBits::Dot as u8 {
+        "8."
+    } else if byte == DigitBits::Nine as u8 | SegmentBits::Dot as u8 {
+        "9."
+    } else if byte == UpCharBits::UpA as u8 | SegmentBits::Dot as u8 {
+        "A."
+    } else if byte == UpCharBits::UpB as u8 | SegmentBits::Dot as u8 {
+        "B."
+    } else if byte == UpCharBits::UpC as u8 | SegmentBits::Dot as u8 {
+        "C."
+    } else if byte == UpCharBits::UpE as u8 | SegmentBits::Dot as u8 {
+        "E."
+    } else if byte == UpCharBits::UpF as u8 | SegmentBits::Dot as u8 {
+        "F."
+    } else if byte == UpCharBits::UpG as u8 | SegmentBits::Dot as u8 {
+        "G."
+    } else if byte == UpCharBits::UpH as u8 | SegmentBits::Dot as u8 {
+        "H."
+    } else if byte == UpCharBits::UpI as u8 | SegmentBits::Dot as u8 {
+        "I."
+    } else if byte == UpCharBits::UpJ as u8 | SegmentBits::Dot as u8 {
+        "J."
+    } else if byte == UpCharBits::UpL as u8 | SegmentBits::Dot as u8 {
+        "L."
+    } else if byte == UpCharBits::UpO as u8 | SegmentBits::Dot as u8 {
+        "O."
+    } else if byte == UpCharBits::UpP as u8 | SegmentBits::Dot as u8 {
+        "P."
+    } else if byte == UpCharBits::UpS as u8 | SegmentBits::Dot as u8 {
+        "S."
+    } else if byte == UpCharBits::UpU as u8 | SegmentBits::Dot as u8 {
+        "U."
+    } else if byte == UpCharBits::UpZ as u8 | SegmentBits::Dot as u8 {
+        "Z."
+    } else if byte == LoCharBits::LoA as u8 | SegmentBits::Dot as u8 {
+        "a."
+    } else if byte == LoCharBits::LoB as u8 | SegmentBits::Dot as u8 {
+        "b."
+    } else if byte == LoCharBits::LoC as u8 | SegmentBits::Dot as u8 {
+        "c."
+    } else if byte == LoCharBits::LoD as u8 | SegmentBits::Dot as u8 {
+        "d."
+    } else if byte == LoCharBits::LoE as u8 | SegmentBits::Dot as u8 {
+        "e."
+    } else if byte == LoCharBits::LoG as u8 | SegmentBits::Dot as u8 {
+        "g."
+    } else if byte == LoCharBits::LoH as u8 | SegmentBits::Dot as u8 {
+        "h."
+    } else if byte == LoCharBits::LoI as u8 | SegmentBits::Dot as u8 {
+        "i."
+    } else if byte == LoCharBits::LoN as u8 | SegmentBits::Dot as u8 {
+        "n."
+    } else if byte == LoCharBits::LoO as u8 | SegmentBits::Dot as u8 {
+        "o."
+    } else if byte == LoCharBits::LoQ as u8 | SegmentBits::Dot as u8 {
+        "q."
+    } else if byte == LoCharBits::LoR as u8 | SegmentBits::Dot as u8 {
+        "r."
+    } else if byte == LoCharBits::LoT as u8 | SegmentBits::Dot as u8 {
+        "t."
+    } else if byte == LoCharBits::LoU as u8 | SegmentBits::Dot as u8 {
+        "u."
+    } else if byte == LoCharBits::LoY as u8 | SegmentBits::Dot as u8 {
+        "y."
+    } else if byte == SpecialCharBits::Minus as u8 | SegmentBits::Dot as u8 {
+        "-."
+    } else if byte == SpecialCharBits::Underscore as u8 | SegmentBits::Dot as u8 {
+        "_."
+    } else if byte == SpecialCharBits::Equals as u8 | SegmentBits::Dot as u8 {
+        "=."
+    } else if byte == SpecialCharBits::QuestionMark as u8 | SegmentBits::Dot as u8 {
+        "?."
+    } else {
+        ""
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

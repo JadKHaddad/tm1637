@@ -150,7 +150,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
 pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     position: usize,
-    iter: I,
+    pub(crate) iter: I,
     _flip: M,
 }
 
@@ -563,6 +563,11 @@ pub mod module {
 
             self.device.display(position, bytes).await
         }
+
+        #[cfg(test)]
+        pub fn calculated(self) -> (usize, impl Iterator<Item = u8>) {
+            M::calculate(self.position, self.iter)
+        }
     }
 
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M, InI>
@@ -729,5 +734,30 @@ pub mod module {
         pub async fn run(self) -> usize {
             self.steps().count().await
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    extern crate std;
+    use std::vec::Vec;
+
+    use crate::{mappings::str_from_byte, test::Noop, TM1637Builder};
+
+    #[test]
+    fn dot_is_dynamically_tied_to_byte() {
+        let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
+
+        let (_, iter) = tm.options().str("HELL").dot(1).dot(3).calculated();
+        let collected = iter.map(str_from_byte).collect::<Vec<_>>();
+
+        assert_eq!(&"E.", collected.get(1).unwrap());
+        assert_eq!(&"L.", collected.last().unwrap());
+
+        let (_, iter) = tm.options().str("HELL").dot(1).dot(3).flip().calculated();
+        let collected = iter.map(str_from_byte).collect::<Vec<_>>();
+
+        assert_eq!(&"3.", collected.get(2).unwrap());
+        assert_eq!(&"7.", collected.first().unwrap());
     }
 }
