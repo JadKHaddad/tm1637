@@ -86,13 +86,13 @@ async fn main(spawner: Spawner) {
     //     .finish()
     //     .run();
 
-    let count = tm
-        .options()
-        .rotating_circle()
-        .position(1)
-        .delay_ms(70)
-        // .flip()
-        .run();
+    // let count = tm
+    //     .options()
+    //     .rotating_circle()
+    //     .position(1)
+    //     .delay_ms(70)
+    //     // .flip()
+    //     .run();
 
     // info!("Count: {:?}", count);
 
@@ -108,6 +108,25 @@ async fn main(spawner: Spawner) {
     // let iter = windows_non_overlapping::<4>(slice, Direction::RightToLeft);
 
     // tm.animate(0, 700, iter).count();
+
+    let count = tm
+        .options()
+        .str("HELLO")
+        .dot(1)
+        .dot(2)
+        .scroll()
+        .finish()
+        .run();
+
+    tm.options()
+        .clock()
+        .hour(13)
+        .minute(5)
+        .finish()
+        .dot(1)
+        .remove_dot(1)
+        .display()
+        .ok();
 
     loop {}
 }

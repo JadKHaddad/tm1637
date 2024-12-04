@@ -1,6 +1,6 @@
 use crate::{
     formatters::clock_to_4digits,
-    mappings::from_ascii_byte,
+    mappings::{from_ascii_byte, SegmentBits},
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
     tokens::{Flipped, NotFlipped},
@@ -129,7 +129,169 @@ pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     hour: u8,
     minute: u8,
-    dot: bool,
+}
+
+impl<'d, const N: usize, T, CLK, DIO, DELAY, F, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+    /// Set the position on the display from which to start displaying the bytes.
+    pub const fn position(mut self, position: usize) -> Self {
+        self.position = position;
+        self
+    }
+
+    /// Use scroll animation options.
+    pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+        ScrollDisplayOptions {
+            options: self,
+            delay_ms: 500,
+            direction: ScrollDirection::LeftToRight,
+            style: ScrollStyle::Circular,
+        }
+    }
+
+    pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, F, M> {
+        RepeatDisplayOptions {
+            options: self,
+            delay_ms: 500,
+        }
+    }
+
+    /// Add a dynamic dot to the display at the specified position.
+    ///
+    /// ## Dynamic
+    ///
+    /// The dot is tied to the byte at the specified position and will move with it.
+    pub fn dot(
+        self,
+        position: usize,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.enumerate().map(move |(i, b)| {
+                if i == position {
+                    b | SegmentBits::Dot as u8
+                } else {
+                    b
+                }
+            }),
+            _flip: self._flip,
+        }
+    }
+
+    /// Remove the dot from the display at the specified position.
+    pub fn remove_dot(
+        self,
+        position: usize,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.enumerate().map(move |(i, b)| {
+                if i == position {
+                    b & !(SegmentBits::Dot as u8)
+                } else {
+                    b
+                }
+            }),
+            _flip: self._flip,
+        }
+    }
+
+    /// Add dots to all positions in the display.
+    pub fn dots(
+        self,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.map(|b| b | SegmentBits::Dot as u8),
+            _flip: self._flip,
+        }
+    }
+
+    /// Remove dots from all positions in the display.
+    pub fn remove_dots(
+        self,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter.map(|b| b & !(SegmentBits::Dot as u8)),
+            _flip: self._flip,
+        }
+    }
+
+    /// Flip the display.
+    pub fn flip(
+        self,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        Flipped,
+    >
+    where
+        F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self.iter,
+            _flip: Flipped,
+        }
+    }
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
@@ -138,7 +300,6 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
             device,
             hour: 0,
             minute: 0,
-            dot: false,
         }
     }
 
@@ -151,21 +312,6 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
     /// Set the minute.
     pub const fn minute(mut self, minute: u8) -> Self {
         self.minute = minute;
-        self
-    }
-
-    pub const fn dot(mut self, dot: bool) -> Self {
-        self.dot = dot;
-        self
-    }
-
-    pub const fn set_dot(mut self) -> Self {
-        self.dot = true;
-        self
-    }
-
-    pub const fn unset_dot(mut self) -> Self {
-        self.dot = false;
         self
     }
 
@@ -184,7 +330,8 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
         DisplayOptions {
             device: self.device,
             position: 0,
-            iter: clock_to_4digits(self.hour, self.minute, self.dot).into_iter(),
+            // add the dot using the `dot` method on the display options
+            iter: clock_to_4digits(self.hour, self.minute, false).into_iter(),
             _flip: NotFlipped,
         }
     }
@@ -255,15 +402,13 @@ pub mod module {
         mappings::RotatingCircleBits,
         rotating_circle::RotatingStyle,
         scroll::{ScrollDirection, ScrollStyle},
-        tokens::Flipped,
         windows::windows_iter,
         ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped, ScrollDisplayOptions,
     };
 
     use super::{RepeatDisplayOptions, RotatingCircleOptions, Scroller};
 
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, F, M>
-        DisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M>
+    impl<const N: usize, CLK, DIO, DELAY, ERR, F, M> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, F, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
@@ -271,55 +416,11 @@ pub mod module {
         F: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
-        /// Set the position on the display from which to start displaying the bytes.
-        pub const fn position(mut self, position: usize) -> Self {
-            self.position = position;
-            self
-        }
-
         /// Display the bytes on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
             self.device.display(position, bytes).await
-        }
-
-        /// Use scroll animation options.
-        pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
-            ScrollDisplayOptions {
-                options: self,
-                delay_ms: 500,
-                direction: ScrollDirection::LeftToRight,
-                style: ScrollStyle::Circular,
-            }
-        }
-
-        pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, F, M> {
-            RepeatDisplayOptions {
-                options: self,
-                delay_ms: 500,
-            }
-        }
-
-        /// Flip the display.
-        pub fn flip(
-            self,
-        ) -> DisplayOptions<
-            'd,
-            N,
-            Token,
-            CLK,
-            DIO,
-            DELAY,
-            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-            Flipped,
-        > {
-            DisplayOptions {
-                device: self.device,
-                position: self.position,
-                iter: self.iter,
-                _flip: Flipped,
-            }
         }
     }
 
