@@ -128,7 +128,16 @@ async fn main(spawner: Spawner) {
         .display()
         .ok();
 
-    tm.options().str("HELL").dot(1).flip().display().ok();
+    tm.options()
+        .str("HELL")
+        .dot(1)
+        .flip()
+        .scroll()
+        .delay_ms(700)
+        .finish()
+        .calculate();
+
+    tm.options().rotating_circle().finish().calculate();
 
     // tm.options()
     //     .clock()

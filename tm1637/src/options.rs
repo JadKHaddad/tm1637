@@ -1,13 +1,13 @@
 use crate::{
     formatters::clock_to_4digits,
-    mappings::{from_ascii_byte, SegmentBits},
+    mappings::{from_ascii_byte, RotatingCircleBits, SegmentBits},
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
     tokens::{Flipped, NotFlipped},
+    windows::windows_iter,
     TM1637,
 };
 
-// TODO: dots with flip are buggy
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
 
 /// Starting point for a High-level API for display operations.
@@ -488,6 +488,103 @@ pub struct RotatingCircleOptions<'d, const N: usize, T, CLK, DIO, DELAY, M> {
     _flip: M,
 }
 
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
+    ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+where
+    I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+{
+    /// Set the delay in milliseconds between each animation step.
+    pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
+        self.delay_ms = delay_ms;
+        self
+    }
+
+    /// Set the animation direction.
+    pub const fn direction(mut self, direction: ScrollDirection) -> Self {
+        self.direction = direction;
+        self
+    }
+
+    /// Set the animation direction to [`ScrollDirection::LeftToRight`].
+    pub const fn left(mut self) -> Self {
+        self.direction = ScrollDirection::LeftToRight;
+        self
+    }
+
+    /// Set the animation direction to [`ScrollDirection::RightToLeft`].
+    pub const fn right(mut self) -> Self {
+        self.direction = ScrollDirection::RightToLeft;
+        self
+    }
+
+    /// Set the animation style.
+    pub const fn style(mut self, style: ScrollStyle) -> Self {
+        self.style = style;
+        self
+    }
+
+    pub fn finish(
+        self,
+    ) -> Scroller<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
+        M,
+    > {
+        let iter =
+            windows_iter::<N>(self.options.iter, self.direction, self.style).map(|i| i.into_iter());
+
+        Scroller {
+            device: self.options.device,
+            inner_iter_len: N,
+            position: self.options.position,
+            delay_ms: self.delay_ms,
+            iter,
+            _flip: self.options._flip,
+        }
+    }
+}
+
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
+    RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+where
+    I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+{
+    /// Set the delay in milliseconds between each animation step.
+    pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
+        self.delay_ms = delay_ms;
+        self
+    }
+
+    pub fn finish(
+        self,
+    ) -> Scroller<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
+        M,
+    > {
+        let iter = self.options.iter.map(move |i| [i]).map(|i| i.into_iter());
+
+        Scroller {
+            device: self.options.device,
+            inner_iter_len: 1,
+            position: self.options.position,
+            delay_ms: self.delay_ms,
+            iter,
+            _flip: self.options._flip,
+        }
+    }
+}
+
 impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
     RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, M>
 {
@@ -528,6 +625,35 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
             _flip: Flipped,
         }
     }
+
+    pub fn finish(
+        self,
+    ) -> Scroller<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
+        M,
+    > {
+        let bytes = match self.style {
+            RotatingStyle::Clockwise => RotatingCircleBits::all_u8_reversed(),
+            RotatingStyle::CounterClockwise => RotatingCircleBits::all_u8(),
+        };
+
+        RepeatDisplayOptions {
+            options: DisplayOptions {
+                device: self.device,
+                position: self.position,
+                iter: bytes.into_iter(),
+                _flip: self._flip,
+            },
+            delay_ms: self.delay_ms,
+        }
+        .finish()
+    }
 }
 
 #[::duplicate::duplicate_item(
@@ -539,15 +665,9 @@ pub mod module {
     use ::embedded_hal::digital::OutputPin;
     use ::futures::StreamExt; // hmm
 
-    use crate::{
-        mappings::RotatingCircleBits,
-        rotating_circle::RotatingStyle,
-        scroll::{ScrollDirection, ScrollStyle},
-        windows::windows_iter,
-        ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped, ScrollDisplayOptions,
-    };
+    use crate::{ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped};
 
-    use super::{RepeatDisplayOptions, RotatingCircleOptions, Scroller};
+    use super::Scroller;
 
     impl<const N: usize, CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, I, M>
     where
@@ -557,178 +677,56 @@ pub mod module {
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
+        /// Calculate the position and bytes that will be displayed.
+        pub fn calculate(self) -> (usize, impl Iterator<Item = u8>) {
+            M::calculate(self.position, self.iter)
+        }
+
         /// Display the bytes on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
             self.device.display(position, bytes).await
         }
-
-        #[cfg(test)]
-        pub fn calculated(self) -> (usize, impl Iterator<Item = u8>) {
-            M::calculate(self.position, self.iter)
-        }
     }
 
     impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M, InI>
         Scroller<'d, N, Token, CLK, DIO, DELAY, I, M>
     where
+        ERR: 'd,
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         I: Iterator<Item = InI> + 'd,
-        InI: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M: MaybeFlipped<N>,
+        InI: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'd,
+        M: MaybeFlipped<N> + 'd,
     {
-        pub fn steps(self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + 'd {
-            let original_position = self.position;
+        fn _calculate(
+            position: usize,
+            iter: I,
+            inner_iter_len: usize,
+        ) -> (usize, impl Iterator<Item = impl Iterator<Item = u8>>) {
+            let original_position = position;
 
-            let iter = self.iter.map(move |item| {
+            let iter = iter.map(move |item| {
                 let (_, bytes) = M::calculate(original_position, item.into_iter());
 
                 bytes
             });
 
-            let position = M::position(original_position, self.inner_iter_len);
-            self.device.scroll(position, self.delay_ms, iter)
+            let position = M::position(original_position, inner_iter_len);
+
+            (position, iter)
         }
 
-        pub async fn run(self) -> usize {
-            self.steps().count().await
-        }
-    }
-
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M>
-        ScrollDisplayOptions<'d, N, Token, CLK, DIO, DELAY, I, M>
-    where
-        CLK: OutputPin<Error = ERR>,
-        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
-        DELAY: DelayTrait,
-        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M: MaybeFlipped<N>,
-    {
-        /// Set the delay in milliseconds between each animation step.
-        pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
-            self.delay_ms = delay_ms;
-            self
+        pub fn calculate(self) -> (usize, impl Iterator<Item = impl Iterator<Item = u8>>) {
+            Self::_calculate(self.position, self.iter, self.inner_iter_len)
         }
 
-        /// Set the animation direction.
-        pub const fn direction(mut self, direction: ScrollDirection) -> Self {
-            self.direction = direction;
-            self
-        }
-
-        /// Set the animation direction to [`ScrollDirection::LeftToRight`].
-        pub const fn left(mut self) -> Self {
-            self.direction = ScrollDirection::LeftToRight;
-            self
-        }
-
-        /// Set the animation direction to [`ScrollDirection::RightToLeft`].
-        pub const fn right(mut self) -> Self {
-            self.direction = ScrollDirection::RightToLeft;
-            self
-        }
-
-        /// Set the animation style.
-        pub const fn style(mut self, style: ScrollStyle) -> Self {
-            self.style = style;
-            self
-        }
-
-        pub fn finish(
-            self,
-        ) -> Scroller<
-            'd,
-            N,
-            Token,
-            CLK,
-            DIO,
-            DELAY,
-            impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
-            M,
-        > {
-            let iter = windows_iter::<N>(self.options.iter, self.direction, self.style)
-                .map(|i| i.into_iter());
-
-            Scroller {
-                device: self.options.device,
-                inner_iter_len: N,
-                position: self.options.position,
-                delay_ms: self.delay_ms,
-                iter,
-                _flip: self.options._flip,
-            }
-        }
-    }
-
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M>
-        RepeatDisplayOptions<'d, N, Token, CLK, DIO, DELAY, I, M>
-    where
-        CLK: OutputPin<Error = ERR>,
-        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
-        DELAY: DelayTrait,
-        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M: MaybeFlipped<N>,
-    {
-        /// Set the delay in milliseconds between each animation step.
-        pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
-            self.delay_ms = delay_ms;
-            self
-        }
-
-        pub fn finish(
-            self,
-        ) -> Scroller<
-            'd,
-            N,
-            Token,
-            CLK,
-            DIO,
-            DELAY,
-            impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
-            M,
-        > {
-            let iter = self.options.iter.map(move |i| [i]).map(|i| i.into_iter());
-
-            Scroller {
-                device: self.options.device,
-                inner_iter_len: 1,
-                position: self.options.position,
-                delay_ms: self.delay_ms,
-                iter,
-                _flip: self.options._flip,
-            }
-        }
-    }
-
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, M>
-        RotatingCircleOptions<'d, N, Token, CLK, DIO, DELAY, M>
-    where
-        ERR: 'd,
-        CLK: OutputPin<Error = ERR>,
-        DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
-        DELAY: DelayTrait,
-        M: MaybeFlipped<N> + 'd,
-    {
         pub fn steps(self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + 'd {
-            let bytes = match self.style {
-                RotatingStyle::Clockwise => RotatingCircleBits::all_u8_reversed(),
-                RotatingStyle::CounterClockwise => RotatingCircleBits::all_u8(),
-            };
+            let (position, iter) = Self::_calculate(self.position, self.iter, self.inner_iter_len);
 
-            RepeatDisplayOptions {
-                options: DisplayOptions {
-                    device: self.device,
-                    position: self.position,
-                    iter: bytes.into_iter(),
-                    _flip: self._flip,
-                },
-                delay_ms: self.delay_ms,
-            }
-            .finish()
-            .steps()
+            self.device.scroll(position, self.delay_ms, iter)
         }
 
         pub async fn run(self) -> usize {
@@ -749,12 +747,12 @@ mod tests {
     fn dot_is_dynamically_tied_to_byte() {
         let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
 
-        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).calculated();
+        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).calculate();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();
 
         assert_eq!(vec!["H", "E.", "L", "L.", "0"], collected);
 
-        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).flip().calculated();
+        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).flip().calculate();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();
 
         assert_eq!(vec!["7.", "7", "3.", "H"], collected);

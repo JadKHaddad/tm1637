@@ -435,7 +435,7 @@ impl SpecialCharBits {
     }
 }
 
-/// Circle bits.
+/// Rotating circle bits.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -509,7 +509,7 @@ pub enum RotatingCircleBits {
 }
 
 impl RotatingCircleBits {
-    /// Returns all circle bits.
+    /// Returns all rotating circle bits.
     pub const fn all() -> [RotatingCircleBits; 6] {
         [
             RotatingCircleBits::A,
@@ -521,7 +521,7 @@ impl RotatingCircleBits {
         ]
     }
 
-    /// Resturns all circle bits reversed.
+    /// Resturns all rotating circle bits reversed.
     pub const fn all_reversed() -> [RotatingCircleBits; 6] {
         [
             RotatingCircleBits::F,
@@ -533,7 +533,7 @@ impl RotatingCircleBits {
         ]
     }
 
-    /// Returns all circle bits as [`u8`].
+    /// Returns all rotating circle bits as [`u8`].
     pub const fn all_u8() -> [u8; 6] {
         [
             RotatingCircleBits::A as u8,
@@ -545,7 +545,7 @@ impl RotatingCircleBits {
         ]
     }
 
-    /// Resturns all circle bits reversed as [`u8`].
+    /// Resturns all rotating circle bits reversed as [`u8`].
     pub const fn all_u8_reversed() -> [u8; 6] {
         [
             RotatingCircleBits::F as u8,
@@ -667,6 +667,7 @@ pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
 }
 
+/// Converts a 7-segment display byte to a `str`.
 pub const fn str_from_byte(byte: u8) -> &'static str {
     if byte == SegmentBits::Dot as u8 {
         "."
