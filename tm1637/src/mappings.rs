@@ -710,16 +710,10 @@ pub const fn str_from_byte(byte: u8) -> &'static str {
         "J"
     } else if byte == UpCharBits::UpL as u8 {
         "L"
-    } else if byte == UpCharBits::UpO as u8 {
-        "O"
     } else if byte == UpCharBits::UpP as u8 {
         "P"
-    } else if byte == UpCharBits::UpS as u8 {
-        "S"
     } else if byte == UpCharBits::UpU as u8 {
         "U"
-    } else if byte == UpCharBits::UpZ as u8 {
-        "Z"
     } else if byte == LoCharBits::LoA as u8 {
         "a"
     } else if byte == LoCharBits::LoB as u8 {
@@ -800,16 +794,10 @@ pub const fn str_from_byte(byte: u8) -> &'static str {
         "J."
     } else if byte == UpCharBits::UpL as u8 | SegmentBits::Dot as u8 {
         "L."
-    } else if byte == UpCharBits::UpO as u8 | SegmentBits::Dot as u8 {
-        "O."
     } else if byte == UpCharBits::UpP as u8 | SegmentBits::Dot as u8 {
         "P."
-    } else if byte == UpCharBits::UpS as u8 | SegmentBits::Dot as u8 {
-        "S."
     } else if byte == UpCharBits::UpU as u8 | SegmentBits::Dot as u8 {
         "U."
-    } else if byte == UpCharBits::UpZ as u8 | SegmentBits::Dot as u8 {
-        "Z."
     } else if byte == LoCharBits::LoA as u8 | SegmentBits::Dot as u8 {
         "a."
     } else if byte == LoCharBits::LoB as u8 | SegmentBits::Dot as u8 {

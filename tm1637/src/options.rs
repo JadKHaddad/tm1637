@@ -740,6 +740,7 @@ pub mod module {
 #[cfg(test)]
 mod tests {
     extern crate std;
+    use std::vec;
     use std::vec::Vec;
 
     use crate::{mappings::str_from_byte, test::Noop, TM1637Builder};
@@ -748,16 +749,14 @@ mod tests {
     fn dot_is_dynamically_tied_to_byte() {
         let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
 
-        let (_, iter) = tm.options().str("HELL").dot(1).dot(3).calculated();
+        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).calculated();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();
 
-        assert_eq!(&"E.", collected.get(1).unwrap());
-        assert_eq!(&"L.", collected.last().unwrap());
+        assert_eq!(vec!["H", "E.", "L", "L.", "0"], collected);
 
-        let (_, iter) = tm.options().str("HELL").dot(1).dot(3).flip().calculated();
+        let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).flip().calculated();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();
 
-        assert_eq!(&"3.", collected.get(2).unwrap());
-        assert_eq!(&"7.", collected.first().unwrap());
+        assert_eq!(vec!["7.", "7", "3.", "H"], collected);
     }
 }
