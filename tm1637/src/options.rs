@@ -7,6 +7,8 @@ use crate::{
     TM1637,
 };
 
+// TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
+
 /// Starting point for a High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
