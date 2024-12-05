@@ -125,15 +125,15 @@ where
         delay_ms: u32,
         iter: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Stream<Item = Result<(), Error<ERR>>> + 'a {
-        futures::stream::unfold((self, iter), move |(this, mut inner_iter)| async move {
-            match inner_iter.next() {
+        futures::stream::unfold((self, iter), move |(this, mut bytes)| async move {
+            match bytes.next() {
                 Some(window) => match this.display(position, window).await {
                     Ok(_) => {
                         this.delay.delay_ms(delay_ms).await;
 
-                        Some((Ok(()), (this, inner_iter)))
+                        Some((Ok(()), (this, bytes)))
                     }
-                    Err(e) => Some((Err(e), (this, inner_iter))),
+                    Err(e) => Some((Err(e), (this, bytes))),
                 },
                 None => None,
             }
@@ -154,7 +154,7 @@ where
         delay_ms: u32,
         iter: impl Iterator<Item = impl Iterator<Item = u8>> + 'a,
     ) -> impl Iterator<Item = Result<(), Error<ERR>>> + 'a {
-        iter.map(move |inner_iter| match self.display(position, inner_iter) {
+        iter.map(move |bytes| match self.display(position, bytes) {
             Ok(_) => {
                 self.delay.delay_ms(delay_ms);
 

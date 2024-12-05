@@ -4,7 +4,7 @@ use crate::{
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
     tokens::{Flipped, NotFlipped},
-    windows::windows_iter,
+    windows::windows,
     TM1637,
 };
 
@@ -460,7 +460,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
         self
     }
 
-    /// Finish setting the clock and display it.
+    /// Finish setting the clock.
     pub fn finish(
         &mut self,
     ) -> DisplayOptions<
@@ -527,6 +527,7 @@ where
         self
     }
 
+    /// Finish setting the scroll animation.
     pub fn finish(
         self,
     ) -> Scroller<
@@ -540,7 +541,7 @@ where
         M,
     > {
         let iter =
-            windows_iter::<N>(self.options.iter, self.direction, self.style).map(|i| i.into_iter());
+            windows::<N>(self.options.iter, self.direction, self.style).map(|i| i.into_iter());
 
         Scroller {
             device: self.options.device,
@@ -564,6 +565,7 @@ where
         self
     }
 
+    /// Finish setting the repeat animation.
     pub fn finish(
         self,
     ) -> Scroller<
@@ -620,6 +622,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
         self
     }
 
+    /// Flip the display.
     pub fn flip(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, Flipped> {
         RotatingCircleOptions {
             device: self.device,
@@ -630,6 +633,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
         }
     }
 
+    /// Finish setting the rotating circle animation.
     pub fn finish(
         self,
     ) -> Scroller<
@@ -681,7 +685,7 @@ pub mod module {
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
         M: MaybeFlipped<N>,
     {
-        /// Calculate the position and bytes that will be displayed.
+        /// Release the `device` and return the calculated position and bytes.
         pub fn calculate(self) -> (usize, impl Iterator<Item = u8>) {
             M::calculate(self.position, self.iter)
         }
@@ -723,16 +727,19 @@ pub mod module {
             (position, iter)
         }
 
+        /// Release the `device` and return the calculated position and bytes.
         pub fn calculate(self) -> (usize, impl Iterator<Item = impl Iterator<Item = u8>>) {
             Self::_calculate(self.position, self.iter, self.inner_iter_len)
         }
 
+        /// Return the scroll animation as an iterator.
         pub fn steps(self) -> impl ScrollIter<Item = Result<(), Error<ERR>>> + 'd {
             let (position, iter) = Self::_calculate(self.position, self.iter, self.inner_iter_len);
 
             self.device.scroll(position, self.delay_ms, iter)
         }
 
+        /// Run the scroll animation and return the number of steps.
         pub async fn run(self) -> usize {
             self.steps().count().await
         }
