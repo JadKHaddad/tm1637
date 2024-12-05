@@ -110,7 +110,7 @@ async fn main(spawner: Spawner) {
 
     // tm.animate(0, 700, iter).count();
 
-    tm.options().u16_4(2025).display().ok();
+    tm.options().u32_7(59898).display().ok();
 
     loop {}
 }

@@ -157,11 +157,14 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     [u32_6]      [u32];
     [u32_7]      [u32];
     [u32_8]      [u32];
+    [i8_2]       [i8];
+    [i16_3]      [i16];
+    [i16_4]      [i16];
 )]
 impl<'d, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
     pub fn function(
         self,
-        u: type_,
+        n: type_,
     ) -> DisplayOptions<
         'd,
         N,
@@ -175,7 +178,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, D
         DisplayOptions {
             device: self.device,
             position: 0,
-            iter: numbers::function(u).into_iter(),
+            iter: numbers::function(n).into_iter(),
             _flip: NotFlipped,
         }
     }
