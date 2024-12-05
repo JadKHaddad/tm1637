@@ -1,6 +1,7 @@
 use crate::{
     formatters::clock_to_4digits,
     mappings::{from_ascii_byte, RotatingCircleBits, SegmentBits},
+    numbers,
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
     tokens::{Flipped, NotFlipped},
@@ -144,6 +145,40 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     // |           |
     // |           |
     //  --- --- ---
+}
+
+#[::duplicate::duplicate_item(
+    function     type_;
+    [u8]         [u8];
+    [u8_2]       [u8];
+    [u16_3]      [u16];
+    [u16_4]      [u16];
+    [u32_5]      [u32];
+    [u32_6]      [u32];
+    [u32_7]      [u32];
+    [u32_8]      [u32];
+)]
+impl<'d, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
+    pub fn function(
+        self,
+        u: type_,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        NotFlipped,
+    > {
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            iter: numbers::function(u).into_iter(),
+            _flip: NotFlipped,
+        }
+    }
 }
 
 /// High-level API for display operations.

@@ -110,46 +110,7 @@ async fn main(spawner: Spawner) {
 
     // tm.animate(0, 700, iter).count();
 
-    tm.options()
-        .iter(
-            b"HELLO"
-                .iter()
-                .copied()
-                .map(mappings::from_ascii_byte)
-                .enumerate()
-                .map(move |(i, b)| {
-                    if i == 1 {
-                        b | SegmentBits::Dot as u8
-                    } else {
-                        b
-                    }
-                }),
-        )
-        .flip()
-        .display()
-        .ok();
-
-    tm.options()
-        .str("Error")
-        .dot(1)
-        .scroll()
-        .delay_ms(700)
-        .direction(ScrollDirection::RightToLeft)
-        .style(ScrollStyle::Circular)
-        .finish()
-        .run();
-
-    let (position, iter) = tm.options().rotating_circle().finish().calculate();
-    tm.scroll(position, 700, iter);
-    // tm.options()
-    //     .clock()
-    //     .hour(13)
-    //     .minute(5)
-    //     .finish()
-    //     .dot(1)
-    //     .remove_dot(1)
-    //     .display()
-    //     .ok();
+    tm.options().u16_4(2025).display().ok();
 
     loop {}
 }
