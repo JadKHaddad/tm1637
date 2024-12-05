@@ -13,6 +13,7 @@ use log::info;
 use tm1637_embedded_hal::{
     mappings::{self, DigitBits, RotatingCircleBits, SegmentBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
+    tokens::Blocking,
     Brightness, TM1637Builder,
 };
 
@@ -56,7 +57,7 @@ async fn main(spawner: Spawner) {
 
     let (clk, dio, delay) = tm.into_parts();
 
-    let mut tm = TM1637Builder::new(clk, dio, delay).build_blocking::<4>();
+    let mut tm = TM1637Builder::new(clk, dio, delay).build::<4, Blocking>();
 
     tm.init().unwrap();
 
@@ -129,16 +130,17 @@ async fn main(spawner: Spawner) {
         .ok();
 
     tm.options()
-        .str("HELL")
+        .str("Error")
         .dot(1)
-        .flip()
         .scroll()
         .delay_ms(700)
+        .direction(ScrollDirection::RightToLeft)
+        .style(ScrollStyle::Circular)
         .finish()
-        .calculate();
+        .run();
 
-    tm.options().rotating_circle().finish().calculate();
-
+    let (position, iter) = tm.options().rotating_circle().finish().calculate();
+    tm.scroll(position, 700, iter);
     // tm.options()
     //     .clock()
     //     .hour(13)

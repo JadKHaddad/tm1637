@@ -1,4 +1,5 @@
 use crate::{
+    mode::Mode,
     tokens::{Async, Blocking},
     Brightness, TM1637,
 };
@@ -41,8 +42,32 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
         self
     }
 
-    /// Build an async [`TM1637`] instance.
-    pub fn build_async<const N: usize>(self) -> TM1637<N, Async, CLK, DIO, DELAY> {
+    /// Build a [`TM1637`] instance with the specified mode.
+    ///
+    /// ## Async
+    ///
+    /// ```rust
+    /// use tm1637_embedded_hal::{mock::Noop, tokens::Async, TM1637Builder};
+    ///
+    /// let clk = Noop;
+    /// let dio = Noop;
+    /// let delay = Noop;
+    ///
+    /// let tm = TM1637Builder::new(clk, dio, delay).build::<4, Async>();
+    /// ```
+    ///
+    /// ## Blocking
+    ///
+    /// ```rust
+    /// use tm1637_embedded_hal::{mock::Noop, tokens::Blocking, TM1637Builder};
+    ///
+    /// let clk = Noop;
+    /// let dio = Noop;
+    /// let delay = Noop;
+    ///
+    /// let tm = TM1637Builder::new(clk, dio, delay).build::<4, Blocking>();
+    /// ```
+    pub fn build<const N: usize, T: Mode>(self) -> TM1637<N, T, CLK, DIO, DELAY> {
         TM1637::new(
             self.clk,
             self.dio,
@@ -52,14 +77,13 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
         )
     }
 
+    /// Build an async [`TM1637`] instance.
+    pub fn build_async<const N: usize>(self) -> TM1637<N, Async, CLK, DIO, DELAY> {
+        self.build()
+    }
+
     /// Build a blocking [`TM1637`] instance.
     pub fn build_blocking<const N: usize>(self) -> TM1637<N, Blocking, CLK, DIO, DELAY> {
-        TM1637::new(
-            self.clk,
-            self.dio,
-            self.delay,
-            self.brightness,
-            self.delay_us,
-        )
+        self.build()
     }
 }

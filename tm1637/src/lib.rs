@@ -11,12 +11,12 @@
 // #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-#[cfg(test)]
-mod test;
-
 mod brightness;
 mod builder;
 mod conditional;
+#[doc(hidden)]
+pub mod mock;
+
 // #[cfg(feature = "demo")]
 // #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
 // pub mod demo;
@@ -26,6 +26,7 @@ pub mod formatters;
 mod identity;
 pub mod mappings;
 mod maybe_flipped;
+mod mode;
 mod options;
 mod rotating_circle;
 pub mod scroll;

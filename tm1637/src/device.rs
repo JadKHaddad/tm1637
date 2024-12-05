@@ -380,7 +380,44 @@ pub mod module {
                 .await
         }
 
+        pub async fn display_slice(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+        ) -> Result<(), Error<ERR>> {
+            self.display(position, bytes.iter().copied()).await
+        }
+
+        pub async fn display_slice_unchecked(
+            &mut self,
+            position: usize,
+            bytes: &[u8],
+        ) -> Result<(), Error<ERR>> {
+            self.display_unchecked(position, bytes.iter().copied())
+                .await
+        }
+
         /// High-level API for static or animated display operations.
+        ///
+        /// # Example
+        ///
+        /// Scroll the text "Error" with a dot on the first position from right to left with a delay of 700ms.
+        ///
+        /// ```rust
+        /// use tm1637_embedded_hal::{mock::Noop, scroll::{ScrollDirection, ScrollStyle}, tokens::Blocking, TM1637Builder};
+        ///
+        /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+        ///
+        /// tm.options()
+        ///     .str("Error")
+        ///     .dot(1)
+        ///     .scroll()
+        ///     .delay_ms(700)
+        ///     .direction(ScrollDirection::RightToLeft)
+        ///     .style(ScrollStyle::Circular)
+        ///     .finish()
+        ///     .run();
+        /// ```
         pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
             InitDisplayOptions::new(self)
         }

@@ -12,10 +12,13 @@
 //!
 //! # Example
 //!
-//! ```rust,ignore
-//! tm.write_bytes_raw(0, i16_to_4digits(1234));
-//! ```
+//! ```rust
+//! use tm1637_embedded_hal::{formatters::i16_to_4digits, mock::Noop, tokens::Blocking, TM1637Builder};
 //!
+//! let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+//!
+//! tm.display_slice(0, &i16_to_4digits(1234));
+//! ```
 
 use crate::mappings::{DigitBits, UpsideDownDigitBits};
 
@@ -136,10 +139,13 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///
 /// Let's create a clock displaying `12:34` with a blinking colon:
 ///
-/// ```rust, ignore
-/// let mut tm = TM1637Builder::new(clk_pin, dio_pin, delay)
-///     .brightness(Brightness::L3)
-///     .build::<4>();
+/// ```rust
+/// use tm1637_embedded_hal::{formatters::clock_to_4digits, mock::Noop, tokens::Blocking, TM1637Builder};
+/// use embedded_hal::delay::DelayNs;
+///
+/// let mut delay = Noop;
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
 ///
 /// tm.init().ok();
 ///
@@ -149,7 +155,7 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///             let blink = second % 2 == 0;
 ///             let segs = clock_to_4digits(hour, minute, blink);
 ///
-///             tm.write_segments_raw(0, &segs).ok();
+///             tm.display_slice(0, &segs).ok();
 ///
 ///             delay.delay_ms(500);
 ///         }

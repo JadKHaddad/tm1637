@@ -72,13 +72,17 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     ///
     /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
     ///
-    /// ```rust, ignore
+    /// ```rust
+    /// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
+    ///
+    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+    ///
     /// tm.options()
     ///     .iter(
     ///         b"HELLO"
     ///             .iter()
     ///             .copied()
-    ///             .map(mappings::from_ascii_byte)
+    ///             .map(from_ascii_byte)
     ///             .enumerate()
     ///             .map(move |(i, b)| {
     ///                 if i == 1 {
@@ -90,20 +94,18 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
     ///     )
     ///     .display()
     ///     .ok();
-    /// ```
     ///
-    /// This example is equivalent to
+    /// // Equivalent to
     ///
-    /// ```rust, ignore
     /// tm.options()
     ///    .str("HELLO")
     ///    .dot(1)
     ///    .display()
     ///    .ok();
     /// ```
-    pub fn iter<It: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
+    pub fn iter<I: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
         self,
-        iter: It,
+        iter: I,
     ) -> DisplayOptions<
         'd,
         N,
@@ -150,7 +152,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CL
 pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
     device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
     position: usize,
-    pub(crate) iter: I,
+    iter: I,
     _flip: M,
 }
 
@@ -366,21 +368,23 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK,
 
     /// Map the bytes using the provided function.
     ///
-    ///  # Example
+    /// # Example
     ///
     /// Manually map each byte in a slice into a human readable character.
     ///
-    /// ```rust, ignore
+    /// ```rust
+    /// use tm1637_embedded_hal::{mappings::from_ascii_byte, mock::Noop, tokens::Blocking, TM1637Builder};
+    ///
+    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+    ///
     /// tm.options()
     ///     .slice(b"HELLO")
-    ///     .map(mappings::from_ascii_byte)
+    ///     .map(from_ascii_byte)
     ///     .display()
     ///     .ok();
-    /// ```
     ///
-    /// This example is equivalent to
+    /// // Equivalent to
     ///
-    /// ```rust, ignore
     /// tm.options()
     ///    .str("HELLO")
     ///    .display()
@@ -741,7 +745,7 @@ mod tests {
     use std::vec;
     use std::vec::Vec;
 
-    use crate::{mappings::str_from_byte, test::Noop, TM1637Builder};
+    use crate::{mappings::str_from_byte, mock::Noop, TM1637Builder};
 
     #[test]
     fn dot_is_dynamically_tied_to_byte() {
