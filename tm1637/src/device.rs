@@ -172,8 +172,8 @@ where
 )]
 pub mod module {
     use crate::{
-        tokens::NotFlipped, Brightness, ConditionalInputPin, DisplayOptions, Error, Identity,
-        InitDisplayOptions, TM1637,
+        options::RotatingCircleOptions, tokens::NotFlipped, Brightness, ConditionalInputPin,
+        DisplayOptions, Error, Identity, TM1637,
     };
     use ::embedded_hal::digital::OutputPin;
 
@@ -400,29 +400,55 @@ pub mod module {
                 .await
         }
 
-        /// High-level API for static or animated display operations.
-        ///
-        /// # Example
-        ///
-        /// Scroll the text "Error" with a dot on the first position from right to left with a delay of 700ms.
-        ///
-        /// ```rust
-        /// use tm1637_embedded_hal::{mock::Noop, scroll::{ScrollDirection, ScrollStyle}, tokens::Blocking, TM1637Builder};
-        ///
-        /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
-        ///
-        /// tm.options()
-        ///     .str("Error")
-        ///     .dot(1)
-        ///     .scroll()
-        ///     .delay_ms(700)
-        ///     .direction(ScrollDirection::RightToLeft)
-        ///     .style(ScrollStyle::Circular)
-        ///     .finish()
-        ///     .run();
-        /// ```
-        pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
-            InitDisplayOptions::new(self)
+        // /// High-level API for static or animated display operations.
+        // ///
+        // /// # Example
+        // ///
+        // /// Scroll the text "Error" with a dot on the first position from right to left with a delay of 700ms.
+        // ///
+        // /// ```rust
+        // /// use tm1637_embedded_hal::{mock::Noop, scroll::{ScrollDirection, ScrollStyle}, tokens::Blocking, TM1637Builder};
+        // ///
+        // /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+        // ///
+        // /// tm.options()
+        // ///     .str("Error")
+        // ///     .dot(1)
+        // ///     .scroll()
+        // ///     .delay_ms(700)
+        // ///     .direction(ScrollDirection::RightToLeft)
+        // ///     .style(ScrollStyle::Circular)
+        // ///     .finish()
+        // ///     .run();
+        // /// ```
+        // pub fn options(&mut self) -> InitDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
+        //     InitDisplayOptions::new(self)
+        // }
+
+        pub fn options(
+            &mut self,
+        ) -> DisplayOptions<
+            '_,
+            N,
+            Token,
+            CLK,
+            DIO,
+            DELAY,
+            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+            NotFlipped,
+        > {
+            DisplayOptions {
+                device: self,
+                position: 0,
+                iter: core::iter::empty(),
+                _flip: NotFlipped,
+            }
+        }
+
+        pub fn rotating_circle(
+            &mut self,
+        ) -> RotatingCircleOptions<'_, N, Token, CLK, DIO, DELAY, NotFlipped> {
+            RotatingCircleOptions::new(self, NotFlipped)
         }
     }
 }

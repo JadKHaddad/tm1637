@@ -10,190 +10,17 @@ use crate::{
     TM1637,
 };
 
-// TODO: remove the InitdisplayOptions and use the DisplayOptions directly with position 0 and empty iter and see how to chain the options.
+// TODO: duoble flip should be possible
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
-
-/// Starting point for a High-level API for display operations.
-#[derive(Debug)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct InitDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
-    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-}
-
-impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
-    pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
-        Self { device }
-    }
-
-    /// Prepare to display a slice of bytes.
-    pub fn slice(
-        self,
-        bytes: &'b [u8],
-    ) -> DisplayOptions<
-        'd,
-        N,
-        T,
-        CLK,
-        DIO,
-        DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
-        NotFlipped,
-    > {
-        DisplayOptions {
-            device: self.device,
-            position: 0,
-            iter: bytes.iter().copied(),
-            _flip: NotFlipped,
-        }
-    }
-
-    /// Prepare to display a string.
-    pub fn str(
-        self,
-        str: &'b str,
-    ) -> DisplayOptions<
-        'd,
-        N,
-        T,
-        CLK,
-        DIO,
-        DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
-        NotFlipped,
-    > {
-        DisplayOptions {
-            device: self.device,
-            position: 0,
-            iter: str.as_bytes().iter().copied().map(from_ascii_byte),
-            _flip: NotFlipped,
-        }
-    }
-
-    /// Prepare to display an iterator of bytes.
-    ///
-    /// # Example
-    ///
-    /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
-    ///
-    /// ```rust
-    /// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
-    ///
-    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
-    ///
-    /// tm.options()
-    ///     .iter(
-    ///         b"HELLO"
-    ///             .iter()
-    ///             .copied()
-    ///             .map(from_ascii_byte)
-    ///             .enumerate()
-    ///             .map(move |(i, b)| {
-    ///                 if i == 1 {
-    ///                     b | SegmentBits::Dot as u8
-    ///                 } else {
-    ///                     b
-    ///                 }
-    ///             }),
-    ///     )
-    ///     .display()
-    ///     .ok();
-    ///
-    /// // Equivalent to
-    ///
-    /// tm.options()
-    ///    .str("HELLO")
-    ///    .dot(1)
-    ///    .display()
-    ///    .ok();
-    /// ```
-    pub fn iter<I: DoubleEndedIterator<Item = u8> + ExactSizeIterator>(
-        self,
-        iter: I,
-    ) -> DisplayOptions<
-        'd,
-        N,
-        T,
-        CLK,
-        DIO,
-        DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        NotFlipped,
-    > {
-        DisplayOptions {
-            device: self.device,
-            position: 0,
-            iter,
-            _flip: NotFlipped,
-        }
-    }
-
-    /// Prepare to display a digital clock.
-    pub fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
-        ClockDisplayOptions::new(self.device)
-    }
-
-    /// Prepare to display a rotating circle animation.
-    pub fn rotating_circle(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
-        RotatingCircleOptions::new(self.device, NotFlipped)
-    }
-
-    // TODO: all formatters go here
-    // TODO: maybe rotating circle over 2 cells 3 or 4 cells etc..
-    //  --- ---
-    // |       |
-    // |       |
-    //  --- ---
-    //  --- --- ---
-    // |           |
-    // |           |
-    //  --- --- ---
-}
-
-#[::duplicate::duplicate_item(
-    function     type_;
-    [u8]         [u8];
-    [u8_2]       [u8];
-    [u16_3]      [u16];
-    [u16_4]      [u16];
-    [u32_5]      [u32];
-    [u32_6]      [u32];
-    [u32_7]      [u32];
-    [u32_8]      [u32];
-    [i8_2]       [i8];
-    [i16_3]      [i16];
-    [i16_4]      [i16];
-)]
-impl<'d, const N: usize, T, CLK, DIO, DELAY> InitDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
-    pub fn function(
-        self,
-        n: type_,
-    ) -> DisplayOptions<
-        'd,
-        N,
-        T,
-        CLK,
-        DIO,
-        DELAY,
-        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        NotFlipped,
-    > {
-        DisplayOptions {
-            device: self.device,
-            position: 0,
-            iter: numbers::function(n).into_iter(),
-            _flip: NotFlipped,
-        }
-    }
-}
 
 /// High-level API for display operations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
-    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-    position: usize,
-    iter: I,
-    _flip: M,
+    pub(crate) device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    pub(crate) position: usize,
+    pub(crate) iter: I,
+    pub(crate) _flip: M,
 }
 
 /// High-level API for scroll animations.
@@ -226,8 +53,8 @@ pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
-    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
     hour: u8,
     minute: u8,
 }
@@ -239,6 +66,30 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
         self
+    }
+
+    pub fn slice(
+        self,
+        bytes: &'b [u8],
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
+        NotFlipped,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            iter: self.iter.exact_size_chain(bytes.iter().copied()),
+            _flip: NotFlipped,
+        }
     }
 
     pub fn str(
@@ -265,6 +116,41 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
                 .exact_size_chain(str.as_bytes().iter().copied().map(from_ascii_byte)),
             _flip: self._flip,
         }
+    }
+
+    pub fn iter<It>(
+        self,
+        iter: It,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        It: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            iter: self.iter.exact_size_chain(iter),
+            _flip: self._flip,
+        }
+    }
+
+    /// Prepare to display a digital clock.
+    pub fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+        ClockDisplayOptions::new(self)
+    }
+
+    /// Prepare to display a rotating circle animation.
+    pub fn rotating_circle(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
+        RotatingCircleOptions::new(self.device, NotFlipped)
     }
 
     /// Use scroll animation options.
@@ -507,10 +393,12 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 }
 
-impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
-    pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
+    ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+{
+    pub fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
         Self {
-            device,
+            options,
             hour: 0,
             minute: 0,
         }
@@ -530,23 +418,22 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> ClockDisplayOptions<'d, N, T, CLK, 
 
     /// Finish setting the clock.
     pub fn finish(
-        &mut self,
+        self,
     ) -> DisplayOptions<
+        'd,
         N,
         T,
         CLK,
         DIO,
         DELAY,
         impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        NotFlipped,
-    > {
-        DisplayOptions {
-            device: self.device,
-            position: 0,
-            // add the dot using the `dot` method on the display options
-            iter: clock_to_4digits(self.hour, self.minute, false).into_iter(),
-            _flip: NotFlipped,
-        }
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
+        self.options
+            .iter(clock_to_4digits(self.hour, self.minute, false).into_iter())
     }
 }
 
@@ -814,6 +701,46 @@ pub mod module {
     }
 }
 
+#[::duplicate::duplicate_item(
+    function     type_;
+    [u8]         [u8];
+    [u8_2]       [u8];
+    [u16_3]      [u16];
+    [u16_4]      [u16];
+    [u32_5]      [u32];
+    [u32_6]      [u32];
+    [u32_7]      [u32];
+    [u32_8]      [u32];
+    [i8_2]       [i8];
+    [i16_3]      [i16];
+    [i16_4]      [i16];
+)]
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+where
+    I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+{
+    pub fn function(
+        self,
+        n: type_,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M,
+    > {
+        DisplayOptions {
+            device: self.device,
+            position: 0,
+            iter: self.iter.exact_size_chain(numbers::function(n).into_iter()),
+            _flip: self._flip,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     extern crate std;
@@ -837,3 +764,44 @@ mod tests {
         assert_eq!(vec!["7.", "7", "3.", "H"], collected);
     }
 }
+
+/*
+/// Prepare to display an iterator of bytes.
+///
+/// # Example
+///
+/// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
+///
+/// ```rust
+/// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+///
+/// tm.options()
+///     .iter(
+///         b"HELLO"
+///             .iter()
+///             .copied()
+///             .map(from_ascii_byte)
+///             .enumerate()
+///             .map(move |(i, b)| {
+///                 if i == 1 {
+///                     b | SegmentBits::Dot as u8
+///                 } else {
+///                     b
+///                 }
+///             }),
+///     )
+///     .display()
+///     .ok();
+///
+/// // Equivalent to
+///
+/// tm.options()
+///    .str("HELLO")
+///    .dot(1)
+///    .display()
+///    .ok();
+/// ```
+pub fn iter<I: DoubleEndedIterator<Item = u8> + ExactSizeIterator>
+ */

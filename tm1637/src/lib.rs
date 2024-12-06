@@ -42,4 +42,4 @@ pub use device::TM1637;
 pub use error::Error;
 pub(crate) use identity::Identity;
 pub use maybe_flipped::MaybeFlipped;
-pub use options::{DisplayOptions, InitDisplayOptions, ScrollDisplayOptions};
+pub use options::{DisplayOptions, ScrollDisplayOptions};
