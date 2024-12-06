@@ -7,10 +7,9 @@ use crate::{
     scroll::{ScrollDirection, ScrollStyle},
     tokens::{Flipped, NotFlipped},
     windows::windows,
-    TM1637,
+    MaybeFlipped, TM1637,
 };
 
-// TODO: duoble flip should be possible
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
 
 /// High-level API for display operations.
@@ -379,16 +378,17 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         DIO,
         DELAY,
         impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        Flipped,
+        impl MaybeFlipped<N>,
     >
     where
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+        M: MaybeFlipped<N>,
     {
         DisplayOptions {
             device: self.device,
             position: self.position,
             iter: self.iter,
-            _flip: Flipped,
+            _flip: M::flip(),
         }
     }
 }

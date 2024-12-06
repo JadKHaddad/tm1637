@@ -7,6 +7,8 @@ pub trait MaybeFlipped<const N: usize> {
     ) -> (usize, impl Iterator<Item = u8>);
 
     fn position(position: usize, len: usize) -> usize;
+
+    fn flip() -> impl MaybeFlipped<N>;
 }
 
 impl<const N: usize> MaybeFlipped<N> for NotFlipped {
@@ -19,6 +21,10 @@ impl<const N: usize> MaybeFlipped<N> for NotFlipped {
 
     fn position(position: usize, _: usize) -> usize {
         position
+    }
+
+    fn flip() -> impl MaybeFlipped<N> {
+        Flipped
     }
 }
 
@@ -58,6 +64,10 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
             true => 0,
             false => N - len - position,
         }
+    }
+
+    fn flip() -> impl MaybeFlipped<N> {
+        NotFlipped
     }
 }
 
