@@ -22,6 +22,7 @@ pub mod mock;
 // pub mod demo;
 mod device;
 mod error;
+mod exact_size;
 pub mod formatters;
 mod identity;
 pub mod mappings;
