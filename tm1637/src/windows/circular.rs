@@ -1,5 +1,6 @@
 use super::{reverse::ReverseWindows, LinearWindows};
 
+/// Internal state for [`CircularWindows`].
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 enum WindowsState<const N: usize> {
@@ -8,6 +9,9 @@ enum WindowsState<const N: usize> {
     FirstAndLast([u8; N], [u8; N]),
 }
 
+/// Circular windows iterator.
+///
+/// Represents [`ScrollStyle::Circular`](crate::scroll::ScrollStyle::Circular) and [`ScrollDirection::LeftToRight`](crate::scroll::ScrollDirection::LeftToRight).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CircularWindows<const N: usize, I> {
@@ -83,6 +87,9 @@ where
     }
 }
 
+/// Reversed circular windows iterator.
+///
+/// Represents [`ScrollStyle::Circular`](crate::scroll::ScrollStyle::Circular) and [`ScrollDirection::RightToLeft`](crate::scroll::ScrollDirection::RightToLeft).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CircularWindowsReversed<const N: usize, I> {

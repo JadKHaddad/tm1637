@@ -67,6 +67,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         self
     }
 
+    /// Add a slice of bytes.
     pub fn slice(
         self,
         bytes: &'b [u8],
@@ -91,6 +92,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         }
     }
 
+    /// Add a string.
     pub fn str(
         self,
         str: &'b str,
@@ -117,6 +119,43 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         }
     }
 
+    /// Add an iterator of bytes.
+    ///
+    /// # Example
+    ///
+    /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
+    ///
+    /// ```rust
+    /// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
+    ///
+    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+    ///
+    /// tm.options()
+    ///     .iter(
+    ///         b"HELLO"
+    ///             .iter()
+    ///             .copied()
+    ///             .map(from_ascii_byte)
+    ///             .enumerate()
+    ///             .map(move |(i, b)| {
+    ///                 if i == 1 {
+    ///                     b | SegmentBits::Dot as u8
+    ///                 } else {
+    ///                     b
+    ///                 }
+    ///             }),
+    ///     )
+    ///     .display()
+    ///     .ok();
+    ///
+    /// // Equivalent to
+    ///
+    /// tm.options()
+    ///    .str("HELLO")
+    ///    .dot(1)
+    ///    .display()
+    ///    .ok();
+    /// ```
     pub fn iter<It>(
         self,
         iter: It,
@@ -147,11 +186,6 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         ClockDisplayOptions::new(self)
     }
 
-    /// Prepare to display a rotating circle animation.
-    pub fn rotating_circle(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
-        RotatingCircleOptions::new(self.device, NotFlipped)
-    }
-
     /// Use scroll animation options.
     pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         ScrollDisplayOptions {
@@ -162,6 +196,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         }
     }
 
+    /// Use repeat animation options.
     pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         RepeatDisplayOptions {
             options: self,
@@ -764,44 +799,3 @@ mod tests {
         assert_eq!(vec!["7.", "7", "3.", "H"], collected);
     }
 }
-
-/*
-/// Prepare to display an iterator of bytes.
-///
-/// # Example
-///
-/// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
-///
-/// ```rust
-/// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
-///
-/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
-///
-/// tm.options()
-///     .iter(
-///         b"HELLO"
-///             .iter()
-///             .copied()
-///             .map(from_ascii_byte)
-///             .enumerate()
-///             .map(move |(i, b)| {
-///                 if i == 1 {
-///                     b | SegmentBits::Dot as u8
-///                 } else {
-///                     b
-///                 }
-///             }),
-///     )
-///     .display()
-///     .ok();
-///
-/// // Equivalent to
-///
-/// tm.options()
-///    .str("HELLO")
-///    .dot(1)
-///    .display()
-///    .ok();
-/// ```
-pub fn iter<I: DoubleEndedIterator<Item = u8> + ExactSizeIterator>
- */

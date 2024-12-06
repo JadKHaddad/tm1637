@@ -1,5 +1,13 @@
 use core::iter::Chain;
 
+/// Exact size iterator.
+///
+/// Must be crated with a `correct` size.
+///
+/// The main purpose of this iterator is to provide a way to chain two iterators and also provide the exact size of the chain.
+/// Because the [`Chain`] iterator does not implement the [`ExactSizeIterator`] trait, we need to implement it ourselves.
+///
+/// See [PR #66531](https://github.com/rust-lang/rust/pull/66531)
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ExactSize<I> {
@@ -7,17 +15,7 @@ pub struct ExactSize<I> {
     size: usize,
 }
 
-fn exact_size_chain<A, B, I>(first: A, second: B) -> ExactSize<Chain<A, B>>
-where
-    A: DoubleEndedIterator<Item = I> + ExactSizeIterator,
-    B: DoubleEndedIterator<Item = I> + ExactSizeIterator,
-{
-    let size = first.len() + second.len();
-    let iter = first.chain(second);
-
-    ExactSize { inner: iter, size }
-}
-
+/// Extension trait for [`DoubleEndedIterator`] and [`ExactSizeIterator`] to chain two iterators and provide the exact size of the chain.
 pub trait ExactSizeChainExt<B>: Sized {
     fn exact_size_chain(self, second: B) -> ExactSize<Chain<Self, B>>;
 }
@@ -27,8 +25,11 @@ where
     A: DoubleEndedIterator<Item = I> + ExactSizeIterator,
     B: DoubleEndedIterator<Item = I> + ExactSizeIterator,
 {
-    fn exact_size_chain(self, second: B) -> ExactSize<Chain<Self, B>> {
-        exact_size_chain(self, second)
+    fn exact_size_chain(self, oher: B) -> ExactSize<Chain<Self, B>> {
+        let size = self.len() + oher.len();
+        let iter = self.chain(oher);
+
+        ExactSize { inner: iter, size }
     }
 }
 

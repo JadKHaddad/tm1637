@@ -1,3 +1,4 @@
+/// Internal state for [`LinearWindows`].
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 enum BufferState {
@@ -5,6 +6,10 @@ enum BufferState {
     Full,
 }
 
+/// Linear windows iterator.
+///
+/// - Represents [`ScrollStyle::Linear`](crate::scroll::ScrollStyle::Linear) and [`ScrollDirection::LeftToRight`](crate::scroll::ScrollDirection::LeftToRight).
+/// - Reversed, represents [`ScrollStyle::Linear`](crate::scroll::ScrollStyle::Linear) and [`ScrollDirection::RightToLeft`](crate::scroll::ScrollDirection::RightToLeft).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct LinearWindows<const N: usize, I> {

@@ -1,3 +1,4 @@
+/// Internal state for [`ReverseWindows`].
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 enum BufferState {
@@ -6,7 +7,7 @@ enum BufferState {
     Full,
 }
 
-// Core for CircularWindowsReversed.
+/// Core for [`CircularWindowsReversed`](super::CircularWindowsReversed).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ReverseWindows<const N: usize, I> {

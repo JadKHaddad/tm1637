@@ -2,6 +2,7 @@ use crate::scroll::{ScrollDirection, ScrollStyle};
 
 use super::{CircularWindows, CircularWindowsReversed, LinearWindows};
 
+/// Returns an iterator over windows of size `N` from the input bytes.
 #[auto_enums::auto_enum(Iterator)]
 pub fn windows<const N: usize>(
     bytes: impl DoubleEndedIterator<Item = u8>,
@@ -14,6 +15,9 @@ pub fn windows<const N: usize>(
     }
 }
 
+/// Returns an iterator over circular windows of size `N` from the input bytes.
+///
+/// See [`windows`].
 #[auto_enums::auto_enum(Iterator)]
 pub fn windows_circular<const N: usize>(
     bytes: impl DoubleEndedIterator<Item = u8>,
@@ -25,6 +29,9 @@ pub fn windows_circular<const N: usize>(
     }
 }
 
+/// Returns an iterator over linear windows of size `N` from the input bytes.
+///
+/// See [`windows`].
 #[auto_enums::auto_enum(Iterator)]
 pub fn windows_linear<const N: usize>(
     bytes: impl DoubleEndedIterator<Item = u8>,
@@ -36,6 +43,11 @@ pub fn windows_linear<const N: usize>(
     }
 }
 
+/// Returns an iterator over windows of size `N` from the input bytes.
+///
+/// This function is for external use. It provides a faster implementation than [`windows`] but it's not used by the library, because of api incompatibility.
+///
+/// The returned value may not be identical to the one returned by [`windows`].
 pub fn windows_slice<const N: usize>(
     bytes: &[u8],
     direction: ScrollDirection,
@@ -67,6 +79,9 @@ pub fn windows_slice<const N: usize>(
     }
 }
 
+/// Returns an iterator over circular windows of size `N` from the input bytes.
+///
+/// See [`windows_slice`].
 pub fn windows_circular_slice<const N: usize>(
     bytes: &[u8],
     direction: ScrollDirection,
@@ -85,6 +100,9 @@ pub fn windows_circular_slice<const N: usize>(
     })
 }
 
+/// Returns an iterator over linear windows of size `N` from the input bytes.
+///
+/// See [`windows_slice`].
 #[auto_enums::auto_enum(Iterator)]
 pub fn windows_linear_slice<const N: usize>(
     bytes: &[u8],

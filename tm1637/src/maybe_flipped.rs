@@ -1,13 +1,17 @@
 use crate::tokens::{Flipped, NotFlipped};
 
+/// A trait for recalculating the `position` and `bytes` on a `maybe flipped` display.
 pub trait MaybeFlipped<const N: usize> {
+    /// Calculate the new `position` and `bytes` for the display.
     fn calculate(
         position: usize,
         bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
     ) -> (usize, impl Iterator<Item = u8>);
 
+    /// Calculate the new `position` for the display.
     fn position(position: usize, len: usize) -> usize;
 
+    /// Flip the display.
     fn flip() -> impl MaybeFlipped<N>;
 }
 
@@ -28,7 +32,6 @@ impl<const N: usize> MaybeFlipped<N> for NotFlipped {
     }
 }
 
-// TODO: fix the flip
 impl<const N: usize> MaybeFlipped<N> for Flipped {
     fn calculate(
         position: usize,

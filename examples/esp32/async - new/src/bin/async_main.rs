@@ -57,7 +57,10 @@ async fn main(spawner: Spawner) {
 
     let (clk, dio, delay) = tm.into_parts();
 
-    let mut tm = TM1637Builder::new(clk, dio, delay).build::<4, Blocking>();
+    let mut tm = TM1637Builder::new(clk, dio, delay)
+        .brightness(Brightness::L0)
+        .delay_us(50)
+        .build::<4, Blocking>();
 
     tm.init().unwrap();
 
@@ -98,19 +101,42 @@ async fn main(spawner: Spawner) {
     // info!("Count: {:?}", count);
 
     let slice = &[
-        DigitBits::One as u8,
-        DigitBits::Two as u8,
-        DigitBits::Three as u8,
-        DigitBits::Four as u8,
-        DigitBits::Five as u8,
-        DigitBits::Six as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
     ];
 
     // let iter = windows_non_overlapping::<4>(slice, Direction::RightToLeft);
 
     // tm.animate(0, 700, iter).count();
 
-    tm.options().flip().u8_2(15).str("oC").flip().display().ok();
+    tm.options()
+        .flip()
+        .u8_2(15)
+        .str("oC  ")
+        .flip()
+        .scroll()
+        .right()
+        .delay_ms(700)
+        .style(ScrollStyle::Linear)
+        .finish()
+        .run();
+    // tm.options()
+    //     .clock()
+    //     .hour(12)
+    //     .minute(20)
+    //     .finish()
+    //     .dot(1)
+    //     .dot(0)
+    //     .display()
+    //     .unwrap();
+    // tm.display_slice(0, slice).unwrap();
+
+    // Timer::after(Duration::from_secs(2)).await;
+    // tm.off().unwrap();
+    // Timer::after(Duration::from_secs(2)).await;
+    // tm.on().unwrap();
 
     loop {}
 }
