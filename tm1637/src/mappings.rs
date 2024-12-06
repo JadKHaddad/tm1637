@@ -148,6 +148,114 @@ impl DigitBits {
     }
 }
 
+/// Maps a hex digit to its closest possible representation on a 7-segment display.
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum HexDigitBits {
+    /// 0
+    Zero = DigitBits::Zero as u8,
+    /// 1
+    One = DigitBits::One as u8,
+    /// 2
+    Two = DigitBits::Two as u8,
+    /// 3
+    Three = DigitBits::Three as u8,
+    /// 4
+    Four = DigitBits::Four as u8,
+    /// 5
+    Five = DigitBits::Five as u8,
+    /// 6
+    Six = DigitBits::Six as u8,
+    /// 7
+    Seven = DigitBits::Seven as u8,
+    /// 8
+    Eight = DigitBits::Eight as u8,
+    /// 9
+    Nine = DigitBits::Nine as u8,
+    /// A
+    A = UpCharBits::UpA as u8,
+    /// b
+    B = LoCharBits::LoB as u8,
+    /// C
+    C = UpCharBits::UpC as u8,
+    /// d
+    D = LoCharBits::LoD as u8,
+    /// E
+    E = UpCharBits::UpE as u8,
+    /// F
+    F = UpCharBits::UpF as u8,
+}
+
+impl HexDigitBits {
+    /// Returns all digits.
+    pub const fn all() -> [HexDigitBits; 16] {
+        [
+            HexDigitBits::Zero,
+            HexDigitBits::One,
+            HexDigitBits::Two,
+            HexDigitBits::Three,
+            HexDigitBits::Four,
+            HexDigitBits::Five,
+            HexDigitBits::Six,
+            HexDigitBits::Seven,
+            HexDigitBits::Eight,
+            HexDigitBits::Nine,
+            HexDigitBits::A,
+            HexDigitBits::B,
+            HexDigitBits::C,
+            HexDigitBits::D,
+            HexDigitBits::E,
+            HexDigitBits::F,
+        ]
+    }
+
+    /// Returns all digits as [`u8`].
+    pub const fn all_u8() -> [u8; 16] {
+        [
+            HexDigitBits::Zero as u8,
+            HexDigitBits::One as u8,
+            HexDigitBits::Two as u8,
+            HexDigitBits::Three as u8,
+            HexDigitBits::Four as u8,
+            HexDigitBits::Five as u8,
+            HexDigitBits::Six as u8,
+            HexDigitBits::Seven as u8,
+            HexDigitBits::Eight as u8,
+            HexDigitBits::Nine as u8,
+            HexDigitBits::A as u8,
+            HexDigitBits::B as u8,
+            HexDigitBits::C as u8,
+            HexDigitBits::D as u8,
+            HexDigitBits::E as u8,
+            HexDigitBits::F as u8,
+        ]
+    }
+
+    /// Creates a new [`HexDigitBits`] from a [`u8`] digit.
+    pub fn from_digit(digit: u8) -> Self {
+        match digit {
+            0 => HexDigitBits::Zero,
+            1 => HexDigitBits::One,
+            2 => HexDigitBits::Two,
+            3 => HexDigitBits::Three,
+            4 => HexDigitBits::Four,
+            5 => HexDigitBits::Five,
+            6 => HexDigitBits::Six,
+            7 => HexDigitBits::Seven,
+            8 => HexDigitBits::Eight,
+            9 => HexDigitBits::Nine,
+            10 => HexDigitBits::A,
+            11 => HexDigitBits::B,
+            12 => HexDigitBits::C,
+            13 => HexDigitBits::D,
+            14 => HexDigitBits::E,
+            15 => HexDigitBits::F,
+            _ => HexDigitBits::Zero,
+        }
+    }
+}
+
 /// Maps a upside-down digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
 #[derive(Debug, Clone, Copy)]

@@ -126,7 +126,7 @@ async fn main(spawner: Spawner) {
     for n in -999..=9999 {
         tm.options().r_i16_4(n).display().ok();
 
-        Timer::after(Duration::from_millis(200)).await;
+        Timer::after(Duration::from_millis(100)).await;
     }
 
     loop {}
