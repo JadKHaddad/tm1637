@@ -1,4 +1,5 @@
 use crate::{
+    exact_size::ExactSizeChainExt,
     formatters::clock_to_4digits,
     mappings::{from_ascii_byte, RotatingCircleBits, SegmentBits},
     numbers,
@@ -9,6 +10,7 @@ use crate::{
     TM1637,
 };
 
+// TODO: remove the InitdisplayOptions and use the DisplayOptions directly with position 0 and empty iter and see how to chain the options.
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
 
 /// Starting point for a High-level API for display operations.
@@ -230,11 +232,39 @@ pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
     minute: u8,
 }
 
-impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
+    DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+{
     /// Set the position on the display from which to start displaying the bytes.
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
         self
+    }
+
+    pub fn str(
+        self,
+        str: &'b str,
+    ) -> DisplayOptions<
+        'd,
+        N,
+        T,
+        CLK,
+        DIO,
+        DELAY,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
+        M,
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
+    {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: self
+                .iter
+                .exact_size_chain(str.as_bytes().iter().copied().map(from_ascii_byte)),
+            _flip: self._flip,
+        }
     }
 
     /// Use scroll animation options.

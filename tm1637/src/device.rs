@@ -171,7 +171,10 @@ where
     [blocking]    []        [identity()]        [crate::tokens::Blocking]     [::embedded_hal::delay::DelayNs];
 )]
 pub mod module {
-    use crate::{Brightness, ConditionalInputPin, Error, Identity, InitDisplayOptions, TM1637};
+    use crate::{
+        tokens::NotFlipped, Brightness, ConditionalInputPin, DisplayOptions, Error, Identity,
+        InitDisplayOptions, TM1637,
+    };
     use ::embedded_hal::digital::OutputPin;
 
     impl<const N: usize, CLK, DIO, DELAY, ERR> TM1637<N, Token, CLK, DIO, DELAY>
