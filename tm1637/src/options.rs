@@ -737,18 +737,27 @@ pub mod module {
 }
 
 #[::duplicate::duplicate_item(
-    function     type_;
-    [u8]         [u8];
-    [u8_2]       [u8];
-    [u16_3]      [u16];
-    [u16_4]      [u16];
-    [u32_5]      [u32];
-    [u32_6]      [u32];
-    [u32_7]      [u32];
-    [u32_8]      [u32];
-    [i8_2]       [i8];
-    [i16_3]      [i16];
-    [i16_4]      [i16];
+    function    type_;
+    [u8]        [u8];
+    [u8_2]      [u8];
+    [r_u8_2]    [u8];
+    [u16_3]     [u16];
+    [r_u16_3]   [u16];
+    [u16_4]     [u16];
+    [r_u16_4]   [u16];
+    [u32_5]     [u32];
+    [r_u32_5]   [u32];
+    [u32_6]     [u32];
+    [r_u32_6]   [u32];
+    [u32_7]     [u32];
+    [r_u32_7]   [u32];
+    [u32_8]     [u32];
+    [r_u32_8]   [u32];
+    [i8_2]      [i8];
+    [i16_3]     [i16];
+    [r_i16_3]   [i16];
+    [i16_4]     [i16];
+    [r_i16_4]   [i16];
 )]
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 where

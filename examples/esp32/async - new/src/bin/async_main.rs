@@ -59,7 +59,7 @@ async fn main(spawner: Spawner) {
 
     let mut tm = TM1637Builder::new(clk, dio, delay)
         .brightness(Brightness::L0)
-        .delay_us(50)
+        .delay_us(30)
         .build::<4, Blocking>();
 
     tm.init().unwrap();
@@ -111,32 +111,23 @@ async fn main(spawner: Spawner) {
 
     // tm.animate(0, 700, iter).count();
 
-    tm.options()
-        .flip()
-        .u8_2(15)
-        .str("oC  ")
-        .flip()
-        .scroll()
-        .right()
-        .delay_ms(700)
-        .style(ScrollStyle::Linear)
-        .finish()
-        .run();
     // tm.options()
-    //     .clock()
-    //     .hour(12)
-    //     .minute(20)
+    //     .flip()
+    //     .u8_2(15)
+    //     .str("oC  ")
+    //     .flip()
+    //     .scroll()
+    //     .right()
+    //     .delay_ms(700)
+    //     .style(ScrollStyle::Linear)
     //     .finish()
-    //     .dot(1)
-    //     .dot(0)
-    //     .display()
-    //     .unwrap();
-    // tm.display_slice(0, slice).unwrap();
+    //     .run();
 
-    // Timer::after(Duration::from_secs(2)).await;
-    // tm.off().unwrap();
-    // Timer::after(Duration::from_secs(2)).await;
-    // tm.on().unwrap();
+    for n in -999..=9999 {
+        tm.options().r_i16_4(n).display().ok();
+
+        Timer::after(Duration::from_millis(200)).await;
+    }
 
     loop {}
 }
