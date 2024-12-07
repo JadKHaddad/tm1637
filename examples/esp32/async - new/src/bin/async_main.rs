@@ -11,7 +11,6 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    align,
     mappings::{self, DigitBits, RotatingCircleBits, SegmentBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     tokens::Blocking,
@@ -107,18 +106,13 @@ async fn main(spawner: Spawner) {
     //     }
     // }
 
-    let bytes = [
-        DigitBits::Zero as u8,
-        DigitBits::One as u8,
-        DigitBits::Two as u8,
-        DigitBits::Three as u8,
-        DigitBits::Four as u8,
-        DigitBits::Five as u8,
-    ];
-
-    let (pos, iter) = align(5, bytes.iter().copied());
-
-    tm.display(pos, iter).unwrap();
+    tm.options()
+        .str("Fucc Error ")
+        .position(0)
+        .scroll()
+        .delay_ms(700)
+        .finish()
+        .run();
 
     loop {}
 }

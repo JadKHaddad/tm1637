@@ -663,33 +663,49 @@ pub mod module {
     use ::embedded_hal::digital::OutputPin;
     use ::futures::StreamExt; // hmm
 
-    use crate::{ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped};
+    use crate::{
+        align::{Align, Aligned},
+        ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped,
+    };
 
     use super::Scroller;
 
-    impl<const N: usize, CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, I, M>
+    #[::duplicate::duplicate_item(
+        NUM ;
+        [4] ;
+        [6] ;
+    )]
+    impl<CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, NUM, Token, CLK, DIO, DELAY, I, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M: MaybeFlipped<N>,
+        M: MaybeFlipped<NUM>,
     {
         /// Release the `device` and return the calculated position and bytes.
         pub fn calculate(self) -> (usize, impl Iterator<Item = u8>) {
-            M::calculate(self.position, self.iter)
+            let (position, bytes) = M::calculate(self.position, self.iter);
+
+            Align::<NUM>::align(position, bytes)
         }
 
         /// Display the bytes on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
+            let (position, bytes) = Align::<NUM>::align(position, bytes);
+
             self.device.display(position, bytes).await
         }
     }
 
-    impl<'d, const N: usize, CLK, DIO, DELAY, ERR, I, M, InI>
-        Scroller<'d, N, Token, CLK, DIO, DELAY, I, M>
+    #[::duplicate::duplicate_item(
+        NUM ;
+        [4] ;
+        [6] ;
+    )]
+    impl<'d, CLK, DIO, DELAY, ERR, I, M, InI> Scroller<'d, NUM, Token, CLK, DIO, DELAY, I, M>
     where
         ERR: 'd,
         CLK: OutputPin<Error = ERR>,
@@ -697,7 +713,7 @@ pub mod module {
         DELAY: DelayTrait,
         I: Iterator<Item = InI> + 'd,
         InI: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'd,
-        M: MaybeFlipped<N> + 'd,
+        M: MaybeFlipped<NUM> + 'd,
     {
         fn _calculate(
             position: usize,
@@ -707,12 +723,14 @@ pub mod module {
             let original_position = position;
 
             let iter = iter.map(move |item| {
-                let (_, bytes) = M::calculate(original_position, item.into_iter());
+                let (position, bytes) = M::calculate(original_position, item.into_iter());
+                let (_, bytes) = Align::<NUM>::align(position, bytes);
 
                 bytes
             });
 
             let position = M::position(original_position, inner_iter_len);
+            let position = Align::<NUM>::position(position);
 
             (position, iter)
         }

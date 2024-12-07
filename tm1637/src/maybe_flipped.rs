@@ -6,7 +6,10 @@ pub trait MaybeFlipped<const N: usize> {
     fn calculate(
         position: usize,
         bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
-    ) -> (usize, impl Iterator<Item = u8>);
+    ) -> (
+        usize,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+    );
 
     /// Calculate the new `position` for the display.
     fn position(position: usize, len: usize) -> usize;
@@ -19,7 +22,10 @@ impl<const N: usize> MaybeFlipped<N> for NotFlipped {
     fn calculate(
         position: usize,
         bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
-    ) -> (usize, impl Iterator<Item = u8>) {
+    ) -> (
+        usize,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+    ) {
         (position, bytes)
     }
 
@@ -36,19 +42,43 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
     fn calculate(
         position: usize,
         bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
-    ) -> (usize, impl Iterator<Item = u8>) {
-        #[auto_enums::auto_enum(ExactSizeIterator)]
+    ) -> (
+        usize,
+        impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
+    ) {
         fn calculate_bytes<const N: usize>(
             bytes: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8>,
             position: usize,
-        ) -> impl ExactSizeIterator<Item = u8> {
+        ) -> impl DoubleEndedIterator<Item = u8> + ExactSizeIterator<Item = u8> {
+            #[auto_enums::enum_derive(DoubleEndedIterator)]
+            enum I<A, B, C> {
+                A(A),
+                B(B),
+                C(C),
+            }
+
+            impl<
+                    A: ExactSizeIterator<Item = u8>,
+                    B: ExactSizeIterator<Item = u8>,
+                    C: ExactSizeIterator<Item = u8>,
+                > ExactSizeIterator for I<A, B, C>
+            {
+                fn len(&self) -> usize {
+                    match self {
+                        I::A(a) => a.len(),
+                        I::B(b) => b.len(),
+                        I::C(c) => c.len(),
+                    }
+                }
+            }
+
             if position > N {
-                return core::iter::empty();
+                return I::C(core::iter::empty());
             }
 
             match bytes.len() + position > N {
-                true => bytes.take(N - position).rev(),
-                false => bytes.rev(),
+                true => I::A(bytes.take(N - position).rev()),
+                false => I::B(bytes.rev()),
             }
         }
 
