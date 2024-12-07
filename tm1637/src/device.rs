@@ -338,15 +338,8 @@ pub mod module {
 
         /// Write the given `bytes` to the display starting from `position`.
         ///
-        /// # Notes
-        ///
-        /// - Positions greater than [`TM1637::num_positions`] will be written to the display regardless.
-        /// - Bytes with index greater than [`TM1637::num_positions`] will be written to the display regardless.
-        ///
         /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
-        ///
-        /// See [`TM1637::display`].
-        pub async fn display_unchecked(
+        pub async fn display(
             &mut self,
             position: usize,
             bytes: impl Iterator<Item = u8>,
@@ -360,46 +353,12 @@ pub mod module {
             Ok(())
         }
 
-        /// Write the given `bytes` to the display starting from `position`.
-        ///
-        /// # Notes
-        ///
-        /// - Positions greater than [`TM1637::num_positions`] will be ignored.
-        ///
-        /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
-        ///
-        /// See [`TM1637::display_unchecked`].
-        pub async fn display(
-            &mut self,
-            position: usize,
-            bytes: impl Iterator<Item = u8>,
-        ) -> Result<(), Error<ERR>> {
-            if position >= self.num_positions() {
-                return Ok(());
-            }
-
-            // N = 4;
-            // self.display_unchecked(position, bytes.take(self.num_positions() - position))
-            // .await
-
-            self.display_unchecked(position, bytes).await
-        }
-
         pub async fn display_slice(
             &mut self,
             position: usize,
             bytes: &[u8],
         ) -> Result<(), Error<ERR>> {
             self.display(position, bytes.iter().copied()).await
-        }
-
-        pub async fn display_slice_unchecked(
-            &mut self,
-            position: usize,
-            bytes: &[u8],
-        ) -> Result<(), Error<ERR>> {
-            self.display_unchecked(position, bytes.iter().copied())
-                .await
         }
 
         /// High-level API for static or animated display operations.

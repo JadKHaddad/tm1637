@@ -671,41 +671,41 @@ pub mod module {
     use super::Scroller;
 
     #[::duplicate::duplicate_item(
-        NUM ;
+        NUM_POS ;
         [4] ;
         [6] ;
     )]
-    impl<CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, NUM, Token, CLK, DIO, DELAY, I, M>
+    impl<CLK, DIO, DELAY, ERR, I, M> DisplayOptions<'_, NUM_POS, Token, CLK, DIO, DELAY, I, M>
     where
         CLK: OutputPin<Error = ERR>,
         DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
         DELAY: DelayTrait,
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-        M: MaybeFlipped<NUM>,
+        M: MaybeFlipped<NUM_POS>,
     {
         /// Release the `device` and return the calculated position and bytes.
         pub fn calculate(self) -> (usize, impl Iterator<Item = u8>) {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
-            Align::<NUM>::align(position, bytes)
+            Align::<NUM_POS>::align(position, bytes)
         }
 
         /// Display the bytes on a `flipped` or `non-flipped` display.
         pub async fn display(self) -> Result<(), Error<ERR>> {
             let (position, bytes) = M::calculate(self.position, self.iter);
 
-            let (position, bytes) = Align::<NUM>::align(position, bytes);
+            let (position, bytes) = Align::<NUM_POS>::align(position, bytes);
 
             self.device.display(position, bytes).await
         }
     }
 
     #[::duplicate::duplicate_item(
-        NUM ;
+        NUM_POS ;
         [4] ;
         [6] ;
     )]
-    impl<'d, CLK, DIO, DELAY, ERR, I, M, InI> Scroller<'d, NUM, Token, CLK, DIO, DELAY, I, M>
+    impl<'d, CLK, DIO, DELAY, ERR, I, M, InI> Scroller<'d, NUM_POS, Token, CLK, DIO, DELAY, I, M>
     where
         ERR: 'd,
         CLK: OutputPin<Error = ERR>,
@@ -713,7 +713,7 @@ pub mod module {
         DELAY: DelayTrait,
         I: Iterator<Item = InI> + 'd,
         InI: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'd,
-        M: MaybeFlipped<NUM> + 'd,
+        M: MaybeFlipped<NUM_POS> + 'd,
     {
         fn _calculate(
             position: usize,
@@ -724,13 +724,13 @@ pub mod module {
 
             let iter = iter.map(move |item| {
                 let (position, bytes) = M::calculate(original_position, item.into_iter());
-                let (_, bytes) = Align::<NUM>::align(position, bytes);
+                let (_, bytes) = Align::<NUM_POS>::align(position, bytes);
 
                 bytes
             });
 
             let position = M::position(original_position, inner_iter_len);
-            let position = Align::<NUM>::position(position);
+            let position = Align::<NUM_POS>::position(position);
 
             (position, iter)
         }

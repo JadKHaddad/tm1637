@@ -1,6 +1,7 @@
 use crate::exact_size::ExactSizeChainExt;
 
 pub trait Aligned {
+    /// Aligns the bytes from a human readable sequence to a sequence that can be written to the display.
     fn align(
         position: usize,
         iter: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
@@ -8,6 +9,7 @@ pub trait Aligned {
         (position, iter)
     }
 
+    // Aligns the position
     fn position(position: usize) -> usize {
         position
     }
@@ -20,6 +22,7 @@ impl Aligned for Align<4> {
         position: usize,
         iter: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
     ) -> (usize, impl Iterator<Item = u8>) {
+        // Don't write more bytes than needed
         (position, iter.take(4 - position))
     }
 }
@@ -39,9 +42,10 @@ impl Aligned for Align<6> {
             return (3, I::A(core::iter::empty()));
         }
 
-        let iter = padding(iter).take(6 - position).rev();
+        let iter = padding_6(iter).take(6 - position).rev();
 
         // 3 is a magic number to make the alignment work
+        // Reversed iterators with <= 6 elements will align perfectly using position 3
         (3, I::B(iter))
     }
 
@@ -50,7 +54,10 @@ impl Aligned for Align<6> {
     }
 }
 
-fn padding(
+/// Iterators with less than 6 elements will never align whithout leaving empty spaces between digits, so we pad with zeros
+///
+/// The padding will be written to the display, overwriting the digits that are already there.
+fn padding_6(
     iter: impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
 ) -> impl DoubleEndedIterator<Item = u8> + ExactSizeIterator {
     #[auto_enums::enum_derive(DoubleEndedIterator)]
@@ -72,7 +79,6 @@ fn padding(
 
     let len = iter.len();
 
-    // less than 6 digits will never align whithout overwriting the last digits, so we pad with zeros
     if len < 6 {
         return I::A(iter.exact_size_chain(core::iter::repeat(0).take(6 - len)));
     };
