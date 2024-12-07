@@ -365,7 +365,6 @@ pub mod module {
         /// # Notes
         ///
         /// - Positions greater than [`TM1637::num_positions`] will be ignored.
-        /// - Bytes with index greater than [`TM1637::num_positions`] will be ignored.
         ///
         /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
         ///
@@ -379,8 +378,11 @@ pub mod module {
                 return Ok(());
             }
 
-            self.display_unchecked(position, bytes.take(self.num_positions() - position))
-                .await
+            // N = 4;
+            // self.display_unchecked(position, bytes.take(self.num_positions() - position))
+            // .await
+
+            self.display_unchecked(position, bytes).await
         }
 
         pub async fn display_slice(

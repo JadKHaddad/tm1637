@@ -11,6 +11,7 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
+    align,
     mappings::{self, DigitBits, RotatingCircleBits, SegmentBits, UpCharBits},
     scroll::{ScrollDirection, ScrollStyle},
     tokens::Blocking,
@@ -31,103 +32,93 @@ async fn main(spawner: Spawner) {
     let clk = Output::new(peripherals.GPIO4.degrade(), Level::Low);
     let dio = OutputOpenDrain::new(peripherals.GPIO19.degrade(), Level::Low, Pull::Up);
 
-    let mut tm = TM1637Builder::new(clk, dio, delay).build_async::<4>();
+    // let mut tm = TM1637Builder::new(clk, dio, delay).build_async::<4>();
 
-    tm.init().await.unwrap();
+    // tm.init().await.unwrap();
 
-    let bytes = [
-        UpCharBits::UpH as u8,
-        UpCharBits::UpE as u8,
-        UpCharBits::UpL as u8,
-        UpCharBits::UpL as u8,
-        UpCharBits::UpO as u8,
-        0,
-    ];
-
-    // let count = tm
-    //     .options()
-    //     .put_str("HELLO")
-    //     .set_dot(1)
-    //     .flip()
-    //     .animate()
-    //     .run()
-    //     .await;
-
-    // info!("Count: {}", count);
-
-    let (clk, dio, delay) = tm.into_parts();
+    // let (clk, dio, delay) = tm.into_parts();
 
     let mut tm = TM1637Builder::new(clk, dio, delay)
-        .brightness(Brightness::L0)
+        .brightness(Brightness::L4)
         .delay_us(30)
-        .build::<4, Blocking>();
+        .build::<6, Blocking>();
 
     tm.init().unwrap();
+    let bytes = [
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+        SegmentBits::Dot as u8,
+    ];
+    tm.display_slice(0, &bytes).unwrap();
 
     let bytes = [
-        UpCharBits::UpH as u8,
-        UpCharBits::UpE as u8,
-        UpCharBits::UpL as u8,
-        UpCharBits::UpL as u8,
-        UpCharBits::UpO as u8,
+        DigitBits::Zero as u8,
+        DigitBits::One as u8,
+        DigitBits::Two as u8,
+        DigitBits::Three as u8,
+        DigitBits::Four as u8,
+        DigitBits::Five as u8,
     ];
 
-    // let count = tm.options().str("HELLO").position(2).flip().display().ok();
-    // let count = tm.options().slice(&bytes).position(1).flip().display().ok();
-    // .scroll()
-    // .delay_ms(700)
-    // .direction(ScrollDirection::RightToLeft)
-    // .style(ScrollStyle::Linear)
-    // .finish()
-    // .run();
-    // let cricles = RotatingCircleBits::all_u8();
-    // let count = tm
-    //     .options()
-    //     .slice(&cricles)
-    //     .position(0)
-    //     // .flip()
-    //     .repeat()
-    //     .finish()
-    //     .run();
+    // if bytes len >= 6
+    // so take len - pos then reverse then give position 3
+    // if pos > len then empty iterator
 
-    // let count = tm
-    //     .options()
-    //     .rotating_circle()
-    //     .position(1)
-    //     .delay_ms(70)
-    //     // .flip()
-    //     .run();
+    // {
+    //     let pos = 0;
 
-    // info!("Count: {:?}", count);
+    //     if pos == 0 {
+    //         let cal_bytes = [bytes[5], bytes[4], bytes[3], bytes[2], bytes[1], bytes[0]];
 
-    let slice = &[
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+
+    //     if pos == 1 {
+    //         let cal_bytes = [bytes[4], bytes[3], bytes[2], bytes[1], bytes[0]];
+
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+
+    //     if pos == 2 {
+    //         let cal_bytes = [bytes[3], bytes[2], bytes[1], bytes[0]];
+
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+
+    //     if pos == 3 {
+    //         let cal_bytes = [bytes[2], bytes[1], bytes[0]];
+
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+
+    //     if pos == 4 {
+    //         let cal_bytes = [bytes[1], bytes[0]];
+
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+
+    //     if pos == 5 {
+    //         let cal_bytes = [bytes[0]];
+
+    //         tm.display_slice(3, &cal_bytes).unwrap();
+    //     }
+    // }
+
+    let bytes = [
+        DigitBits::Zero as u8,
+        DigitBits::One as u8,
+        DigitBits::Two as u8,
+        DigitBits::Three as u8,
+        DigitBits::Four as u8,
+        DigitBits::Five as u8,
     ];
 
-    // let iter = windows_non_overlapping::<4>(slice, Direction::RightToLeft);
+    let (pos, iter) = align(5, bytes.iter().copied());
 
-    // tm.animate(0, 700, iter).count();
-
-    // tm.options()
-    //     .flip()
-    //     .u8_2(15)
-    //     .str("oC  ")
-    //     .flip()
-    //     .scroll()
-    //     .right()
-    //     .delay_ms(700)
-    //     .style(ScrollStyle::Linear)
-    //     .finish()
-    //     .run();
-
-    for n in -999..=9999 {
-        tm.options().r_i16_4(n).display().ok();
-
-        Timer::after(Duration::from_millis(100)).await;
-    }
+    tm.display(pos, iter).unwrap();
 
     loop {}
 }
