@@ -5,17 +5,10 @@
 //! The following features are available:
 //! - `ack`: enables the driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
 //! - `defmt`: implements `defmt::Format` for structs and enums.
-//! - `demo`: enables the demo module.
 
 #![no_std]
 // #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
-
-#[doc(hidden)]
-pub mod mock;
-// #[cfg(feature = "demo")]
-// #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
-// pub mod demo;
 
 mod align;
 mod brightness;
@@ -28,6 +21,8 @@ pub mod formatters;
 mod identity;
 pub mod mappings;
 mod maybe_flipped;
+#[doc(hidden)]
+pub mod mock;
 mod mode;
 pub mod numbers;
 mod options;

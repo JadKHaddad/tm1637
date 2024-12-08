@@ -10,9 +10,8 @@ keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
 readme = "../README.md"
 
 [features]
-default = ["demo", "ack"]
+default = ["ack"]
 ack = []
-demo = []
 defmt = ["dep:defmt"]
 
 [dependencies]
