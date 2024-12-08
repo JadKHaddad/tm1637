@@ -1,4 +1,4 @@
-use crate::scroll::{ScrollDirection, ScrollStyle};
+use crate::options::scroll::{ScrollDirection, ScrollStyle};
 
 use super::{CircularWindows, CircularWindowsReversed, LinearWindows};
 

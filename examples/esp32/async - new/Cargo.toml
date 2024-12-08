@@ -21,7 +21,6 @@ static_cell = { version = "2.1.0", features = ["nightly"] }
 futures = { version = "0.3.31", default-features = false }
 tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, features = [
     "ack",
-    "demo",
 ] }
 itoa = { version = "1.0.14", features = ["no-panic"] }
 ryu = { version = "1.0.18", features = ["no-panic"] }

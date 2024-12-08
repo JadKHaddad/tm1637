@@ -25,12 +25,9 @@ mod maybe_flipped;
 pub mod mock;
 mod mode;
 pub mod numbers;
-mod options;
-mod rotating_circle;
-pub mod scroll;
+pub mod options;
 mod str_parser;
 pub mod tokens;
-pub mod windows;
 
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;

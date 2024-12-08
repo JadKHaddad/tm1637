@@ -172,7 +172,7 @@ where
 )]
 pub mod module {
     use crate::{
-        options::{DisplayOptions, RotatingCircleOptions},
+        options::{circles::CirclesDisplayOptions, DisplayOptions},
         tokens::NotFlipped,
         Brightness, ConditionalInputPin, Error, Identity, TM1637,
     };
@@ -403,11 +403,8 @@ pub mod module {
             }
         }
 
-        // TODO: return CirculesDisplayOptions where we can configure the circles.
-        pub fn rotating_circle(
-            &mut self,
-        ) -> RotatingCircleOptions<'_, N, Token, CLK, DIO, DELAY, NotFlipped> {
-            RotatingCircleOptions::new(self, NotFlipped)
+        pub fn circles(&mut self) -> CirclesDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
+            CirclesDisplayOptions { device: self }
         }
     }
 }

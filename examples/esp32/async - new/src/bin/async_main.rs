@@ -11,8 +11,8 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{self, DigitBits, RotatingCircleBits, SegmentBits, UpCharBits},
-    scroll::{ScrollDirection, ScrollStyle},
+    mappings::{self, DigitBits, SegmentBits, UpCharBits},
+    options::circles::RotatingDirection,
     tokens::Blocking,
     Brightness, TM1637Builder,
 };
@@ -112,19 +112,27 @@ async fn main(spawner: Spawner) {
     //     Timer::after(Duration::from_millis(100)).await;
     // }
 
-    tm.options()
-        .position(0)
-        .str("Error.")
-        .dot(0)
-        .remove_dot(4)
-        .display()
-        .ok();
-    // tm.options().position(5).u8_2(23).display().ok();
+    // tm.options()
+    //     .position(0)
+    //     .str("Error.")
+    //     .dot(0)
+    //     .remove_dot(4)
+    //     .display()
+    //     .ok();
+    // // tm.options().position(5).u8_2(23).display().ok();
 
-    let mut buffer = ryu::Buffer::new();
-    let printed = buffer.format(1.234);
+    // let mut buffer = ryu::Buffer::new();
+    // let printed = buffer.format(1.234);
 
-    tm.options().str(printed).display().ok();
+    // tm.options().str(printed).display().ok();
 
-    loop {}
+    for _ in 0..100 {
+        tm.circles()
+            .rotating()
+            .position(0)
+            .delay_ms(100)
+            .direction(RotatingDirection::Clockwise)
+            .finish()
+            .run();
+    }
 }
