@@ -15,7 +15,7 @@ ack = []
 defmt = ["dep:defmt"]
 
 [dependencies]
-duplicate = "1.0.0"
+duplicate = "2.0.0"
 embedded-hal-async = { version = "1.0.0" }
 embedded-hal = { version = "1.0.0" }
 defmt = { version = "0.3.6", optional = true }
