@@ -11,16 +11,16 @@
 // #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-mod brightness;
-mod builder;
-mod conditional;
 #[doc(hidden)]
 pub mod mock;
-
 // #[cfg(feature = "demo")]
 // #[cfg_attr(docsrs, doc(cfg(feature = "demo")))]
 // pub mod demo;
+
 mod align;
+mod brightness;
+mod builder;
+mod conditional;
 mod device;
 mod error;
 mod exact_size;
@@ -33,6 +33,7 @@ mod numbers;
 mod options;
 mod rotating_circle;
 pub mod scroll;
+mod str_parser;
 pub mod tokens;
 pub mod windows;
 

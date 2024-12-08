@@ -5,6 +5,7 @@ use crate::{
     numbers,
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
+    str_parser::StrParser,
     tokens::{Flipped, NotFlipped},
     windows::windows,
     MaybeFlipped, TM1637,
@@ -112,9 +113,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         DisplayOptions {
             device: self.device,
             position: self.position,
-            iter: self
-                .iter
-                .exact_size_chain(str.as_bytes().iter().copied().map(from_ascii_byte)),
+            iter: self.iter.exact_size_chain(StrParser::new(str)),
             _flip: self._flip,
         }
     }
@@ -818,7 +817,7 @@ mod tests {
         let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).calculate();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();
 
-        assert_eq!(vec!["H", "E.", "L", "L.", "0"], collected);
+        assert_eq!(vec!["H", "E.", "L", "L."], collected);
 
         let (_, iter) = tm.options().str("HELLO").dot(1).dot(3).flip().calculate();
         let collected = iter.map(str_from_byte).collect::<Vec<_>>();

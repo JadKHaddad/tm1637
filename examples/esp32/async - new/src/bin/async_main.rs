@@ -40,7 +40,7 @@ async fn main(spawner: Spawner) {
     let mut tm = TM1637Builder::new(clk, dio, delay)
         .brightness(Brightness::L4)
         .delay_us(30)
-        .build::<4, Blocking>();
+        .build::<6, Blocking>();
 
     tm.init().unwrap();
     // let bytes = [
@@ -112,8 +112,8 @@ async fn main(spawner: Spawner) {
     //     Timer::after(Duration::from_millis(100)).await;
     // }
 
-    // tm.options().position(1).str("Err").display().ok();
-    tm.options().position(5).u8_2(23).display().ok();
+    tm.options().position(0).str("Error.").display().ok();
+    // tm.options().position(5).u8_2(23).display().ok();
 
     loop {}
 }
