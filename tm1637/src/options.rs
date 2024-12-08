@@ -796,7 +796,7 @@ where
     > {
         DisplayOptions {
             device: self.device,
-            position: 0,
+            position: self.position,
             iter: self.iter.exact_size_chain(numbers::function(n).into_iter()),
             _flip: self._flip,
         }

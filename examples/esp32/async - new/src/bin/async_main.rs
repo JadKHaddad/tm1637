@@ -40,18 +40,18 @@ async fn main(spawner: Spawner) {
     let mut tm = TM1637Builder::new(clk, dio, delay)
         .brightness(Brightness::L4)
         .delay_us(30)
-        .build::<6, Blocking>();
+        .build::<4, Blocking>();
 
     tm.init().unwrap();
-    let bytes = [
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-        SegmentBits::Dot as u8,
-    ];
-    tm.display_slice(0, &bytes).unwrap();
+    // let bytes = [
+    //     SegmentBits::Dot as u8,
+    //     SegmentBits::Dot as u8,
+    //     SegmentBits::Dot as u8,
+    //     SegmentBits::Dot as u8,
+    //     SegmentBits::Dot as u8,
+    //     SegmentBits::Dot as u8,
+    // ];
+    // tm.display_slice(0, &bytes).unwrap();
 
     let bytes = [
         DigitBits::Zero as u8,
@@ -106,13 +106,14 @@ async fn main(spawner: Spawner) {
     //     }
     // }
 
-    tm.options()
-        .str("Fucc Error ")
-        .position(0)
-        .scroll()
-        .delay_ms(700)
-        .finish()
-        .run();
+    // for n in 0..999999 {
+    //     tm.options().position(2).u32_6(n).display().ok();
+
+    //     Timer::after(Duration::from_millis(100)).await;
+    // }
+
+    // tm.options().position(1).str("Err").display().ok();
+    tm.options().position(5).u8_2(23).display().ok();
 
     loop {}
 }
