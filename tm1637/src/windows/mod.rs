@@ -1,3 +1,5 @@
+//! Create windows from iterators and slices.
+
 mod circular;
 mod functions;
 mod linear;

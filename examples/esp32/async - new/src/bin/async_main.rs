@@ -112,8 +112,19 @@ async fn main(spawner: Spawner) {
     //     Timer::after(Duration::from_millis(100)).await;
     // }
 
-    tm.options().position(0).str("Error.").display().ok();
+    tm.options()
+        .position(0)
+        .str("Error.")
+        .dot(0)
+        .remove_dot(4)
+        .display()
+        .ok();
     // tm.options().position(5).u8_2(23).display().ok();
+
+    let mut buffer = ryu::Buffer::new();
+    let printed = buffer.format(1.234);
+
+    tm.options().str(printed).display().ok();
 
     loop {}
 }

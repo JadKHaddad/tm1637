@@ -1,6 +1,6 @@
-use crate::mappings::{DigitBits, SpecialCharBits};
+//! Format signed and unsigned integers into byte arrays.
 
-// TODO: use a macro or something to generate these functions
+use crate::mappings::{DigitBits, SpecialCharBits};
 
 pub fn u8(n: u8) -> [u8; 1] {
     let n = n.clamp(0, 9);
@@ -318,346 +318,6 @@ pub fn r_u32_6(n: u32) -> [u8; 6] {
     }
 }
 
-pub fn u32_7(n: u32) -> [u8; 7] {
-    let n = n.clamp(0, 9999999);
-
-    if n > 999999 {
-        [
-            DigitBits::from_digit((n / 1000000) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 99999 {
-        [
-            DigitBits::from_digit((n / 100000) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-        ]
-    } else if n > 9999 {
-        [
-            DigitBits::from_digit((n / 10000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-        ]
-    } else if n > 999 {
-        [
-            DigitBits::from_digit((n / 1000) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-        ]
-    } else if n > 99 {
-        [
-            DigitBits::from_digit((n / 100) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-        ]
-    } else if n > 9 {
-        [
-            DigitBits::from_digit((n / 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    } else {
-        [
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    }
-}
-
-pub fn r_u32_7(n: u32) -> [u8; 7] {
-    let n = n.clamp(0, 9999999);
-
-    if n > 999999 {
-        [
-            DigitBits::from_digit((n / 1000000) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 99999 {
-        [
-            0,
-            DigitBits::from_digit((n / 100000) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 9999 {
-        [
-            0,
-            0,
-            DigitBits::from_digit((n / 10000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 999 {
-        [
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 1000) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 99 {
-        [
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 100) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 9 {
-        [
-            0,
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else {
-        [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    }
-}
-
-pub fn u32_8(n: u32) -> [u8; 8] {
-    let n = n.clamp(0, 99999999);
-
-    if n > 9999999 {
-        [
-            DigitBits::from_digit((n / 10000000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 999999 {
-        [
-            DigitBits::from_digit((n / 1000000) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-        ]
-    } else if n > 99999 {
-        [
-            DigitBits::from_digit((n / 100000) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-        ]
-    } else if n > 9999 {
-        [
-            DigitBits::from_digit((n / 10000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-        ]
-    } else if n > 999 {
-        [
-            DigitBits::from_digit((n / 1000) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-        ]
-    } else if n > 99 {
-        [
-            DigitBits::from_digit((n / 100) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    } else if n > 9 {
-        [
-            DigitBits::from_digit((n / 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    } else {
-        [
-            DigitBits::from_digit((n % 10) as u8) as u8,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-        ]
-    }
-}
-
-pub fn r_u32_8(n: u32) -> [u8; 8] {
-    let n = n.clamp(0, 99999999);
-
-    if n > 9999999 {
-        [
-            DigitBits::from_digit((n / 10000000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 999999 {
-        [
-            0,
-            DigitBits::from_digit((n / 1000000) as u8) as u8,
-            DigitBits::from_digit(((n / 100000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 99999 {
-        [
-            0,
-            0,
-            DigitBits::from_digit((n / 100000) as u8) as u8,
-            DigitBits::from_digit(((n / 10000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 9999 {
-        [
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 10000) as u8) as u8,
-            DigitBits::from_digit(((n / 1000) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 999 {
-        [
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 1000) as u8) as u8,
-            DigitBits::from_digit(((n / 100) % 10) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 99 {
-        [
-            0,
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 100) as u8) as u8,
-            DigitBits::from_digit(((n / 10) % 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else if n > 9 {
-        [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n / 10) as u8) as u8,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    } else {
-        [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            DigitBits::from_digit((n % 10) as u8) as u8,
-        ]
-    }
-}
-
 pub fn i8_2(n: i8) -> [u8; 2] {
     let n = n.clamp(-9, 99);
 
@@ -769,4 +429,188 @@ pub fn r_i16_4(n: i16) -> [u8; 4] {
     }
 }
 
-// TODO: more stuff
+pub fn i32_5(n: i32) -> [u8; 5] {
+    let n = n.clamp(-9999, 99999);
+
+    if n > 0 {
+        u32_5(n.unsigned_abs())
+    } else if n < -999 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 1000) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -99 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 100) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+        ]
+    } else if n < -9 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+            0,
+        ]
+    } else {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+            0,
+            0,
+        ]
+    }
+}
+
+pub fn r_i32_5(n: i32) -> [u8; 5] {
+    let n = n.clamp(-9999, 99999);
+
+    if n > 0 {
+        r_u32_5(n.unsigned_abs())
+    } else if n < -999 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 1000) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -99 {
+        [
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 100) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -9 {
+        [
+            0,
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else {
+        [
+            0,
+            0,
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    }
+}
+
+pub fn i32_6(n: i32) -> [u8; 6] {
+    let n = n.clamp(-99999, 999999);
+
+    if n > 0 {
+        u32_6(n.unsigned_abs())
+    } else if n < -9999 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10000) as u8) as u8,
+            DigitBits::from_digit(((-n / 1000) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -999 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 1000) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+        ]
+    } else if n < -99 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 100) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+            0,
+        ]
+    } else if n < -9 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+            0,
+            0,
+        ]
+    } else {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+            0,
+            0,
+            0,
+            0,
+        ]
+    }
+}
+
+pub fn r_i32_6(n: i32) -> [u8; 6] {
+    let n = n.clamp(-99999, 999999);
+
+    if n > 0 {
+        r_u32_6(n.unsigned_abs())
+    } else if n < -9999 {
+        [
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10000) as u8) as u8,
+            DigitBits::from_digit(((-n / 1000) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -999 {
+        [
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 1000) as u8) as u8,
+            DigitBits::from_digit(((-n / 100) % 10) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -99 {
+        [
+            0,
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 100) as u8) as u8,
+            DigitBits::from_digit(((-n / 10) % 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else if n < -9 {
+        [
+            0,
+            0,
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n / 10) as u8) as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    } else {
+        [
+            0,
+            0,
+            0,
+            0,
+            SpecialCharBits::Minus as u8,
+            DigitBits::from_digit((-n % 10) as u8) as u8,
+        ]
+    }
+}

@@ -1,3 +1,5 @@
+//! Tokens for the different modes of operation and display orientation.
+
 use crate::mode::Mode;
 
 /// Token for `async` operations.

@@ -1,3 +1,5 @@
+//! Scroll animation settings.
+
 mod direction;
 mod style;
 

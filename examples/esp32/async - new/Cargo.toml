@@ -23,6 +23,8 @@ tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, feat
     "ack",
     "demo",
 ] }
+itoa = { version = "1.0.14", features = ["no-panic"] }
+ryu = { version = "1.0.18", features = ["no-panic"] }
 
 [profile.dev]
 # Rust debug is too slow.

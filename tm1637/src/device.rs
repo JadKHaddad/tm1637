@@ -12,7 +12,7 @@ use crate::{
 ///
 /// # Type parameters
 ///
-/// - `N`: Number of positions on the display.
+/// - `N`: Number of positions on the display. 4 or 6.
 /// - `T`: Operating mode. [`Async`](crate::tokens::Async) or [`Blocking`](crate::tokens::Blocking).
 /// - `CLK`: Clock.
 /// - `DIO`: Data input/output.
@@ -172,8 +172,9 @@ where
 )]
 pub mod module {
     use crate::{
-        options::RotatingCircleOptions, tokens::NotFlipped, Brightness, ConditionalInputPin,
-        DisplayOptions, Error, Identity, TM1637,
+        options::{DisplayOptions, RotatingCircleOptions},
+        tokens::NotFlipped,
+        Brightness, ConditionalInputPin, Error, Identity, TM1637,
     };
     use ::embedded_hal::digital::OutputPin;
 

@@ -1,14 +1,15 @@
 use crate::{
     exact_size::ExactSizeChainExt,
     formatters::clock_to_4digits,
-    mappings::{from_ascii_byte, RotatingCircleBits, SegmentBits},
+    mappings::{RotatingCircleBits, SegmentBits},
+    maybe_flipped::MaybeFlipped,
     numbers,
     rotating_circle::RotatingStyle,
     scroll::{ScrollDirection, ScrollStyle},
     str_parser::StrParser,
     tokens::{Flipped, NotFlipped},
     windows::windows,
-    MaybeFlipped, TM1637,
+    TM1637,
 };
 
 // TODO: seperate the options into modules and use the dublicated stuff only for functions that uses the display. See Display options for example.
@@ -125,7 +126,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
     ///
     /// ```rust
-    /// use tm1637_embedded_hal::{mappings::{from_ascii_byte, SegmentBits}, mock::Noop, tokens::Blocking, TM1637Builder};
+    /// use tm1637_embedded_hal::{mappings::SegmentBits, mock::Noop, tokens::Blocking, TM1637Builder};
     ///
     /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
     ///
@@ -134,7 +135,6 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     ///         b"HELLO"
     ///             .iter()
     ///             .copied()
-    ///             .map(from_ascii_byte)
     ///             .enumerate()
     ///             .map(move |(i, b)| {
     ///                 if i == 1 {
@@ -150,7 +150,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// // Equivalent to
     ///
     /// tm.options()
-    ///    .str("HELLO")
+    ///    .slice(b"HELLO")
     ///    .dot(1)
     ///    .display()
     ///    .ok();
@@ -664,7 +664,9 @@ pub mod module {
 
     use crate::{
         align::{Align, Aligned},
-        ConditionalInputPin, DisplayOptions, Error, Identity, MaybeFlipped,
+        maybe_flipped::MaybeFlipped,
+        options::DisplayOptions,
+        ConditionalInputPin, Error, Identity,
     };
 
     use super::Scroller;
@@ -766,15 +768,15 @@ pub mod module {
     [r_u32_5]   [u32];
     [u32_6]     [u32];
     [r_u32_6]   [u32];
-    [u32_7]     [u32];
-    [r_u32_7]   [u32];
-    [u32_8]     [u32];
-    [r_u32_8]   [u32];
     [i8_2]      [i8];
     [i16_3]     [i16];
     [r_i16_3]   [i16];
     [i16_4]     [i16];
     [r_i16_4]   [i16];
+    [i32_5]     [i32];
+    [r_i32_5]   [i32];
+    [i32_6]     [i32];
+    [r_i32_6]   [i32];
 )]
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 where
