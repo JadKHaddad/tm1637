@@ -11,8 +11,9 @@ use esp_hal::{
 use futures::StreamExt;
 use log::info;
 use tm1637_embedded_hal::{
-    mappings::{self, DigitBits, SegmentBits, UpCharBits},
+    mappings::{DigitBits, SegmentBits, UpCharBits},
     options::circles::RotatingDirection,
+    str::StrParser,
     tokens::Blocking,
     Brightness, TM1637Builder,
 };
@@ -126,13 +127,24 @@ async fn main(spawner: Spawner) {
 
     // tm.options().str(printed).display().ok();
 
-    for _ in 0..100 {
-        tm.circles()
-            .rotating()
-            .position(0)
-            .delay_ms(100)
-            .direction(RotatingDirection::Clockwise)
-            .finish()
-            .run();
-    }
+    // for _ in 0..100 {
+    //     tm.circles()
+    //         .rotating()
+    //         .position(0)
+    //         .delay_ms(100)
+    //         .direction(RotatingDirection::Clockwise)
+    //         .finish()
+    //         .run();
+    // }
+
+    tm.options()
+        .iter(StrParser::new("HELLO").enumerate().map(move |(i, b)| {
+            if i == 1 {
+                b | SegmentBits::Dot as u8
+            } else {
+                b
+            }
+        }))
+        .display()
+        .ok();
 }

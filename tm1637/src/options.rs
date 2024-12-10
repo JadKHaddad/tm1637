@@ -1,15 +1,20 @@
-use clock::ClockDisplayOptions;
-use repeat::RepeatDisplayOptions;
-use scroll::{ScrollDirection, ScrollDisplayOptions, ScrollStyle};
+//! High-level API for display operations.
 
 use crate::{
     exact_size::ExactSizeChainExt, mappings::SegmentBits, maybe_flipped::MaybeFlipped, numbers,
-    str_parser::StrParser, tokens::NotFlipped, TM1637,
+    str::StrParser, tokens::NotFlipped, TM1637,
 };
+
 pub mod circles;
-pub mod clock;
-pub mod repeat;
-pub mod scroll;
+pub mod windows;
+
+mod clock;
+mod repeat;
+mod scroll;
+
+pub use clock::*;
+pub use repeat::*;
+pub use scroll::*;
 
 /// High-level API for display operations.
 #[derive(Debug)]
@@ -87,31 +92,25 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
     ///
     /// ```rust
-    /// use tm1637_embedded_hal::{mappings::SegmentBits, mock::Noop, tokens::Blocking, TM1637Builder};
+    /// use tm1637_embedded_hal::{mappings::SegmentBits, mock::Noop, str::StrParser, tokens::Blocking, TM1637Builder};
     ///
     /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
     ///
     /// tm.options()
-    ///     .iter(
-    ///         b"HELLO"
-    ///             .iter()
-    ///             .copied()
-    ///             .enumerate()
-    ///             .map(move |(i, b)| {
-    ///                 if i == 1 {
-    ///                     b | SegmentBits::Dot as u8
-    ///                 } else {
-    ///                     b
-    ///                 }
-    ///             }),
-    ///     )
+    ///     .iter(StrParser::new("HELLO").enumerate().map(move |(i, b)| {
+    ///         if i == 1 {
+    ///             b | SegmentBits::Dot as u8
+    ///         } else {
+    ///             b
+    ///         }
+    ///     }))
     ///     .display()
     ///     .ok();
     ///
     /// // Equivalent to
     ///
     /// tm.options()
-    ///    .slice(b"HELLO")
+    ///    .str("HELLO")
     ///    .dot(1)
     ///    .display()
     ///    .ok();
@@ -331,13 +330,14 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     ///     .display()
     ///     .ok();
     ///
-    /// // Equivalent to
+    /// // Equivalent** to
     ///
     /// tm.options()
     ///    .str("HELLO")
     ///    .display()
     ///    .ok();
     /// ```
+    /// ** The [`DisplayOptions::str`] method uses [`StrParser`] internally.
     pub fn map<F: FnMut(u8) -> u8>(
         self,
         f: F,

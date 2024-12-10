@@ -1,7 +1,28 @@
+//! [`str`] parsing utilities.
+
 use core::str::Bytes;
 
 use crate::mappings::{from_ascii_byte, SegmentBits};
 
+/// Parse a string to it's corresponding 7-segment display bits.
+///
+/// Dots are ignored unless they appear after a character. The dot is then or'd with the character.
+///
+/// # Example
+///
+/// ```rust
+/// use tm1637_embedded_hal::{str::StrParser, mappings::{DigitBits, LoCharBits, SegmentBits, UpCharBits}};
+///
+/// let input = "..oH.3..45..............6.7";
+/// let mut parser = StrParser::new(input);
+///
+/// assert_eq!(7, parser.len());
+/// assert_eq!(LoCharBits::LoO as u8, parser.next().unwrap());
+/// assert_eq!(UpCharBits::UpH as u8 | SegmentBits::Dot as u8, parser.next().unwrap());
+/// assert_eq!(DigitBits::Seven as u8, parser.next_back().unwrap());
+/// assert_eq!(4, parser.len());
+/// ```
+///
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct StrParser<'a> {
@@ -12,7 +33,7 @@ pub struct StrParser<'a> {
     /// - `0`: No dot has been read.
     /// - `SegmentBits::Dot as u8`: A dot has been read.
     ///
-    /// We or this value with the found digit on the next call to next_back.
+    /// We or this value with the found digit on the next call to `next_back`.
     or: u8,
     size: usize,
 }

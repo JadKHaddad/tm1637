@@ -11,7 +11,7 @@ enum WindowsState<const N: usize> {
 
 /// Circular windows iterator.
 ///
-/// Represents [`ScrollStyle::Circular`](crate::scroll::ScrollStyle::Circular) and [`ScrollDirection::LeftToRight`](crate::scroll::ScrollDirection::LeftToRight).
+/// Represents [`ScrollStyle::Circular`](crate::options::ScrollStyle::Circular) and [`ScrollDirection::LeftToRight`](crate::options::ScrollDirection::LeftToRight).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CircularWindows<const N: usize, I> {
@@ -89,7 +89,7 @@ where
 
 /// Reversed circular windows iterator.
 ///
-/// Represents [`ScrollStyle::Circular`](crate::scroll::ScrollStyle::Circular) and [`ScrollDirection::RightToLeft`](crate::scroll::ScrollDirection::RightToLeft).
+/// Represents [`ScrollStyle::Circular`](crate::options::ScrollStyle::Circular) and [`ScrollDirection::RightToLeft`](crate::options::ScrollDirection::RightToLeft).
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CircularWindowsReversed<const N: usize, I> {

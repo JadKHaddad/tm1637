@@ -4,12 +4,10 @@ use crate::TM1637;
 
 mod direction;
 mod style;
-pub mod windows;
 
-use super::DisplayOptions;
+use super::{windows::windows, DisplayOptions};
 pub use direction::ScrollDirection;
 pub use style::ScrollStyle;
-use windows::windows;
 
 /// High-level API for scroll animations.
 #[derive(Debug)]
@@ -99,7 +97,7 @@ where
     [asynch]      [async]   [await.identity()]  [crate::tokens::Async]    [::embedded_hal_async::delay::DelayNs] [::futures::Stream];
     [blocking]    []        [identity()]        [crate::tokens::Blocking] [::embedded_hal::delay::DelayNs]       [Iterator];
 )]
-pub mod module {
+mod module {
     use ::embedded_hal::digital::OutputPin;
     #[allow(unused_imports)]
     use ::futures::StreamExt as _;

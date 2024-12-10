@@ -1,5 +1,6 @@
 use super::{scroll::Scroller, DisplayOptions};
 
+/// High-level API for repeat animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct RepeatDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {

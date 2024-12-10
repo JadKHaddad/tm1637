@@ -26,7 +26,7 @@ pub mod mock;
 mod mode;
 pub mod numbers;
 pub mod options;
-mod str_parser;
+pub mod str;
 pub mod tokens;
 
 pub use brightness::Brightness;
