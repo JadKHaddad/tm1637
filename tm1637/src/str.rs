@@ -24,7 +24,6 @@ use crate::mappings::{from_ascii_byte, SegmentBits};
 /// ```
 ///
 #[derive(Debug, Clone)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct StrParser<'a> {
     bytes: Bytes<'a>,
     current: Option<u8>,
@@ -36,6 +35,13 @@ pub struct StrParser<'a> {
     /// We or this value with the found digit on the next call to `next_back`.
     or: u8,
     size: usize,
+}
+
+#[cfg(feature = "defmt")]
+impl defmt::Format for StrParser<'_> {
+    fn format(&self, fmt: defmt::Formatter) {
+        defmt::write!(fmt, "StrParser {{ .. }}")
+    }
 }
 
 impl<'a> StrParser<'a> {
