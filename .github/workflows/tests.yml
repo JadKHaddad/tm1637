@@ -55,22 +55,6 @@ jobs:
         working-directory: ${{env.working-directory}}
         run: cargo clippy --features=default -- -D warnings
 
-      - name: Clippy -- async
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=async -- -D warnings
-      
-      - name: Clippy -- blocking
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=blocking -- -D warnings
-      
-      - name: Clippy -- disable-checks
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=disable-checks -- -D warnings
-
-      - name: Clippy -- demo
-        working-directory: ${{env.working-directory}}
-        run: cargo clippy --features=demo -- -D warnings
-
       - name: Clippy --all-features
         working-directory: ${{env.working-directory}}
         run: cargo clippy --all --all-features -- -D warnings
