@@ -437,32 +437,34 @@ mod module {
 }
 
 #[::duplicate::duplicate_item(
-    function    type_;
-    [u8]        [u8];
-    [u8_2]      [u8];
-    [r_u8_2]    [u8];
-    [u16_3]     [u16];
-    [r_u16_3]   [u16];
-    [u16_4]     [u16];
-    [r_u16_4]   [u16];
-    [u32_5]     [u32];
-    [r_u32_5]   [u32];
-    [u32_6]     [u32];
-    [r_u32_6]   [u32];
-    [i8_2]      [i8];
-    [i16_3]     [i16];
-    [r_i16_3]   [i16];
-    [i16_4]     [i16];
-    [r_i16_4]   [i16];
-    [i32_5]     [i32];
-    [r_i32_5]   [i32];
-    [i32_6]     [i32];
-    [r_i32_6]   [i32];
+    function    type_   link;
+    [u8]        [u8]    ["[`u8`](crate::numbers::u8)"];
+    [u8_2]      [u8]    ["[`u8_2`](crate::numbers::u8_2)"];
+    [r_u8_2]    [u8]    ["[`r_u8_2`](crate::numbers::r_u8_2)"];
+    [u16_3]     [u16]   ["[`u16_3`](crate::numbers::u16_3)"];
+    [r_u16_3]   [u16]   ["[`r_u16_3`](crate::numbers::r_u16_3)"];
+    [u16_4]     [u16]   ["[`u16_4`](crate::numbers::u16_4)"];
+    [r_u16_4]   [u16]   ["[`r_u16_4`](crate::numbers::r_u16_4)"];
+    [u32_5]     [u32]   ["[`u32_5`](crate::numbers::u32_5)"];
+    [r_u32_5]   [u32]   ["[`r_u32_5`](crate::numbers::r_u32_5)"];
+    [u32_6]     [u32]   ["[`u32_6`](crate::numbers::u32_6)"];
+    [r_u32_6]   [u32]   ["[`r_u32_6`](crate::numbers::r_u32_6)"];
+    [i8_2]      [i8]    ["[`i8_2`](crate::numbers::i8_2)"];
+    [i16_3]     [i16]   ["[`i16_3`](crate::numbers::i16_3)"];
+    [r_i16_3]   [i16]   ["[`r_i16_3`](crate::numbers::r_i16_3)"];
+    [i16_4]     [i16]   ["[`i16_4`](crate::numbers::i16_4)"];
+    [r_i16_4]   [i16]   ["[`r_i16_4`](crate::numbers::r_i16_4)"];
+    [i32_5]     [i32]   ["[`i32_5`](crate::numbers::i32_5)"];
+    [r_i32_5]   [i32]   ["[`r_i32_5`](crate::numbers::r_i32_5)"];
+    [i32_6]     [i32]   ["[`i32_6`](crate::numbers::i32_6)"];
+    [r_i32_6]   [i32]   ["[`r_i32_6`](crate::numbers::r_i32_6)"];
 )]
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 where
     I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
 {
+    #[doc = "See "]
+    #[doc = link]
     pub fn function(
         self,
         n: type_,
