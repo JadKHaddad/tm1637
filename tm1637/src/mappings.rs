@@ -588,9 +588,16 @@ pub const fn flip_mirror(byte: u8) -> u8 {
 ///
 /// Display `Err` text on a 4-digit display:
 ///
-/// ```rust,ignore
+/// ```rust
+/// use tm1637_embedded_hal::{mappings::from_ascii_byte, mock::Noop, TM1637Builder};
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
+///
+/// tm.init().ok();
+///
 /// let err = "Err".as_bytes().iter().copied().map(from_ascii_byte);
-/// tm.write_segments_raw_iter(0, err).ok();
+///
+/// tm.display(0, err).ok();
 /// ```
 pub const fn from_ascii_byte(byte: u8) -> u8 {
     match byte {

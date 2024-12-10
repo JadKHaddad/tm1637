@@ -92,9 +92,9 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Manually map each byte in a slice into a human readable character and set the dot at the 2nd position.
     ///
     /// ```rust
-    /// use tm1637_embedded_hal::{mappings::SegmentBits, mock::Noop, str::StrParser, tokens::Blocking, TM1637Builder};
+    /// use tm1637_embedded_hal::{mappings::SegmentBits, mock::Noop, str::StrParser, TM1637Builder};
     ///
-    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
     ///
     /// tm.options()
     ///     .iter(StrParser::new("HELLO").enumerate().map(move |(i, b)| {
@@ -320,9 +320,9 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Manually map each byte in a slice into a human readable character.
     ///
     /// ```rust
-    /// use tm1637_embedded_hal::{mappings::from_ascii_byte, mock::Noop, tokens::Blocking, TM1637Builder};
+    /// use tm1637_embedded_hal::{mappings::from_ascii_byte, mock::Noop, TM1637Builder};
     ///
-    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+    /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
     ///
     /// tm.options()
     ///     .slice(b"HELLO")

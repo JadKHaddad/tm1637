@@ -369,9 +369,9 @@ pub mod module {
         /// Scroll the text "Error" with a dot on the first position from right to left with a delay of 700ms.
         ///
         /// ```rust
-        /// use tm1637_embedded_hal::{mock::Noop, scroll::{ScrollDirection, ScrollStyle}, tokens::Blocking, TM1637Builder};
+        /// use tm1637_embedded_hal::{mock::Noop, options::{ScrollDirection, ScrollStyle}, TM1637Builder};
         ///
-        /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build::<4, Blocking>();
+        /// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
         ///
         /// tm.options()
         ///     .str("Error")
