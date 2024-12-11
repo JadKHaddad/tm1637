@@ -2,7 +2,7 @@
 
 use crate::{
     exact_size::ExactSizeChainExt, mappings::SegmentBits, maybe_flipped::MaybeFlipped, numbers,
-    str::StrParser, tokens::NotFlipped, TM1637,
+    str::StrParser, TM1637,
 };
 
 pub mod circles;
@@ -47,16 +47,16 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
         DIO,
         DELAY,
         impl DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
-        NotFlipped,
+        M,
     >
     where
         I: DoubleEndedIterator<Item = u8> + ExactSizeIterator + 'b,
     {
         DisplayOptions {
             device: self.device,
-            position: 0,
+            position: self.position,
             iter: self.iter.exact_size_chain(bytes.iter().copied()),
-            _flip: NotFlipped,
+            _flip: self._flip,
         }
     }
 
@@ -134,7 +134,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     {
         DisplayOptions {
             device: self.device,
-            position: 0,
+            position: self.position,
             iter: self.iter.exact_size_chain(iter),
             _flip: self._flip,
         }
