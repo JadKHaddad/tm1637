@@ -41,7 +41,7 @@ async fn main(spawner: Spawner) {
     let mut tm = TM1637Builder::new(clk, dio, delay)
         .brightness(Brightness::L4)
         .delay_us(30)
-        .build::<6, Blocking>();
+        .build::<4, Blocking>();
 
     tm.init().unwrap();
     // let bytes = [
@@ -137,14 +137,23 @@ async fn main(spawner: Spawner) {
     //         .run();
     // }
 
+    // tm.options()
+    //     .iter(StrParser::new("HELLO").enumerate().map(move |(i, b)| {
+    //         if i == 1 {
+    //             b | SegmentBits::Dot as u8
+    //         } else {
+    //             b
+    //         }
+    //     }))
+    //     .display()
+    //     .ok();
+
     tm.options()
-        .iter(StrParser::new("HELLO").enumerate().map(move |(i, b)| {
-            if i == 1 {
-                b | SegmentBits::Dot as u8
-            } else {
-                b
-            }
-        }))
+        .clock()
+        .hour(12)
+        .minute(56)
+        .finish()
+        .dot(1)
         .display()
         .ok();
 }

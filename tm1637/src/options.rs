@@ -141,6 +141,8 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 
     /// Prepare to display a digital clock.
+    ///
+    /// See [`ClockDisplayOptions`].
     pub fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         ClockDisplayOptions::new(self)
     }
@@ -156,6 +158,10 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 
     /// Use repeat animation options.
+    ///
+    /// Display all bytes of the given iterator on the same position.
+    ///
+    /// See [`RepeatDisplayOptions`].
     pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         RepeatDisplayOptions {
             options: self,

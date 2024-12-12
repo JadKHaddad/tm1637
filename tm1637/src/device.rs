@@ -118,7 +118,11 @@ where
     DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
     DELAY: ::embedded_hal_async::delay::DelayNs,
 {
-    // Does not stop on error
+    /// Scroll the given `iter` of bytes on the display starting from `position` with a delay of `delay_ms` milliseconds.
+    ///
+    /// ## Note
+    ///
+    /// - The stream does not stop on error.
     pub fn scroll<'a>(
         &'a mut self,
         position: usize,
@@ -147,7 +151,11 @@ where
     DIO: OutputPin<Error = ERR> + ConditionalInputPin<ERR>,
     DELAY: ::embedded_hal::delay::DelayNs,
 {
-    // Does not stop on error
+    /// Scroll the given `iter` of bytes on the display starting from `position` with a delay of `delay_ms` milliseconds.
+    ///
+    /// ## Note
+    ///
+    /// - The iterator does not stop on error.
     pub fn scroll<'a>(
         &'a mut self,
         position: usize,
@@ -354,6 +362,9 @@ pub mod module {
             Ok(())
         }
 
+        /// Write the given `bytes` slice to the display starting from `position`.
+        ///
+        /// See [`TM1637::display`].
         pub async fn display_slice(
             &mut self,
             position: usize,
@@ -403,6 +414,7 @@ pub mod module {
             }
         }
 
+        /// High-level API for animated circles (loading spinner).
         pub fn circles(&mut self) -> CirclesDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
             CirclesDisplayOptions { device: self }
         }

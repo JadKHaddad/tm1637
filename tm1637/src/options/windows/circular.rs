@@ -21,6 +21,7 @@ pub struct CircularWindows<const N: usize, I> {
 }
 
 impl<const N: usize, I> CircularWindows<N, I> {
+    /// Create a new [`CircularWindows`] iterator.
     pub const fn new(iter: I) -> Self {
         Self {
             state: WindowsState::<N>::Init,
@@ -99,6 +100,7 @@ pub struct CircularWindowsReversed<const N: usize, I> {
 }
 
 impl<const N: usize, I> CircularWindowsReversed<N, I> {
+    /// Create a new [`CircularWindowsReversed`] iterator.
     pub const fn new(iter: I) -> Self {
         Self {
             state: WindowsState::<N>::Init,

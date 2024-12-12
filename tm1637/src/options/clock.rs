@@ -2,6 +2,35 @@ use crate::formatters::clock_to_4digits;
 
 use super::DisplayOptions;
 
+/// High-level API for setting a clock.
+///
+/// # Example
+///
+/// Display the time `14:28` on the display.
+///
+/// ```rust
+/// use tm1637_embedded_hal::{mock::Noop, TM1637Builder};
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
+///
+/// tm.options()
+///     .clock()
+///     .hour(14)
+///     .minute(28)
+///     .finish()
+///     // Set the colon between the hours and minutes.
+///     .dot(1)
+///     .display()
+///     .ok();
+/// ```
+///
+/// The display will show:
+///
+/// ```text
+/// +---+ +---+ +---+ +---+
+/// | 1 | | 4 |:| 2 | | 8 |
+/// +---+ +---+ +---+ +---+
+/// ```
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
@@ -13,6 +42,7 @@ pub struct ClockDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
+    /// Create a new [`ClockDisplayOptions`] instance.
     pub fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
         Self {
             options,

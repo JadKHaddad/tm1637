@@ -19,6 +19,7 @@ pub struct LinearWindows<const N: usize, I> {
 }
 
 impl<const N: usize, I> LinearWindows<N, I> {
+    /// Create a new [`LinearWindows`] iterator.
     pub const fn new(iter: I) -> Self {
         Self {
             buffer: [0; N],

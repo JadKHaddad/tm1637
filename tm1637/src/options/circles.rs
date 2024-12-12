@@ -10,6 +10,7 @@ pub use bits::*;
 pub use default_options::RotatingCircleOptions;
 pub use direction::*;
 
+/// High-level API for circle animations.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct CirclesDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
@@ -17,6 +18,7 @@ pub struct CirclesDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY> CirclesDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
+    /// Create a new [`RotatingCircleOptions`] instance.
     pub fn rotating(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
         RotatingCircleOptions::new(self.device, NotFlipped)
     }

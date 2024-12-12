@@ -6,6 +6,9 @@ use crate::{
 
 use super::{bits::RotatingCircleBits, RotatingDirection};
 
+/// Default rotating circle options.
+///
+/// The animation consists of a single circle that rotates clockwise or counter-clockwise on a given position.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct RotatingCircleOptions<'d, const N: usize, T, CLK, DIO, DELAY, M> {
@@ -19,6 +22,7 @@ pub struct RotatingCircleOptions<'d, const N: usize, T, CLK, DIO, DELAY, M> {
 impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
     RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, M>
 {
+    /// Create a new [`RotatingCircleOptions`] instance.
     pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>, flip: M) -> Self {
         Self {
             device,

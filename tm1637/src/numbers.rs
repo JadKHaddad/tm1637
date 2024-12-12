@@ -1,5 +1,9 @@
 //! Format signed and unsigned integers into byte arrays.
 
+// TODO: rework the whole thing
+
+#![allow(missing_docs)]
+
 use crate::mappings::{DigitBits, SpecialCharBits};
 
 pub fn u8(n: u8) -> [u8; 1] {

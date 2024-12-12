@@ -45,6 +45,7 @@ impl defmt::Format for StrParser<'_> {
 }
 
 impl<'a> StrParser<'a> {
+    /// Create a new [`StrParser`] from a &[`str`].
     pub fn new(str: &'a str) -> Self {
         Self {
             bytes: str.bytes(),

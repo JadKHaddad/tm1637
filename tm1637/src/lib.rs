@@ -7,7 +7,7 @@
 //! - `defmt`: implements `defmt::Format` for structs and enums.
 
 #![no_std]
-// #![deny(unsafe_code, missing_docs, missing_debug_implementations)]
+#![deny(unsafe_code, missing_docs, missing_debug_implementations)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod align;
