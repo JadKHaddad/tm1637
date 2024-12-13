@@ -123,7 +123,7 @@ where
     /// ## Note
     ///
     /// - The stream does not stop on error.
-    pub fn scroll<'a>(
+    pub(crate) fn scroll<'a>(
         &'a mut self,
         position: usize,
         delay_ms: u32,
@@ -156,7 +156,7 @@ where
     /// ## Note
     ///
     /// - The iterator does not stop on error.
-    pub fn scroll<'a>(
+    pub(crate) fn scroll<'a>(
         &'a mut self,
         position: usize,
         delay_ms: u32,
@@ -339,7 +339,7 @@ pub mod module {
         }
 
         /// Set [`TM1637::brightness`] and write the brightness level to the display.
-        pub async fn write_brightness(&mut self, brightness: Brightness) -> Result<(), Error<ERR>> {
+        pub async fn set_brightness(&mut self, brightness: Brightness) -> Result<(), Error<ERR>> {
             self.brightness = brightness;
 
             self.write_brightness_cmd(brightness).await
