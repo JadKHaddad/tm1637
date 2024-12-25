@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub mod circles;
-pub mod windows;
+mod windows;
 
 mod clock;
 mod repeat;
