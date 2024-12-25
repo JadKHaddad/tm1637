@@ -21,7 +21,7 @@ pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {
 
 /// Scroll animation.
 ///
-/// Responsible for running the animation using [`TM1637::scroll`].
+/// Responsible for running the animation.
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {

@@ -347,7 +347,7 @@ pub mod module {
 
         /// Write the given `bytes` to the display starting from `position`.
         ///
-        /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::write_brightness`] or [`TM1637::init`] to set the brightness level.
+        /// Brightness level will not be written to the device on each call. Make sure to call [`TM1637::set_brightness`] or [`TM1637::init`] to set the brightness level.
         pub async fn display(
             &mut self,
             position: usize,

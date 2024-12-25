@@ -1,3 +1,4 @@
+//! Noop implementation of embedded-hal traits for testing purposes.
 #[derive(Debug)]
 pub struct Noop;
 
