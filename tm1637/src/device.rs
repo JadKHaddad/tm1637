@@ -416,7 +416,7 @@ pub mod module {
 
         /// High-level API for animated circles (loading spinner).
         pub fn circles(&mut self) -> CirclesDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
-            CirclesDisplayOptions { device: self }
+            CirclesDisplayOptions::new(self)
         }
     }
 }

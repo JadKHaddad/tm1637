@@ -13,31 +13,40 @@ pub use style::ScrollStyle;
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct ScrollDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {
-    pub(crate) options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
-    pub(crate) delay_ms: u32,
-    pub(crate) direction: ScrollDirection,
-    pub(crate) style: ScrollStyle,
-}
-
-/// Scroll animation.
-///
-/// Responsible for running the animation.
-#[derive(Debug)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
-pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
-    pub(crate) device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-    pub(crate) inner_iter_len: usize,
-    pub(crate) position: usize,
-    pub(crate) delay_ms: u32,
-    pub(crate) iter: I,
-    pub(crate) _flip: M,
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
+    delay_ms: u32,
+    direction: ScrollDirection,
+    style: ScrollStyle,
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
-where
-    I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
 {
+    /// Create a new [`ScrollDisplayOptions`] instance.
+    pub fn new(
+        options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
+        delay_ms: u32,
+        direction: ScrollDirection,
+        style: ScrollStyle,
+    ) -> Self {
+        Self {
+            options,
+            delay_ms,
+            direction,
+            style,
+        }
+    }
+
+    /// Create a new [`ScrollDisplayOptions`] instance with default settings.
+    pub fn new_with_defaults(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
+        Self::new(
+            options,
+            500,
+            ScrollDirection::LeftToRight,
+            ScrollStyle::Circular,
+        )
+    }
+
     /// Set the delay in milliseconds between each animation step.
     pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
         self.delay_ms = delay_ms;
@@ -80,7 +89,10 @@ where
         DELAY,
         impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
         M,
-    > {
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
         let iter =
             windows::<N>(self.options.iter, self.direction, self.style).map(|i| i.into_iter());
 
@@ -91,6 +103,41 @@ where
             delay_ms: self.delay_ms,
             iter,
             _flip: self.options._flip,
+        }
+    }
+}
+
+/// Scroll animation.
+///
+/// Responsible for running the animation.
+#[derive(Debug)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
+    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    inner_iter_len: usize,
+    position: usize,
+    delay_ms: u32,
+    iter: I,
+    _flip: M,
+}
+
+impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> Scroller<'d, N, T, CLK, DIO, DELAY, I, M> {
+    /// Create a new [`Scroller`] instance.
+    pub fn new(
+        device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+        inner_iter_len: usize,
+        position: usize,
+        delay_ms: u32,
+        iter: I,
+        _flip: M,
+    ) -> Self {
+        Self {
+            device,
+            inner_iter_len,
+            position,
+            delay_ms,
+            iter,
+            _flip,
         }
     }
 }

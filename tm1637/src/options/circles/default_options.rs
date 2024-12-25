@@ -12,25 +12,36 @@ use super::{bits::RotatingCircleBits, RotatingDirection};
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct RotatingCircleOptions<'d, const N: usize, T, CLK, DIO, DELAY, M> {
-    pub(crate) device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-    pub(crate) position: usize,
-    pub(crate) delay_ms: u32,
-    pub(crate) direction: RotatingDirection,
-    pub(crate) _flip: M,
+    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    position: usize,
+    delay_ms: u32,
+    direction: RotatingDirection,
+    _flip: M,
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
     RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, M>
 {
     /// Create a new [`RotatingCircleOptions`] instance.
-    pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>, flip: M) -> Self {
+    pub fn new(
+        device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+        position: usize,
+        delay_ms: u32,
+        direction: RotatingDirection,
+        flip: M,
+    ) -> Self {
         Self {
             device,
-            position: 0,
-            delay_ms: 500,
-            direction: RotatingDirection::Clockwise,
+            position,
+            delay_ms,
+            direction,
             _flip: flip,
         }
+    }
+
+    /// Create a new [`RotatingCircleOptions`] instance with default settings.
+    pub fn new_with_defaults(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>, flip: M) -> Self {
+        Self::new(device, 0, 500, RotatingDirection::Clockwise, flip)
     }
 
     /// Set the starting position of the rotating circle.
@@ -83,15 +94,15 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
             RotatingDirection::CounterClockwise => RotatingCircleBits::all_u8(),
         };
 
-        RepeatDisplayOptions {
-            options: DisplayOptions {
+        RepeatDisplayOptions::new(
+            DisplayOptions {
                 device: self.device,
                 position: self.position,
                 iter: bytes.into_iter(),
                 _flip: self._flip,
             },
-            delay_ms: self.delay_ms,
-        }
+            self.delay_ms,
+        )
         .finish()
     }
 }

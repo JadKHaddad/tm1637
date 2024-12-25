@@ -42,15 +42,23 @@ use super::{scroll::Scroller, DisplayOptions};
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct RepeatDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, D> {
-    pub(crate) options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
-    pub(crate) delay_ms: u32,
+    options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, D>,
+    delay_ms: u32,
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
-where
-    I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
 {
+    /// Create a new [`RepeatDisplayOptions`] instance.
+    pub fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>, delay_ms: u32) -> Self {
+        Self { options, delay_ms }
+    }
+
+    /// Create a new [`RepeatDisplayOptions`] instance with default settings.
+    pub fn new_with_defaults(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
+        Self::new(options, 500)
+    }
+
     /// Set the delay in milliseconds between each animation step.
     pub const fn delay_ms(mut self, delay_ms: u32) -> Self {
         self.delay_ms = delay_ms;
@@ -69,16 +77,19 @@ where
         DELAY,
         impl Iterator<Item = impl DoubleEndedIterator<Item = u8> + ExactSizeIterator>,
         M,
-    > {
+    >
+    where
+        I: DoubleEndedIterator<Item = u8> + ExactSizeIterator,
+    {
         let iter = self.options.iter.map(move |i| [i]).map(|i| i.into_iter());
 
-        Scroller {
-            device: self.options.device,
-            inner_iter_len: 1,
-            position: self.options.position,
-            delay_ms: self.delay_ms,
+        Scroller::new(
+            self.options.device,
+            1,
+            self.options.position,
+            self.delay_ms,
             iter,
-            _flip: self.options._flip,
-        }
+            self.options._flip,
+        )
     }
 }

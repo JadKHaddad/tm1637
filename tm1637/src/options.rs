@@ -2,7 +2,7 @@
 
 use crate::{
     exact_size::ExactSizeChainExt, mappings::SegmentBits, maybe_flipped::MaybeFlipped, numbers,
-    str::StrParser, TM1637,
+    str::StrParser, tokens::NotFlipped, TM1637,
 };
 
 pub mod circles;
@@ -29,6 +29,18 @@ pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
 impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
+    /// Create a new [`DisplayOptions`] instance.
+    pub fn new(
+        device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    ) -> DisplayOptions<'d, N, T, CLK, DIO, DELAY, core::iter::Empty<u8>, NotFlipped> {
+        DisplayOptions {
+            device,
+            position: 0,
+            iter: core::iter::empty(),
+            _flip: NotFlipped,
+        }
+    }
+
     /// Set the position on the display from which to start displaying the bytes.
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
@@ -148,13 +160,8 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 
     /// Use scroll animation options.
-    pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
-        ScrollDisplayOptions {
-            options: self,
-            delay_ms: 500,
-            direction: ScrollDirection::LeftToRight,
-            style: ScrollStyle::Circular,
-        }
+    pub fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+        ScrollDisplayOptions::new_with_defaults(self)
     }
 
     /// Use repeat animation options.
@@ -162,11 +169,8 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Display all bytes of the given iterator on the same position.
     ///
     /// See [`RepeatDisplayOptions`].
-    pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
-        RepeatDisplayOptions {
-            options: self,
-            delay_ms: 500,
-        }
+    pub fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+        RepeatDisplayOptions::new_with_defaults(self)
     }
 
     /// Add a dynamic dot to the display at the specified position.
