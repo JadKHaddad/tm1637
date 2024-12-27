@@ -1,4 +1,6 @@
 //! Format signed and unsigned integers into byte arrays.
+//!
+//! This module is WIP. Planned for release v0.5.0.
 
 // TODO: rework the whole thing
 
