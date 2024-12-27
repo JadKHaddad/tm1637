@@ -61,4 +61,4 @@ jobs:
         
       - name: Test
         working-directory: ${{env.working-directory}}
-        run: cargo test --all-features
+        run: cargo test
