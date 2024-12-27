@@ -19,14 +19,14 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
     /// Create a new [`TM1637Builder`] instance with default values.
     ///
     /// - `brightness`: [`Brightness::L0`]
-    /// - `delay_us`: 10
+    /// - `delay_us`: 100
     pub const fn new(clk: CLK, dio: DIO, delay: DELAY) -> Self {
         Self {
             clk,
             dio,
             delay,
             brightness: Brightness::L0,
-            delay_us: 10,
+            delay_us: 100,
         }
     }
 
