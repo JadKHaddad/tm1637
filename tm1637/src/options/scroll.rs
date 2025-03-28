@@ -23,7 +23,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
     /// Create a new [`ScrollDisplayOptions`] instance.
-    pub fn new(
+    pub const fn new(
         options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
         delay_ms: u32,
         direction: ScrollDirection,
@@ -38,7 +38,9 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 
     /// Create a new [`ScrollDisplayOptions`] instance with default settings.
-    pub fn new_with_defaults(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
+    pub const fn new_with_defaults(
+        options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
+    ) -> Self {
         Self::new(
             options,
             500,
@@ -123,7 +125,7 @@ pub struct Scroller<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M> Scroller<'d, N, T, CLK, DIO, DELAY, I, M> {
     /// Create a new [`Scroller`] instance.
-    pub fn new(
+    pub const fn new(
         device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
         inner_iter_len: usize,
         position: usize,

@@ -50,12 +50,17 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
     /// Create a new [`RepeatDisplayOptions`] instance.
-    pub fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>, delay_ms: u32) -> Self {
+    pub const fn new(
+        options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
+        delay_ms: u32,
+    ) -> Self {
         Self { options, delay_ms }
     }
 
     /// Create a new [`RepeatDisplayOptions`] instance with default settings.
-    pub fn new_with_defaults(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
+    pub const fn new_with_defaults(
+        options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>,
+    ) -> Self {
         Self::new(options, 500)
     }
 

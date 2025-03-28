@@ -23,7 +23,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
     RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, M>
 {
     /// Create a new [`RotatingCircleOptions`] instance.
-    pub fn new(
+    pub const fn new(
         device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
         position: usize,
         delay_ms: u32,
@@ -40,7 +40,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, M>
     }
 
     /// Create a new [`RotatingCircleOptions`] instance with default settings.
-    pub fn new_with_defaults(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>, flip: M) -> Self {
+    pub const fn new_with_defaults(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>, flip: M) -> Self {
         Self::new(device, 0, 500, RotatingDirection::Clockwise, flip)
     }
 

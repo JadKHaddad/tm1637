@@ -43,7 +43,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
     /// Create a new [`ClockDisplayOptions`] instance.
-    pub fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
+    pub const fn new(options: DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>) -> Self {
         Self {
             options,
             hour: 0,

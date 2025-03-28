@@ -19,7 +19,7 @@ pub struct CirclesDisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY> {
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY> CirclesDisplayOptions<'d, N, T, CLK, DIO, DELAY> {
     /// Create a new [`CirclesDisplayOptions`] instance.
-    pub fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
+    pub const fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
         Self { device }
     }
 
