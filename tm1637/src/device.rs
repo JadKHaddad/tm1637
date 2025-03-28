@@ -334,7 +334,7 @@ pub mod module {
 
         /// Clear the display.
         pub async fn clear(&mut self) -> Result<(), Error<ERR>> {
-            self.display(0, ::core::iter::repeat(0).take(self.num_positions()))
+            self.display(0, ::core::iter::repeat_n(0, self.num_positions()))
                 .await
         }
 

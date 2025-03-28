@@ -29,7 +29,7 @@ impl Aligned for Align<4> {
         }
 
         if position > 3 {
-            return (position, I::A(core::iter::empty()));
+            return (position, I::A(::core::iter::empty()));
         }
 
         // Don't write more bytes than needed
@@ -49,7 +49,7 @@ impl Aligned for Align<6> {
         }
 
         if position > 5 {
-            return (3, I::A(core::iter::empty()));
+            return (3, I::A(::core::iter::empty()));
         }
 
         // 3 is a magic number to make the alignment work
@@ -88,7 +88,7 @@ fn padding_6(
     let len = iter.len();
 
     if len < 6 {
-        return I::A(iter.exact_size_chain(core::iter::repeat(0).take(6 - len)));
+        return I::A(iter.exact_size_chain(::core::iter::repeat_n(0, 6 - len)));
     };
 
     I::B(iter)
