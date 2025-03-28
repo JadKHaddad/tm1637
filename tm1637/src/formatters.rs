@@ -206,7 +206,7 @@ pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
 
 /// Formats a [`f32`] with the given amount of decimal digits, for a `6-digit display`.
 pub fn f32_to_6digits(n: f32, decimals: u8) -> [u8; 6] {
-    use core::ops::Mul;
+    use ::core::ops::Mul;
 
     let mut b: [u8; 6] = [0; 6];
     let decimal_position = 5 - decimals;

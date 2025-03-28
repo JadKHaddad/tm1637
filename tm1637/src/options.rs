@@ -27,14 +27,14 @@ pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY>
-    DisplayOptions<'d, N, T, CLK, DIO, DELAY, core::iter::Empty<u8>, NotFlipped>
+    DisplayOptions<'d, N, T, CLK, DIO, DELAY, ::core::iter::Empty<u8>, NotFlipped>
 {
     /// Create a new [`DisplayOptions`] instance.
     pub const fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
         DisplayOptions {
             device,
             position: 0,
-            iter: core::iter::empty(),
+            iter: ::core::iter::empty(),
             _flip: NotFlipped,
         }
     }

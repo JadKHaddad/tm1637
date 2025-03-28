@@ -73,7 +73,7 @@ impl<const N: usize> MaybeFlipped<N> for Flipped {
             }
 
             if position > N {
-                return I::C(core::iter::empty());
+                return I::C(::core::iter::empty());
             }
 
             match bytes.len() + position > N {

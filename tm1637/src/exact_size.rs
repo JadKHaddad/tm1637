@@ -1,4 +1,4 @@
-use core::iter::Chain;
+use ::core::iter::Chain;
 
 /// Exact size iterator.
 ///

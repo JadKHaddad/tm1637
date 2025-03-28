@@ -1,6 +1,6 @@
 //! [`str`] parsing utilities.
 
-use core::str::Bytes;
+use ::core::str::Bytes;
 
 use crate::mappings::{from_ascii_byte, SegmentBits};
 
