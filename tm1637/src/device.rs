@@ -406,12 +406,7 @@ pub mod module {
             impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
             NotFlipped,
         > {
-            DisplayOptions {
-                device: self,
-                position: 0,
-                iter: core::iter::empty(),
-                _flip: NotFlipped,
-            }
+            DisplayOptions::new(self)
         }
 
         /// High-level API for animated circles (loading spinner).

@@ -26,13 +26,11 @@ pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
     pub(crate) _flip: M,
 }
 
-impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
-    DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+impl<'d, const N: usize, T, CLK, DIO, DELAY>
+    DisplayOptions<'d, N, T, CLK, DIO, DELAY, core::iter::Empty<u8>, NotFlipped>
 {
     /// Create a new [`DisplayOptions`] instance.
-    pub fn new(
-        device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-    ) -> DisplayOptions<'d, N, T, CLK, DIO, DELAY, core::iter::Empty<u8>, NotFlipped> {
+    pub const fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
         DisplayOptions {
             device,
             position: 0,
@@ -40,7 +38,11 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
             _flip: NotFlipped,
         }
     }
+}
 
+impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
+    DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
+{
     /// Set the position on the display from which to start displaying the bytes.
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
