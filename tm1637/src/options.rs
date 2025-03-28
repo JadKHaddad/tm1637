@@ -12,6 +12,8 @@ mod clock;
 mod repeat;
 mod scroll;
 
+pub mod erased;
+
 pub use clock::*;
 pub use repeat::*;
 pub use scroll::*;

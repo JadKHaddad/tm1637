@@ -8,6 +8,8 @@ use crate::{
     Brightness, ConditionalInputPin, Error, TM1637Builder,
 };
 
+mod erased;
+
 /// `TM1637` 7-segment display driver.
 ///
 /// # Type parameters
