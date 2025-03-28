@@ -62,7 +62,7 @@ impl Aligned for Align<6> {
     }
 }
 
-/// Iterators with less than 6 elements will never align whithout leaving empty spaces between digits, so we pad with zeros
+/// Iterators with less than 6 elements will never align without leaving empty spaces between digits, so we pad with zeros
 ///
 /// The padding will be written to the display, overwriting the digits that are already there.
 fn padding_6(
