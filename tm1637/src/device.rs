@@ -396,16 +396,8 @@ pub mod module {
         /// ```
         pub fn options(
             &mut self,
-        ) -> DisplayOptions<
-            '_,
-            N,
-            Token,
-            CLK,
-            DIO,
-            DELAY,
-            impl DoubleEndedIterator<Item = u8> + ExactSizeIterator,
-            NotFlipped,
-        > {
+        ) -> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, ::core::iter::Empty<u8>, NotFlipped>
+        {
             DisplayOptions::new(self)
         }
 
