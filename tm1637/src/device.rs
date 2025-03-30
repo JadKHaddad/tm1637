@@ -398,7 +398,7 @@ pub mod module {
             &mut self,
         ) -> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, ::core::iter::Empty<u8>, NotFlipped>
         {
-            DisplayOptions::new(self)
+            DisplayOptions::empty(self)
         }
 
         /// High-level API for animated circles (loading spinner).

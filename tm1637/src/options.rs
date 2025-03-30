@@ -20,17 +20,17 @@ pub use scroll::*;
 #[derive(Debug)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct DisplayOptions<'d, const N: usize, T, CLK, DIO, DELAY, I, M> {
-    pub(crate) device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
-    pub(crate) position: usize,
-    pub(crate) iter: I,
-    pub(crate) _flip: M,
+    device: &'d mut TM1637<N, T, CLK, DIO, DELAY>,
+    position: usize,
+    iter: I,
+    _flip: M,
 }
 
 impl<'d, const N: usize, T, CLK, DIO, DELAY>
     DisplayOptions<'d, N, T, CLK, DIO, DELAY, ::core::iter::Empty<u8>, NotFlipped>
 {
-    /// Create a new [`DisplayOptions`] instance.
-    pub const fn new(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
+    /// Create a new empty [`DisplayOptions`] instance.
+    pub const fn empty(device: &'d mut TM1637<N, T, CLK, DIO, DELAY>) -> Self {
         DisplayOptions {
             device,
             position: 0,
@@ -43,6 +43,19 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY>
 impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     DisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M>
 {
+    /// Map the iter using the provided function.
+    pub fn map_iter<U, F: FnMut(I) -> U>(
+        self,
+        mut f: F,
+    ) -> DisplayOptions<'d, N, T, CLK, DIO, DELAY, U, M> {
+        DisplayOptions {
+            device: self.device,
+            position: self.position,
+            iter: f(self.iter),
+            _flip: self._flip,
+        }
+    }
+
     /// Set the position on the display from which to start displaying the bytes.
     pub const fn position(mut self, position: usize) -> Self {
         self.position = position;
