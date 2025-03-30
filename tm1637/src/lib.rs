@@ -31,7 +31,7 @@ pub mod tokens;
 
 pub use brightness::Brightness;
 pub use builder::TM1637Builder;
-pub(crate) use conditional::ConditionalInputPin;
+pub use conditional::ConditionalInputPin;
 pub use device::TM1637;
 pub use error::Error;
 pub(crate) use identity::Identity;
