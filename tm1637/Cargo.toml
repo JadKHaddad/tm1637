@@ -1,6 +1,6 @@
 [package]
 name = "tm1637-embedded-hal"
-version = "0.5.0-alpha.1"
+version = "0.5.0-alpha.2"
 edition = "2021"
 authors = ["Jad K. Haddad <jadkhaddad@gmail.com>"]
 description = "A platform agnostic driver to interface with the TM1637 (7-segment LED display) using embedded-hal and embedded-hal-async."
