@@ -1,5 +1,12 @@
 # TM1637
 
+![Build Status](https://github.com/JadKHaddad/tm1637/actions/workflows/build-and-test.yml/badge.svg)
+[![crates.io](https://img.shields.io/crates/v/tm1637-embedded-hal.svg)](https://crates.io/crates/tm1637-embedded-hal)
+[![Crates.io (MSRV)](https://img.shields.io/crates/msrv/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+[![docs.rs](https://docs.rs/tm1637-embedded-hal/badge.svg)](https://docs.rs/tm1637-embedded-hal)
+[![Crates.io (Downloads)](https://img.shields.io/crates/d/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+[![Crates.io (License)](https://img.shields.io/crates/l/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+
 A platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](https://crates.io/crates/embedded-hal) and [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) traits.
 
 !["ruSt" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-rust.webp?raw=true)
