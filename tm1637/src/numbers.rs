@@ -4,6 +4,36 @@
 
 // TODO: rework the whole thing
 
+/*
+TLDR; this module is a mess.
+
+fn is_even(number: i32) -> bool {
+    if number == 1 { false }
+    else if number == 2 { true }
+    else if number == 3 { false }
+    else if number == 4 { true }
+    else if number == 5 { false }
+    else if number == 6 { true }
+    else if number == 7 { false }
+    else if number == 8 { true }
+    else if number == 9 { false }
+    else if number == 10 { true }
+    else if number == 11 { false }
+    else if number == 12 { true }
+    else if number == 13 { false }
+    else if number == 14 { true }
+    else if number == 15 { false }
+    else if number == 16 { true }
+    else if number == 17 { false }
+    else if number == 18 { true }
+    else if number == 19 { false }
+    else if number == 20 { true }
+    else if number == 21 { false }
+    else if number == 22 { true }
+    else { panic!("Number not supported!") }
+}
+*/
+
 #![allow(missing_docs)]
 
 use crate::mappings::{DigitBits, SpecialCharBits};
