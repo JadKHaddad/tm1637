@@ -170,12 +170,12 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Prepare to display a digital clock.
     ///
     /// See [`ClockDisplayOptions`].
-    pub fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+    pub const fn clock(self) -> ClockDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         ClockDisplayOptions::new(self)
     }
 
     /// Use scroll animation options.
-    pub fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+    pub const fn scroll(self) -> ScrollDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         ScrollDisplayOptions::new_with_defaults(self)
     }
 
@@ -184,7 +184,7 @@ impl<'d, 'b, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Display all bytes of the given iterator on the same position.
     ///
     /// See [`RepeatDisplayOptions`].
-    pub fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
+    pub const fn repeat(self) -> RepeatDisplayOptions<'d, N, T, CLK, DIO, DELAY, I, M> {
         RepeatDisplayOptions::new_with_defaults(self)
     }
 

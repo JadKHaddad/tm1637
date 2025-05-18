@@ -24,7 +24,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY> CirclesDisplayOptions<'d, N, T, CLK
     }
 
     /// Create a new [`RotatingCircleOptions`] instance.
-    pub fn rotating(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
+    pub const fn rotating(self) -> RotatingCircleOptions<'d, N, T, CLK, DIO, DELAY, NotFlipped> {
         RotatingCircleOptions::new_with_defaults(self.device, NotFlipped)
     }
 }

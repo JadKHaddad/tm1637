@@ -31,13 +31,13 @@ impl<CLK, DIO, DELAY> TM1637Builder<CLK, DIO, DELAY> {
     }
 
     /// Set the brightness level.
-    pub fn brightness(mut self, brightness: Brightness) -> Self {
+    pub const fn brightness(mut self, brightness: Brightness) -> Self {
         self.brightness = brightness;
         self
     }
 
     /// Set the delay in microseconds.
-    pub fn delay_us(mut self, delay_us: u32) -> Self {
+    pub const fn delay_us(mut self, delay_us: u32) -> Self {
         self.delay_us = delay_us;
         self
     }

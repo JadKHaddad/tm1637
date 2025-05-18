@@ -82,7 +82,7 @@ impl<const N: usize, T, CLK, DIO, DELAY> TM1637<N, T, CLK, DIO, DELAY> {
     }
 
     /// Get a mutable reference to the clock pin.
-    pub fn clk_mut(&mut self) -> &mut CLK {
+    pub const fn clk_mut(&mut self) -> &mut CLK {
         &mut self.clk
     }
 
@@ -92,7 +92,7 @@ impl<const N: usize, T, CLK, DIO, DELAY> TM1637<N, T, CLK, DIO, DELAY> {
     }
 
     /// Get a mutable reference to the data input/output pin.
-    pub fn dio_mut(&mut self) -> &mut DIO {
+    pub const fn dio_mut(&mut self) -> &mut DIO {
         &mut self.dio
     }
 
@@ -102,7 +102,7 @@ impl<const N: usize, T, CLK, DIO, DELAY> TM1637<N, T, CLK, DIO, DELAY> {
     }
 
     /// Get a mutable reference to the delay provider.
-    pub fn delay_mut(&mut self) -> &mut DELAY {
+    pub const fn delay_mut(&mut self) -> &mut DELAY {
         &mut self.delay
     }
 
@@ -394,7 +394,7 @@ pub mod module {
         ///     .finish()
         ///     .run();
         /// ```
-        pub fn options(
+        pub const fn options(
             &mut self,
         ) -> DisplayOptions<'_, N, Token, CLK, DIO, DELAY, ::core::iter::Empty<u8>, NotFlipped>
         {
@@ -402,7 +402,7 @@ pub mod module {
         }
 
         /// High-level API for animated circles (loading spinner).
-        pub fn circles(&mut self) -> CirclesDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
+        pub const fn circles(&mut self) -> CirclesDisplayOptions<'_, N, Token, CLK, DIO, DELAY> {
             CirclesDisplayOptions::new(self)
         }
     }

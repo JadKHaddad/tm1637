@@ -129,7 +129,7 @@ impl DigitBits {
     }
 
     /// Creates a new [`DigitBits`] from a [`u8`] digit.
-    pub fn from_digit(digit: u8) -> Self {
+    pub const fn from_digit(digit: u8) -> Self {
         match digit {
             0 => DigitBits::Zero,
             1 => DigitBits::One,
@@ -231,7 +231,7 @@ impl HexDigitBits {
     }
 
     /// Creates a new [`HexDigitBits`] from a [`u8`] digit.
-    pub fn from_digit(digit: u8) -> Self {
+    pub const fn from_digit(digit: u8) -> Self {
         match digit {
             0 => HexDigitBits::Zero,
             1 => HexDigitBits::One,
@@ -314,7 +314,7 @@ impl UpsideDownDigitBits {
     }
 
     /// Creates a new [`DigitBits`] from a [`u8`] digit.
-    pub fn from_digit(digit: u8) -> Self {
+    pub const fn from_digit(digit: u8) -> Self {
         match digit {
             0 => UpsideDownDigitBits::Zero,
             1 => UpsideDownDigitBits::One,
