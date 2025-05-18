@@ -36,8 +36,6 @@ pub enum SegmentBits {
     /// - `Or` this bit with the other bits to display the dot.
     /// - `Or` this bit with the bit responsible for displaying the double point. Often second position on a 4-digit display.
     Dot = 0b10000000,
-    // TODO: maybe rename this to Colon
-    // We still have to figure out how to handle dps
 }
 
 impl SegmentBits {
