@@ -25,9 +25,9 @@ where
     A: DoubleEndedIterator<Item = I> + ExactSizeIterator,
     B: DoubleEndedIterator<Item = I> + ExactSizeIterator,
 {
-    fn exact_size_chain(self, oher: B) -> ExactSize<Chain<Self, B>> {
-        let size = self.len() + oher.len();
-        let iter = self.chain(oher);
+    fn exact_size_chain(self, other: B) -> ExactSize<Chain<Self, B>> {
+        let size = self.len() + other.len();
+        let iter = self.chain(other);
 
         ExactSize { inner: iter, size }
     }

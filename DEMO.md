@@ -16,9 +16,9 @@
 
 !["hour" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-hour.webp?raw=true)
 
-## 4-digit i16 upsidedown
+## 4-digit i16 upside down
 
-!["i16 upsidedown" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-i16-upsidedown.webp?raw=true)
+!["i16 upside down" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-i16-upsidedown.webp?raw=true)
 
 ## 4-digit i16
 

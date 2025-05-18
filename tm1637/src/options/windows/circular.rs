@@ -31,7 +31,7 @@ impl<const N: usize, I> CircularWindows<N, I> {
     }
 }
 
-/// Shifts the last item to the left and inserts firt[index] at the end.
+/// Shifts the last item to the left and inserts first[index] at the end.
 fn shift_left<const N: usize>(first: &[u8; N], last: &[u8; N], index: usize) -> [u8; N] {
     let mut buffer = [0; N];
 
@@ -110,7 +110,7 @@ impl<const N: usize, I> CircularWindowsReversed<N, I> {
     }
 }
 
-/// Shifts the last item to the right and inserts firt[N - 1 - index] at the front.
+/// Shifts the last item to the right and inserts first[N - 1 - index] at the front.
 fn shift_right<const N: usize>(first: &[u8; N], last: &[u8; N], index: usize) -> [u8; N] {
     let mut buffer = [0; N];
 

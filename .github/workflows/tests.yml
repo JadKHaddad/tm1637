@@ -1,4 +1,4 @@
-name: Tests
+name: build
 
 on:
   push:
@@ -17,7 +17,6 @@ jobs:
         rust:
           - stable
           - beta
-          - nightly
         os:
           - ubuntu-latest
 

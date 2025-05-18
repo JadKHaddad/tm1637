@@ -1,0 +1,29 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "asynch",
+        "clippy",
+        "codegen",
+        "defmt",
+        "docsrs",
+        "FLIPPI",
+        "FLOPPI",
+        "ftdi",
+        "Haddad",
+        "Iván",
+        "nextest",
+        "println",
+        "repr",
+        "rustc",
+        "rustdoc",
+        "Sánchez",
+        "Swatinem",
+        "taiki",
+        "Tlinkall",
+        "wokwi"
+    ],
+    "ignorePaths": [
+        "target"
+    ]
+}

@@ -33,7 +33,7 @@ fn main() -> ! {
     tm.init().ok();
 
     // Display the number `123456` starting from the first position on the display.
-    // 6-digit displays are a litle bit tricky to align. Use the High-Level API for a more convenient way.
+    // 6-digit displays are a little bit tricky to align. Use the High-Level API for a more convenient way.
     let bytes = [
         0b01001111, /* 3 */
         0b01011011, /* 2 */
@@ -72,8 +72,8 @@ fn main() -> ! {
     delay.delay_millis(DELAY_MS);
 
     // Using the High-Level API you can concatenate multiple bytes. let's display a calculated temperature value.
-    let temprature = 1596;
-    tm.options().u16_4(temprature).str(" c").display().ok();
+    let temperature = 1596;
+    tm.options().u16_4(temperature).str(" c").display().ok();
 
     delay.delay_millis(DELAY_MS);
 

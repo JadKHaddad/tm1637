@@ -40,8 +40,8 @@ use crate::mappings::{DigitBits, UpsideDownDigitBits};
 /// tm.init().ok();
 ///
 /// for i in -100..100 {
-///     let segs = i16_to_4digits(i);
-///     tm.display_slice(0, &segs).ok();
+///     let segments = i16_to_4digits(i);
+///     tm.display_slice(0, &segments).ok();
 ///
 ///     delay.delay_ms(100);
 /// }
@@ -157,9 +157,9 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///     for minute in 34..60 {
 ///         for second in 0..120 {
 ///             let blink = second % 2 == 0;
-///             let segs = clock_to_4digits(hour, minute, blink);
+///             let segments = clock_to_4digits(hour, minute, blink);
 ///
-///             tm.display_slice(0, &segs).ok();
+///             tm.display_slice(0, &segments).ok();
 ///
 ///             delay.delay_ms(500);
 ///         }
@@ -184,6 +184,8 @@ pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
 }
 
 /// Formats a [`i16`] clamped between `-999` and `9999`, for an `upside-down 4-digit display`.
+// FIXME `upside_down` is a breaking change
+// cspell:disable-next-line
 pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
     let mut bytes: [u8; 4] = [0; 4];
     let mut m: i16 = n.clamp(-999, 9999).abs();

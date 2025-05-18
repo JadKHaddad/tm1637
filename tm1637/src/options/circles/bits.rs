@@ -86,7 +86,7 @@ impl RotatingCircleBits {
         ]
     }
 
-    /// Resturns all rotating circle bits reversed.
+    /// Returns all rotating circle bits reversed.
     pub const fn all_reversed() -> [RotatingCircleBits; 6] {
         [
             RotatingCircleBits::F,
@@ -110,7 +110,7 @@ impl RotatingCircleBits {
         ]
     }
 
-    /// Resturns all rotating circle bits reversed as [`u8`].
+    /// Returns all rotating circle bits reversed as [`u8`].
     pub const fn all_u8_reversed() -> [u8; 6] {
         [
             RotatingCircleBits::F as u8,

@@ -55,8 +55,8 @@ fn main() -> ! {
     delay.delay_millis(DELAY_MS);
 
     // Using the High-Level API you can concatenate multiple bytes. let's display a calculated temperature value.
-    let temprature = 15;
-    tm.options().u8_2(temprature).str(" c").display().ok();
+    let temperature = 15;
+    tm.options().u8_2(temperature).str(" c").display().ok();
 
     delay.delay_millis(DELAY_MS);
 
