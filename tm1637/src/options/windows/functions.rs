@@ -24,8 +24,8 @@ pub fn windows_circular<const N: usize>(
     direction: ScrollDirection,
 ) -> impl Iterator<Item = [u8; N]> {
     match direction {
-        ScrollDirection::LeftToRight => CircularWindows::<N, _>::new(bytes),
-        ScrollDirection::RightToLeft => CircularWindowsReversed::<N, _>::new(bytes),
+        ScrollDirection::RightToLeft => CircularWindows::<N, _>::new(bytes),
+        ScrollDirection::LeftToRight => CircularWindowsReversed::<N, _>::new(bytes),
     }
 }
 
@@ -38,7 +38,7 @@ pub fn windows_linear<const N: usize>(
     direction: ScrollDirection,
 ) -> impl Iterator<Item = [u8; N]> {
     match direction {
-        ScrollDirection::LeftToRight => LinearWindows::<N, _>::new(bytes),
-        ScrollDirection::RightToLeft => LinearWindows::<N, _>::new(bytes).rev(),
+        ScrollDirection::RightToLeft => LinearWindows::<N, _>::new(bytes),
+        ScrollDirection::LeftToRight => LinearWindows::<N, _>::new(bytes).rev(),
     }
 }

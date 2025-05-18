@@ -44,7 +44,7 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
         Self::new(
             options,
             500,
-            ScrollDirection::LeftToRight,
+            ScrollDirection::RightToLeft,
             ScrollStyle::Circular,
         )
     }
@@ -62,13 +62,13 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     }
 
     /// Set the animation direction to [`ScrollDirection::LeftToRight`].
-    pub const fn left(mut self) -> Self {
+    pub const fn left_to_right(mut self) -> Self {
         self.direction = ScrollDirection::LeftToRight;
         self
     }
 
     /// Set the animation direction to [`ScrollDirection::RightToLeft`].
-    pub const fn right(mut self) -> Self {
+    pub const fn right_to_left(mut self) -> Self {
         self.direction = ScrollDirection::RightToLeft;
         self
     }
@@ -76,6 +76,18 @@ impl<'d, const N: usize, T, CLK, DIO, DELAY, I, M>
     /// Set the animation style.
     pub const fn style(mut self, style: ScrollStyle) -> Self {
         self.style = style;
+        self
+    }
+
+    /// Set the animation style to [`ScrollStyle::Circular`].
+    pub const fn circular(mut self) -> Self {
+        self.style = ScrollStyle::Circular;
+        self
+    }
+
+    /// Set the animation style to [`ScrollStyle::Linear`].
+    pub const fn linear(mut self) -> Self {
+        self.style = ScrollStyle::Linear;
         self
     }
 
