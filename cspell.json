@@ -6,12 +6,14 @@
         "clippy",
         "codegen",
         "defmt",
+        "devcontainers",
         "docsrs",
         "FLIPPI",
         "FLOPPI",
         "ftdi",
         "Haddad",
         "Iván",
+        "libftdi",
         "MSRV",
         "nextest",
         "println",
@@ -25,6 +27,8 @@
         "wokwi"
     ],
     "ignorePaths": [
-        "target"
+        "target",
+        "*.vscode",
+        ".gitignore"
     ]
 }
