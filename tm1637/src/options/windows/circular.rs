@@ -309,7 +309,7 @@ mod test {
     fn see() {
         // FIXME: In CircularWindowsReversed: the byte at index N is disappearing while using the StrParser::new("012345678"); because test greater_than_n_rev is passing
         // We are moving back at N = 4, so its lost by StrParser::next_back()
-        let message = "12345678";
+        let message = "012345678";
 
         std::println!("-----------------> CircularWindowsReversed::<4, _>");
         std::println!();

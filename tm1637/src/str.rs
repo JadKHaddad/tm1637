@@ -64,6 +64,7 @@ impl<'a> From<&'a str> for StrParser<'a> {
 
 impl Iterator for StrParser<'_> {
     type Item = u8;
+
     fn next(&mut self) -> Option<Self::Item> {
         if self.size == 0 {
             return None;
@@ -131,7 +132,20 @@ impl DoubleEndedIterator for StrParser<'_> {
                         return Some(byte);
                     }
                 },
-                None => return None,
+                None => {
+                    return match self.current.take() {
+                        Some(current) => {
+                            self.size -= 1;
+
+                            Some(from_ascii_byte(current) | self.or)
+                        }
+                        None => {
+                            self.or = 0;
+
+                            None
+                        }
+                    };
+                }
             }
         }
     }
@@ -292,5 +306,74 @@ mod tests {
         assert_eq!(None, parser.next_back());
         assert_eq!(None, parser.next());
         assert_eq!(0, parser.len());
+    }
+
+    // TODO: remove this test and add a test for this case where next and next back overlap with dots and everything else
+    // After fix remove the test in circular.rs (fn see())
+    #[test]
+    #[ignore = "debug"]
+    fn see() {
+        let mut parser = StrParser::new("012345678");
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        std::println!();
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+
+        std::println!("------------------------->");
+
+        let mut parser = "012345678".bytes();
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        std::println!();
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", elem as char);
+
+        let elem = parser.next_back().unwrap();
+        std::println!("elem: {:?}", elem as char);
     }
 }

@@ -55,7 +55,7 @@ where
                             self.state = BufferState::Filling(counter);
                         }
                         BufferState::Full => {
-                            // At this point, we shift everything to the left making space for the new byte an N - 1
+                            // At this point, we shift everything to the left making space for the new byte at N - 1
                             // and then we add the new byte at the end.
 
                             // TODO: Optimize this.
