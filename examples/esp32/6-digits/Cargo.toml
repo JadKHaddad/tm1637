@@ -1,23 +1,17 @@
 [package]
-name = "esp32-tm1637-example-4-digits"
-version = "0.1.0"
 edition = "2021"
+name = "esp32-tm1637-example-6-digits"
+version = "0.1.0"
+
+[[bin]]
+name = "esp32-tm1637-example-6-digits"
+path = "./src/bin/main.rs"
 
 [dependencies]
-esp-backtrace = { version = "0.14.2", features = [
-    "esp32",
-    "exception-handler",
-    "panic-handler",
-    "println",
-] }
-
-esp-hal = { version = "0.22.0", features = ["esp32"] }
-esp-println = { version = "0.12.0", features = ["esp32", "log"] }
-log = { version = "0.4.21" }
+critical-section = "1.2.0"
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32", "unstable"] }
 ryu = "1.0.18"
-tm1637-embedded-hal = { path = "../../../tm1637", default-features = false, features = [
-    "ack",
-] }
+tm1637-embedded-hal = { path = "../../../tm1637", default-features = false }
 
 [profile.dev]
 # Rust debug is too slow.

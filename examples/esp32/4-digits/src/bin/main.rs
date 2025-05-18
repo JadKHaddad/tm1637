@@ -1,24 +1,31 @@
 #![no_std]
 #![no_main]
 
-use esp_backtrace as _;
-use esp_hal::delay::Delay;
-use esp_hal::gpio::{Level, Output, OutputOpenDrain, Pull};
-use esp_hal::prelude::*;
-use tm1637_embedded_hal::mappings::{DigitBits, LoCharBits, UpCharBits};
-use tm1637_embedded_hal::options::{ScrollDirection, ScrollStyle};
-use tm1637_embedded_hal::{Brightness, TM1637Builder};
+use esp_hal::{
+    delay::Delay,
+    gpio::{Level, Output, OutputConfig},
+    Config,
+};
+use tm1637_embedded_hal::{
+    mappings::{DigitBits, LoCharBits, UpCharBits},
+    options::{ScrollDirection, ScrollStyle},
+    Brightness, TM1637Builder,
+};
 
 const DELAY_MS: u32 = 2000;
 
-#[entry]
+#[panic_handler]
+fn panic(_: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
+
+#[esp_hal::main]
 fn main() -> ! {
-    let peripherals = esp_hal::init(esp_hal::Config::default());
+    let peripherals = esp_hal::init(Config::default());
 
     let delay = Delay::new();
-    let clk = Output::new(peripherals.GPIO4.degrade(), Level::Low);
-    // We use OutputOpenDrain that implements `OutputPin` and `InputPin` because the `ack` feature is enabled.
-    let dio = OutputOpenDrain::new(peripherals.GPIO19.degrade(), Level::Low, Pull::Up);
+    let clk = Output::new(peripherals.GPIO4, Level::Low, OutputConfig::default());
+    let dio = Output::new(peripherals.GPIO19, Level::Low, OutputConfig::default());
 
     // Create a TM1637 instance with 4 digits.
     let mut tm = TM1637Builder::new(clk, dio, delay)
