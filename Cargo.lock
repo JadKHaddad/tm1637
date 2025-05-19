@@ -254,7 +254,7 @@ dependencies = [
 
 [[package]]
 name = "tm1637-embedded-hal"
-version = "0.5.0-alpha.2"
+version = "0.5.0-alpha.3"
 dependencies = [
  "auto_enums",
  "defmt",

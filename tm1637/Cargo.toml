@@ -1,6 +1,6 @@
 [package]
 name = "tm1637-embedded-hal"
-version = "0.5.0-alpha.2"
+version = "0.5.0-alpha.3"
 edition = "2021"
 rust-version = "1.83.0"
 authors = ["Jad K. Haddad <jadkhaddad@gmail.com>"]
