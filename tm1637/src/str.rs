@@ -132,20 +132,17 @@ impl DoubleEndedIterator for StrParser<'_> {
                         return Some(byte);
                     }
                 },
-                None => {
-                    return match self.current.take() {
-                        Some(current) => {
-                            self.size -= 1;
+                None => match self.current.take() {
+                    Some(current) => {
+                        let byte = from_ascii_byte(current) | self.or;
 
-                            Some(from_ascii_byte(current) | self.or)
-                        }
-                        None => {
-                            self.or = 0;
+                        self.or = 0;
+                        self.size -= 1;
 
-                            None
-                        }
-                    };
-                }
+                        return Some(byte);
+                    }
+                    None => return None,
+                },
             }
         }
     }
@@ -173,21 +170,6 @@ mod tests {
                 DigitBits::Three as u8,
                 DigitBits::Four as u8
             ],
-            result
-        );
-
-        let parser = StrParser::new("HE.LLO");
-        let result: Vec<u8> = parser.take(3).rev().collect();
-
-        assert_eq!(
-            vec![
-                UpCharBits::UpH as u8,
-                UpCharBits::UpE as u8 | SegmentBits::Dot as u8,
-                UpCharBits::UpL as u8,
-            ]
-            .into_iter()
-            .rev()
-            .collect::<Vec<_>>(),
             result
         );
     }
@@ -249,6 +231,21 @@ mod tests {
 
     #[test]
     fn dots_rev() {
+        let parser = StrParser::new("HE.LLO");
+        let result: Vec<u8> = parser.take(3).rev().collect();
+
+        assert_eq!(
+            vec![
+                UpCharBits::UpH as u8,
+                UpCharBits::UpE as u8 | SegmentBits::Dot as u8,
+                UpCharBits::UpL as u8,
+            ]
+            .into_iter()
+            .rev()
+            .collect::<Vec<_>>(),
+            result
+        );
+
         let parser = StrParser::new("..12.3..45..............6.7");
         let result: Vec<u8> = parser.rev().collect();
         let mut expected = vec![
@@ -308,72 +305,75 @@ mod tests {
         assert_eq!(0, parser.len());
     }
 
-    // TODO: remove this test and add a test for this case where next and next back overlap with dots and everything else
-    // After fix remove the test in circular.rs (fn see())
     #[test]
-    #[ignore = "debug"]
-    fn see() {
-        let mut parser = StrParser::new("012345678");
+    fn overlap() {
+        let mut parser = StrParser::new("12345");
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(5, parser.len());
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(Some(DigitBits::One as u8), parser.next());
+        assert_eq!(4, parser.len());
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(Some(DigitBits::Two as u8), parser.next());
+        assert_eq!(3, parser.len());
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(Some(DigitBits::Three as u8), parser.next());
+        assert_eq!(2, parser.len());
 
-        std::println!();
+        assert_eq!(Some(DigitBits::Five as u8), parser.next_back());
+        assert_eq!(1, parser.len());
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(Some(DigitBits::Four as u8), parser.next_back());
+        assert_eq!(0, parser.len());
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(None, parser.next());
+        assert_eq!(None, parser.next_back());
+        assert_eq!(0, parser.len());
+    }
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+    #[test]
+    fn overlap_dots_on_next() {
+        let mut parser = StrParser::new("12.3");
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", crate::mappings::str_from_byte(elem));
+        assert_eq!(3, parser.len());
 
-        std::println!("------------------------->");
+        assert_eq!(Some(DigitBits::One as u8), parser.next());
+        assert_eq!(2, parser.len());
 
-        let mut parser = "012345678".bytes();
+        assert_eq!(Some(DigitBits::Three as u8), parser.next_back());
+        assert_eq!(1, parser.len());
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(
+            Some(DigitBits::Two as u8 | SegmentBits::Dot as u8),
+            parser.next()
+        );
+        assert_eq!(0, parser.len());
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(None, parser.next());
+        assert_eq!(None, parser.next_back());
+        assert_eq!(0, parser.len());
+    }
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", elem as char);
+    #[test]
+    fn overlap_dots_on_next_back() {
+        let mut parser = StrParser::new("12...3");
 
-        let elem = parser.next().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(3, parser.len());
 
-        std::println!();
+        assert_eq!(Some(DigitBits::One as u8), parser.next());
+        assert_eq!(2, parser.len());
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(Some(DigitBits::Three as u8), parser.next_back());
+        assert_eq!(1, parser.len());
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(
+            Some(DigitBits::Two as u8 | SegmentBits::Dot as u8),
+            parser.next_back()
+        );
+        assert_eq!(0, parser.len());
 
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", elem as char);
-
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", elem as char);
-
-        let elem = parser.next_back().unwrap();
-        std::println!("elem: {:?}", elem as char);
+        assert_eq!(None, parser.next());
+        assert_eq!(None, parser.next_back());
+        assert_eq!(0, parser.len());
     }
 }

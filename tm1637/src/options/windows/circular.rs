@@ -173,8 +173,6 @@ mod test {
     use std::vec;
     use std::vec::Vec;
 
-    use crate::str::StrParser;
-
     use super::*;
 
     #[test]
@@ -301,97 +299,5 @@ mod test {
             ],
             collected
         );
-    }
-
-    // cargo test --package tm1637-embedded-hal --lib -- options::windows::circular::test::see --exact --show-output --ignored
-    #[test]
-    #[ignore = "debug"]
-    fn see() {
-        // FIXME: In CircularWindowsReversed: the byte at index N is disappearing while using the StrParser::new("012345678"); because test greater_than_n_rev is passing
-        // We are moving back at N = 4, so its lost by StrParser::next_back()
-        let message = "012345678";
-
-        std::println!("-----------------> CircularWindowsReversed::<4, _>");
-        std::println!();
-
-        let iter = StrParser::new(message);
-        let windows = CircularWindowsReversed::<4, _>::new(iter);
-        let collected = windows.collect::<Vec<_>>();
-
-        let collected = collected
-            .into_iter()
-            .map(|item| {
-                item.into_iter()
-                    .map(crate::mappings::str_from_byte)
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-
-        for item in collected.iter() {
-            std::println!("{:?}", item);
-        }
-
-        std::println!();
-        std::println!("-----------------> CircularWindowsReversed::<6, _>");
-        std::println!();
-
-        let iter = StrParser::new(message);
-        let windows = CircularWindowsReversed::<6, _>::new(iter);
-        let collected = windows.collect::<Vec<_>>();
-
-        let collected = collected
-            .into_iter()
-            .map(|item| {
-                item.into_iter()
-                    .map(crate::mappings::str_from_byte)
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-
-        for item in collected.iter() {
-            std::println!("{:?}", item);
-        }
-
-        std::println!();
-        std::println!("-----------------> CircularWindows::<4, _>");
-        std::println!();
-
-        let iter = StrParser::new(message);
-        let windows = CircularWindows::<4, _>::new(iter);
-        let collected = windows.collect::<Vec<_>>();
-
-        let collected = collected
-            .into_iter()
-            .map(|item| {
-                item.into_iter()
-                    .map(crate::mappings::str_from_byte)
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-
-        for item in collected.iter() {
-            std::println!("{:?}", item);
-        }
-
-        std::println!();
-        std::println!("-----------------> CircularWindows::<6, _>");
-        std::println!();
-
-        let iter = StrParser::new(message);
-        let windows = CircularWindows::<6, _>::new(iter);
-        let collected = windows.collect::<Vec<_>>();
-
-        let collected = collected
-            .into_iter()
-            .map(|item| {
-                item.into_iter()
-                    .map(crate::mappings::str_from_byte)
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-
-        for item in collected.iter() {
-            std::println!("{:?}", item);
-        }
     }
 }
