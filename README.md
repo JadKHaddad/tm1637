@@ -13,10 +13,8 @@ A platform agnostic driver to interface with the `TM1637` (7-segment display) us
 
 ## Features
 
-The following features are available:
-
-- `ack`: enables the driver to use the `InputPin` trait for the `DIO` pin and wait for the acknowledgment signal from the display.
-- `defmt`: implements `defmt::Format` for structs and enums.
+- `ack`: Enables the driver to use the [`InputPin`](https://docs.rs/embedded-hal/latest/embedded_hal/digital/trait.InputPin.html) trait for the `DIO` pin and wait for the acknowledgment signal from the display.
+- `defmt`: Implements [`defmt::Format`](https://docs.rs/defmt/latest/defmt/trait.Format.html) for structs and enums.
 
 ## Usage
 
