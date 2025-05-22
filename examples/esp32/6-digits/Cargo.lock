@@ -451,7 +451,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "esp32-tm1637-example-46-digits"
+name = "esp32-tm1637-example-6-digits"
 version = "0.1.0"
 dependencies = [
  "critical-section",
@@ -914,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "tm1637-embedded-hal"
-version = "0.5.0-alpha.2"
+version = "0.5.0-alpha.3"
 dependencies = [
  "auto_enums",
  "duplicate",
