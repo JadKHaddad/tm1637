@@ -1,0 +1,27 @@
+[package]
+edition = "2021"
+name = "esp32-tm1637-example-4-digits"
+version = "0.1.0"
+
+[[bin]]
+name = "esp32-tm1637-example-4-digits"
+path = "./src/bin/main.rs"
+
+[dependencies]
+critical-section = "1.2.0"
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32", "unstable"] }
+tm1637-embedded-hal = { path = "../../../tm1637", default-features = false }
+
+[profile.dev]
+# Rust debug is too slow.
+# For debug builds always builds with some optimization
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false

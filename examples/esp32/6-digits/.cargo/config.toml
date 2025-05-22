@@ -1,0 +1,13 @@
+# cspell: disable
+[target.xtensa-esp32-none-elf]
+runner = "espflash flash --monitor --chip esp32"
+
+[env]
+
+[build]
+rustflags = ["-C", "link-arg=-nostartfiles"]
+
+target = "xtensa-esp32-none-elf"
+
+[unstable]
+build-std = ["core"]

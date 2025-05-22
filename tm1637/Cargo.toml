@@ -1,30 +1,27 @@
 [package]
 name = "tm1637-embedded-hal"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
+rust-version = "1.83.0"
 authors = ["Jad K. Haddad <jadkhaddad@gmail.com>"]
-description = "A platform agnostic driver to interface with the TM1637 (7-segment LED display) using embedded-hal."
+description = "A platform agnostic driver to interface with the TM1637 (7-segment LED display) using embedded-hal and embedded-hal-async."
 repository = "https://github.com/JadKHaddad/tm1637"
 license = "MIT OR Apache-2.0"
 keywords = ["tm1637", "embedded-hal", "no-std", "embedded"]
 readme = "../README.md"
 
 [features]
-default = ["async", "impl-debug", "mappings"]
-async = ["dep:embedded-hal", "dep:embedded-hal-async"]
-blocking = ["dep:embedded-hal"]
-mappings = []
-formatters = ["mappings"]
-disable-checks = []
-demo = ["mappings", "formatters"]
-impl-debug = []
-impl-defmt-format = ["dep:defmt"]
+default = []
+ack = []
+defmt = ["dep:defmt"]
 
 [dependencies]
-duplicate = "1.0.0"
-embedded-hal-async = { version = "1.0.0", optional = true }
-embedded-hal = { version = "1.0.0", optional = true }
-defmt = { version = "0.3.6", optional = true }
+duplicate = "2.0.0"
+embedded-hal-async = { version = "1.0.0" }
+embedded-hal = { version = "1.0.0" }
+defmt = { version = "1.0.1", optional = true }
+auto_enums = "0.8.7"
+futures = { version = "0.3.31", default-features = false }
 
 [package.metadata.docs.rs]
 all-features = true

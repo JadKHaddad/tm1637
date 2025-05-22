@@ -5,19 +5,22 @@
 //!
 //! There are versions of these functions that are meant for 4-digit displays
 //! and for 6-digit displays. The 6-digit versions take into account that the
-//! order of the bytes does not drectly correlate with the order of the physical
+//! order of the bytes does not directly correlate with the order of the physical
 //! digits.
 //!
 //! All numbers are aligned to the right.
 //!
 //! # Example
 //!
-//! ```rust,ignore
-//! tm.write_bytes_raw(0, i16_to_4digits(1234));
-//! ```
+//! ```rust
+//! use tm1637_embedded_hal::{formatters::i16_to_4digits, mock::Noop, TM1637Builder};
 //!
-//! This module is only available when the `formatters` feature of this
-//! library is activated.
+//! let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
+//!
+//! tm.init().ok();
+//!
+//! tm.display_slice(0, &i16_to_4digits(1234));
+//! ```
 
 use crate::mappings::{DigitBits, UpsideDownDigitBits};
 
@@ -27,18 +30,20 @@ use crate::mappings::{DigitBits, UpsideDownDigitBits};
 ///
 /// A counter that goes from `-100` to `100`:
 ///
-/// ```rust, ignore
-/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
-///     .brightness(Brightness::L3)
-///     .build();
+/// ```rust
+/// use tm1637_embedded_hal::{formatters::i16_to_4digits, mock::Noop, TM1637Builder};
+/// use embedded_hal::delay::DelayNs;
+///
+/// let mut delay = Noop;
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
 ///
 /// tm.init().ok();
 ///
 /// for i in -100..100 {
-///     let segs = i16_to_4digits(i);
-///     tm.write_segments_raw(0, &segs).ok();
+///     let segments = i16_to_4digits(i);
+///     tm.display_slice(0, &segments).ok();
 ///
-///     delay.delay_ms(100u16);
+///     delay.delay_ms(100);
 /// }
 /// ```
 pub fn i16_to_4digits(n: i16) -> [u8; 4] {
@@ -138,10 +143,13 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///
 /// Let's create a clock displaying `12:34` with a blinking colon:
 ///
-/// ```rust, ignore
-/// let mut tm = TM1637::builder(clk_pin, dio_pin, delay)
-///     .brightness(Brightness::L3)
-///     .build();
+/// ```rust
+/// use tm1637_embedded_hal::{formatters::clock_to_4digits, mock::Noop, TM1637Builder};
+/// use embedded_hal::delay::DelayNs;
+///
+/// let mut delay = Noop;
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
 ///
 /// tm.init().ok();
 ///
@@ -149,9 +157,9 @@ pub fn degrees_to_4digits(n: i16) -> [u8; 4] {
 ///     for minute in 34..60 {
 ///         for second in 0..120 {
 ///             let blink = second % 2 == 0;
-///             let segs = clock_to_4digits(hour, minute, blink);
+///             let segments = clock_to_4digits(hour, minute, blink);
 ///
-///             tm.write_segments_raw(0, &segs).ok();
+///             tm.display_slice(0, &segments).ok();
 ///
 ///             delay.delay_ms(500);
 ///         }
@@ -176,7 +184,7 @@ pub fn clock_to_4digits(hour: u8, minute: u8, colon: bool) -> [u8; 4] {
 }
 
 /// Formats a [`i16`] clamped between `-999` and `9999`, for an `upside-down 4-digit display`.
-pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
+pub fn i16_to_upside_down_4digits(n: i16) -> [u8; 4] {
     let mut bytes: [u8; 4] = [0; 4];
     let mut m: i16 = n.clamp(-999, 9999).abs();
 
@@ -198,7 +206,7 @@ pub fn i16_to_upsidedown_4digits(n: i16) -> [u8; 4] {
 
 /// Formats a [`f32`] with the given amount of decimal digits, for a `6-digit display`.
 pub fn f32_to_6digits(n: f32, decimals: u8) -> [u8; 6] {
-    use core::ops::Mul;
+    use ::core::ops::Mul;
 
     let mut b: [u8; 6] = [0; 6];
     let decimal_position = 5 - decimals;

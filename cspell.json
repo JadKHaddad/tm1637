@@ -1,0 +1,35 @@
+{
+    "version": "0.2",
+    "language": "en",
+    "words": [
+        "asynch",
+        "clippy",
+        "codegen",
+        "defmt",
+        "devcontainers",
+        "docsrs",
+        "FLIPPI",
+        "FLOPPI",
+        "ftdi",
+        "Haddad",
+        "Iván",
+        "libftdi",
+        "linkall",
+        "MSRV",
+        "nextest",
+        "println",
+        "repr",
+        "rustc",
+        "rustdoc",
+        "Sánchez",
+        "Swatinem",
+        "taiki",
+        "Tlinkall",
+        "wokwi"
+    ],
+    "ignorePaths": [
+        "target",
+        "*.vscode",
+        ".gitignore"
+    ]
+}

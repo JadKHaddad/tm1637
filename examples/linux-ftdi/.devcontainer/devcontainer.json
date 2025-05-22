@@ -1,0 +1,12 @@
+{
+	"name": "Rust",
+	"image": "mcr.microsoft.com/devcontainers/rust:1-1-bullseye",
+	"mounts": [
+		{
+			"source": "devcontainer-cargo-cache-${devcontainerId}",
+			"target": "/usr/local/cargo",
+			"type": "volume"
+		}
+	],
+	"postCreateCommand": "sudo apt-get update && sudo apt-get install -y libftdi1-dev"
+}

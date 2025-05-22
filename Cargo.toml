@@ -1,11 +1,9 @@
 [workspace]
 members = ["tm1637"]
 exclude = [
-    "examples/esp32/async",
-    "examples/esp32/blocking",
-    "examples/rp-pico/async",
-    "examples/rp-pico/blocking",
-    "examples/linux-ftdi/blocking",
+    "examples/esp32/4-digits",
+    "examples/esp32/6-digits",
+    "examples/linux-ftdi",
 ]
 resolver = "2"
 default-members = ["tm1637"]

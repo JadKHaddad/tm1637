@@ -1,21 +1,19 @@
 //! Mappings for 7-segment display characters.
 //!
-//! This module is only available when the `mappings` feature of this
-//! library is activated.
-
-//       A
-//      ---
-//  F  |   |  B
-//      -G-
-//  E  |   |  C
-//      ---
-//       D
+//! ```text
+//!      A
+//!     ---
+//! F  |   |  B
+//!     -G-
+//! E  |   |  C
+//!     ---
+//!      D
+//! ```
 
 /// Maps the segment from the device to its bit.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SegmentBits {
     /// A segment
     SegA = 0b00000001,
@@ -31,11 +29,13 @@ pub enum SegmentBits {
     SegF = 0b00100000,
     /// G segment
     SegG = 0b01000000,
-    /// Double point
+    /// Double point or dot
     ///
-    /// ## Usage
-    /// `Or` this bit with the bit responsible for displaying the double point. Often second position.
-    SegPoint = 0b10000000,
+    /// # Usage
+    ///
+    /// - `Or` this bit with the other bits to display the dot.
+    /// - `Or` this bit with the bit responsible for displaying the double point. Often second position on a 4-digit display.
+    Dot = 0b10000000,
 }
 
 impl SegmentBits {
@@ -49,7 +49,7 @@ impl SegmentBits {
             SegmentBits::SegE,
             SegmentBits::SegF,
             SegmentBits::SegG,
-            SegmentBits::SegPoint,
+            SegmentBits::Dot,
         ]
     }
 
@@ -63,16 +63,15 @@ impl SegmentBits {
             SegmentBits::SegE as u8,
             SegmentBits::SegF as u8,
             SegmentBits::SegG as u8,
-            SegmentBits::SegPoint as u8,
+            SegmentBits::Dot as u8,
         ]
     }
 }
 
 /// Maps a digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum DigitBits {
     /// 0
     Zero = 0b00111111,
@@ -130,7 +129,7 @@ impl DigitBits {
     }
 
     /// Creates a new [`DigitBits`] from a [`u8`] digit.
-    pub fn from_digit(digit: u8) -> Self {
+    pub const fn from_digit(digit: u8) -> Self {
         match digit {
             0 => DigitBits::Zero,
             1 => DigitBits::One,
@@ -147,11 +146,118 @@ impl DigitBits {
     }
 }
 
+/// Maps a hex digit to its closest possible representation on a 7-segment display.
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum HexDigitBits {
+    /// 0
+    Zero = DigitBits::Zero as u8,
+    /// 1
+    One = DigitBits::One as u8,
+    /// 2
+    Two = DigitBits::Two as u8,
+    /// 3
+    Three = DigitBits::Three as u8,
+    /// 4
+    Four = DigitBits::Four as u8,
+    /// 5
+    Five = DigitBits::Five as u8,
+    /// 6
+    Six = DigitBits::Six as u8,
+    /// 7
+    Seven = DigitBits::Seven as u8,
+    /// 8
+    Eight = DigitBits::Eight as u8,
+    /// 9
+    Nine = DigitBits::Nine as u8,
+    /// A
+    A = UpCharBits::UpA as u8,
+    /// b
+    B = LoCharBits::LoB as u8,
+    /// C
+    C = UpCharBits::UpC as u8,
+    /// d
+    D = LoCharBits::LoD as u8,
+    /// E
+    E = UpCharBits::UpE as u8,
+    /// F
+    F = UpCharBits::UpF as u8,
+}
+
+impl HexDigitBits {
+    /// Returns all digits.
+    pub const fn all() -> [HexDigitBits; 16] {
+        [
+            HexDigitBits::Zero,
+            HexDigitBits::One,
+            HexDigitBits::Two,
+            HexDigitBits::Three,
+            HexDigitBits::Four,
+            HexDigitBits::Five,
+            HexDigitBits::Six,
+            HexDigitBits::Seven,
+            HexDigitBits::Eight,
+            HexDigitBits::Nine,
+            HexDigitBits::A,
+            HexDigitBits::B,
+            HexDigitBits::C,
+            HexDigitBits::D,
+            HexDigitBits::E,
+            HexDigitBits::F,
+        ]
+    }
+
+    /// Returns all digits as [`u8`].
+    pub const fn all_u8() -> [u8; 16] {
+        [
+            HexDigitBits::Zero as u8,
+            HexDigitBits::One as u8,
+            HexDigitBits::Two as u8,
+            HexDigitBits::Three as u8,
+            HexDigitBits::Four as u8,
+            HexDigitBits::Five as u8,
+            HexDigitBits::Six as u8,
+            HexDigitBits::Seven as u8,
+            HexDigitBits::Eight as u8,
+            HexDigitBits::Nine as u8,
+            HexDigitBits::A as u8,
+            HexDigitBits::B as u8,
+            HexDigitBits::C as u8,
+            HexDigitBits::D as u8,
+            HexDigitBits::E as u8,
+            HexDigitBits::F as u8,
+        ]
+    }
+
+    /// Creates a new [`HexDigitBits`] from a [`u8`] digit.
+    pub const fn from_digit(digit: u8) -> Self {
+        match digit {
+            0 => HexDigitBits::Zero,
+            1 => HexDigitBits::One,
+            2 => HexDigitBits::Two,
+            3 => HexDigitBits::Three,
+            4 => HexDigitBits::Four,
+            5 => HexDigitBits::Five,
+            6 => HexDigitBits::Six,
+            7 => HexDigitBits::Seven,
+            8 => HexDigitBits::Eight,
+            9 => HexDigitBits::Nine,
+            10 => HexDigitBits::A,
+            11 => HexDigitBits::B,
+            12 => HexDigitBits::C,
+            13 => HexDigitBits::D,
+            14 => HexDigitBits::E,
+            15 => HexDigitBits::F,
+            _ => HexDigitBits::Zero,
+        }
+    }
+}
+
 /// Maps a upside-down digit to its closest possible representation on a 7-segment display.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UpsideDownDigitBits {
     /// Upside-down 0
     Zero = 0b00111111,
@@ -208,7 +314,7 @@ impl UpsideDownDigitBits {
     }
 
     /// Creates a new [`DigitBits`] from a [`u8`] digit.
-    pub fn from_digit(digit: u8) -> Self {
+    pub const fn from_digit(digit: u8) -> Self {
         match digit {
             0 => UpsideDownDigitBits::Zero,
             1 => UpsideDownDigitBits::One,
@@ -227,9 +333,8 @@ impl UpsideDownDigitBits {
 
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum UpCharBits {
     /// Uppercase A
     UpA = 0x77,
@@ -313,9 +418,8 @@ impl UpCharBits {
 
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum LoCharBits {
     /// Lowercase A
     LoA = 0x5F,
@@ -395,9 +499,8 @@ impl LoCharBits {
 
 /// Maps a character to its closest possible representation on a 7-segment display.
 #[repr(u8)]
-#[derive(Clone, Copy)]
-#[cfg_attr(feature = "impl-defmt-format", derive(defmt::Format))]
-#[cfg_attr(feature = "impl-debug", derive(core::fmt::Debug))]
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SpecialCharBits {
     /// Space symbol
     Space = 0,
@@ -483,9 +586,16 @@ pub const fn flip_mirror(byte: u8) -> u8 {
 ///
 /// Display `Err` text on a 4-digit display:
 ///
-/// ```rust,ignore
+/// ```rust
+/// use tm1637_embedded_hal::{mappings::from_ascii_byte, mock::Noop, TM1637Builder};
+///
+/// let mut tm = TM1637Builder::new(Noop, Noop, Noop).build_blocking::<4>();
+///
+/// tm.init().ok();
+///
 /// let err = "Err".as_bytes().iter().copied().map(from_ascii_byte);
-/// tm.write_segments_raw_iter(0, err).ok();
+///
+/// tm.display(0, err).ok();
 /// ```
 pub const fn from_ascii_byte(byte: u8) -> u8 {
     match byte {
@@ -545,6 +655,181 @@ pub const fn from_ascii_byte(byte: u8) -> u8 {
 /// Converts a `char` to a 7-segment display byte. See [`from_ascii_byte`] for more information.
 pub const fn from_char(c: char) -> u8 {
     from_ascii_byte(c as u8)
+}
+
+/// Converts a 7-segment display byte to a `str`.
+pub const fn str_from_byte(byte: u8) -> &'static str {
+    if byte == SegmentBits::Dot as u8 {
+        "."
+    } else if byte == DigitBits::Zero as u8 {
+        "0"
+    } else if byte == DigitBits::One as u8 {
+        "1"
+    } else if byte == DigitBits::Two as u8 {
+        "2"
+    } else if byte == DigitBits::Three as u8 {
+        "3"
+    } else if byte == DigitBits::Four as u8 {
+        "4"
+    } else if byte == DigitBits::Five as u8 {
+        "5"
+    } else if byte == DigitBits::Six as u8 {
+        "6"
+    } else if byte == DigitBits::Seven as u8 {
+        "7"
+    } else if byte == DigitBits::Eight as u8 {
+        "8"
+    } else if byte == DigitBits::Nine as u8 {
+        "9"
+    } else if byte == UpCharBits::UpA as u8 {
+        "A"
+    } else if byte == UpCharBits::UpB as u8 {
+        "B"
+    } else if byte == UpCharBits::UpC as u8 {
+        "C"
+    } else if byte == UpCharBits::UpE as u8 {
+        "E"
+    } else if byte == UpCharBits::UpF as u8 {
+        "F"
+    } else if byte == UpCharBits::UpG as u8 {
+        "G"
+    } else if byte == UpCharBits::UpH as u8 {
+        "H"
+    } else if byte == UpCharBits::UpI as u8 {
+        "I"
+    } else if byte == UpCharBits::UpJ as u8 {
+        "J"
+    } else if byte == UpCharBits::UpL as u8 {
+        "L"
+    } else if byte == UpCharBits::UpP as u8 {
+        "P"
+    } else if byte == UpCharBits::UpU as u8 {
+        "U"
+    } else if byte == LoCharBits::LoA as u8 {
+        "a"
+    } else if byte == LoCharBits::LoB as u8 {
+        "b"
+    } else if byte == LoCharBits::LoC as u8 {
+        "c"
+    } else if byte == LoCharBits::LoD as u8 {
+        "d"
+    } else if byte == LoCharBits::LoE as u8 {
+        "e"
+    } else if byte == LoCharBits::LoG as u8 {
+        "g"
+    } else if byte == LoCharBits::LoH as u8 {
+        "h"
+    } else if byte == LoCharBits::LoI as u8 {
+        "i"
+    } else if byte == LoCharBits::LoN as u8 {
+        "n"
+    } else if byte == LoCharBits::LoO as u8 {
+        "o"
+    } else if byte == LoCharBits::LoQ as u8 {
+        "q"
+    } else if byte == LoCharBits::LoR as u8 {
+        "r"
+    } else if byte == LoCharBits::LoT as u8 {
+        "t"
+    } else if byte == LoCharBits::LoU as u8 {
+        "u"
+    } else if byte == LoCharBits::LoY as u8 {
+        "y"
+    } else if byte == SpecialCharBits::Space as u8 {
+        " "
+    } else if byte == SpecialCharBits::Minus as u8 {
+        "-"
+    } else if byte == SpecialCharBits::Underscore as u8 {
+        "_"
+    } else if byte == SpecialCharBits::Equals as u8 {
+        "="
+    } else if byte == SpecialCharBits::QuestionMark as u8 {
+        "?"
+    } else if byte == DigitBits::Zero as u8 | SegmentBits::Dot as u8 {
+        "0."
+    } else if byte == DigitBits::One as u8 | SegmentBits::Dot as u8 {
+        "1."
+    } else if byte == DigitBits::Two as u8 | SegmentBits::Dot as u8 {
+        "2."
+    } else if byte == DigitBits::Three as u8 | SegmentBits::Dot as u8 {
+        "3."
+    } else if byte == DigitBits::Four as u8 | SegmentBits::Dot as u8 {
+        "4."
+    } else if byte == DigitBits::Five as u8 | SegmentBits::Dot as u8 {
+        "5."
+    } else if byte == DigitBits::Six as u8 | SegmentBits::Dot as u8 {
+        "6."
+    } else if byte == DigitBits::Seven as u8 | SegmentBits::Dot as u8 {
+        "7."
+    } else if byte == DigitBits::Eight as u8 | SegmentBits::Dot as u8 {
+        "8."
+    } else if byte == DigitBits::Nine as u8 | SegmentBits::Dot as u8 {
+        "9."
+    } else if byte == UpCharBits::UpA as u8 | SegmentBits::Dot as u8 {
+        "A."
+    } else if byte == UpCharBits::UpB as u8 | SegmentBits::Dot as u8 {
+        "B."
+    } else if byte == UpCharBits::UpC as u8 | SegmentBits::Dot as u8 {
+        "C."
+    } else if byte == UpCharBits::UpE as u8 | SegmentBits::Dot as u8 {
+        "E."
+    } else if byte == UpCharBits::UpF as u8 | SegmentBits::Dot as u8 {
+        "F."
+    } else if byte == UpCharBits::UpG as u8 | SegmentBits::Dot as u8 {
+        "G."
+    } else if byte == UpCharBits::UpH as u8 | SegmentBits::Dot as u8 {
+        "H."
+    } else if byte == UpCharBits::UpI as u8 | SegmentBits::Dot as u8 {
+        "I."
+    } else if byte == UpCharBits::UpJ as u8 | SegmentBits::Dot as u8 {
+        "J."
+    } else if byte == UpCharBits::UpL as u8 | SegmentBits::Dot as u8 {
+        "L."
+    } else if byte == UpCharBits::UpP as u8 | SegmentBits::Dot as u8 {
+        "P."
+    } else if byte == UpCharBits::UpU as u8 | SegmentBits::Dot as u8 {
+        "U."
+    } else if byte == LoCharBits::LoA as u8 | SegmentBits::Dot as u8 {
+        "a."
+    } else if byte == LoCharBits::LoB as u8 | SegmentBits::Dot as u8 {
+        "b."
+    } else if byte == LoCharBits::LoC as u8 | SegmentBits::Dot as u8 {
+        "c."
+    } else if byte == LoCharBits::LoD as u8 | SegmentBits::Dot as u8 {
+        "d."
+    } else if byte == LoCharBits::LoE as u8 | SegmentBits::Dot as u8 {
+        "e."
+    } else if byte == LoCharBits::LoG as u8 | SegmentBits::Dot as u8 {
+        "g."
+    } else if byte == LoCharBits::LoH as u8 | SegmentBits::Dot as u8 {
+        "h."
+    } else if byte == LoCharBits::LoI as u8 | SegmentBits::Dot as u8 {
+        "i."
+    } else if byte == LoCharBits::LoN as u8 | SegmentBits::Dot as u8 {
+        "n."
+    } else if byte == LoCharBits::LoO as u8 | SegmentBits::Dot as u8 {
+        "o."
+    } else if byte == LoCharBits::LoQ as u8 | SegmentBits::Dot as u8 {
+        "q."
+    } else if byte == LoCharBits::LoR as u8 | SegmentBits::Dot as u8 {
+        "r."
+    } else if byte == LoCharBits::LoT as u8 | SegmentBits::Dot as u8 {
+        "t."
+    } else if byte == LoCharBits::LoU as u8 | SegmentBits::Dot as u8 {
+        "u."
+    } else if byte == LoCharBits::LoY as u8 | SegmentBits::Dot as u8 {
+        "y."
+    } else if byte == SpecialCharBits::Minus as u8 | SegmentBits::Dot as u8 {
+        "-."
+    } else if byte == SpecialCharBits::Underscore as u8 | SegmentBits::Dot as u8 {
+        "_."
+    } else if byte == SpecialCharBits::Equals as u8 | SegmentBits::Dot as u8 {
+        "=."
+    } else if byte == SpecialCharBits::QuestionMark as u8 | SegmentBits::Dot as u8 {
+        "?."
+    } else {
+        ""
+    }
 }
 
 #[cfg(test)]

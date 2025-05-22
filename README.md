@@ -1,21 +1,20 @@
 # TM1637
 
+![Build Status](https://github.com/JadKHaddad/tm1637/actions/workflows/build-and-test.yml/badge.svg)
+[![crates.io](https://img.shields.io/crates/v/tm1637-embedded-hal.svg)](https://crates.io/crates/tm1637-embedded-hal)
+[![Crates.io (MSRV)](https://img.shields.io/crates/msrv/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+[![docs.rs](https://docs.rs/tm1637-embedded-hal/badge.svg)](https://docs.rs/tm1637-embedded-hal)
+[![Crates.io (Downloads)](https://img.shields.io/crates/d/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+[![Crates.io (License)](https://img.shields.io/crates/l/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
+
 A platform agnostic driver to interface with the `TM1637` (7-segment display) using the [`embedded-hal`](https://crates.io/crates/embedded-hal) and [`embedded-hal-async`](https://crates.io/crates/embedded-hal-async) traits.
 
 !["ruSt" on a 4-digit display](https://github.com/JadKHaddad/tm1637/blob/main/assets/4digits-rust.webp?raw=true)
 
 ## Features
 
-The following features are available:
-
-- `blocking`: enables blocking functionality.
-- `async`: enables asynchronous functionality.
-- `impl-debug`: implements `core::fmt::Debug` for structs and enums.
-- `impl-defmt-format`: implements `defmt::Format` for structs and enums.
-- `mappings`: enables the mappings module.
-- `formatters`: enables the number formatting module.
-- `demo`: enables the demo module.
-- `disable-checks`: disables bound checks while writing to the display. When enabled, positions greater than available positions on the display will be written to the display regardless, causing more delay than needed. Enable this feature only if you are sure about the positions you are writing to.
+- `ack`: Enables the driver to use the [`InputPin`](https://docs.rs/embedded-hal/latest/embedded_hal/digital/trait.InputPin.html) trait for the `DIO` pin and wait for the acknowledgment signal from the display.
+- `defmt`: Implements [`defmt::Format`](https://docs.rs/defmt/latest/defmt/trait.Format.html) for structs and enums.
 
 ## Usage
 
