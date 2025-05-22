@@ -1,6 +1,6 @@
 # TM1637
 
-![Build Status](https://github.com/JadKHaddad/tm1637/actions/workflows/build-and-test.yml/badge.svg)
+![Build Status](https://github.com/JadKHaddad/tm1637/actions/workflows/build-and-test.yaml/badge.svg)
 [![crates.io](https://img.shields.io/crates/v/tm1637-embedded-hal.svg)](https://crates.io/crates/tm1637-embedded-hal)
 [![Crates.io (MSRV)](https://img.shields.io/crates/msrv/tm1637-embedded-hal)](https://crates.io/crates/tm1637-embedded-hal)
 [![docs.rs](https://docs.rs/tm1637-embedded-hal/badge.svg)](https://docs.rs/tm1637-embedded-hal)
