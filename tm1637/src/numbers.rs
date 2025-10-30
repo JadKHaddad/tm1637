@@ -51,8 +51,6 @@ fn is_even(number: i32) -> bool {
 }
 */
 
-#![allow(missing_docs)]
-
 use crate::mappings::{DigitBits, SpecialCharBits};
 
 /// Format a [`prim@u8`] into its 7-segment byte representation as a `[u8; 1]` aligning the bytes to the left.
