@@ -113,7 +113,7 @@ mod test {
         let windows = ReverseWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+        assert_eq!(vec![*b"1234"], collected);
     }
 
     #[test]
@@ -122,9 +122,6 @@ mod test {
         let windows = ReverseWindows::<3, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(
-            vec![[b'l', b'o', b'r'], [b'm', b'l', b'o'], [b'e', b'm', b'l'],],
-            collected
-        );
+        assert_eq!(vec![*b"lor", *b"mlo", *b"eml",], collected);
     }
 }
