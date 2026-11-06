@@ -505,6 +505,9 @@ pub fn r_u32_6(n: u32) -> [u8; 6] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::i8_2, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = i8_2(0);
+/// assert_eq!(formatted, [DigitBits::Zero as u8, 0]);
+///
 /// let formatted = i8_2(1);
 /// assert_eq!(formatted, [DigitBits::One as u8, 0]);
 ///
@@ -514,7 +517,7 @@ pub fn r_u32_6(n: u32) -> [u8; 6] {
 pub fn i8_2(n: i8) -> [u8; 2] {
     let n = n.clamp(-9, 99);
 
-    if n > 0 {
+    if n >= 0 {
         u8_2(n.unsigned_abs())
     } else {
         [
@@ -530,6 +533,9 @@ pub fn i8_2(n: i8) -> [u8; 2] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::i16_3, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = i16_3(0);
+/// assert_eq!(formatted, [DigitBits::Zero as u8, 0, 0]);
+///
 /// let formatted = i16_3(1);
 /// assert_eq!(formatted, [DigitBits::One as u8, 0, 0]);
 ///
@@ -542,7 +548,7 @@ pub fn i8_2(n: i8) -> [u8; 2] {
 pub fn i16_3(n: i16) -> [u8; 3] {
     let n = n.clamp(-99, 999);
 
-    if n > 0 {
+    if n >= 0 {
         u16_3(n.unsigned_abs())
     } else if n < -9 {
         [
@@ -565,6 +571,9 @@ pub fn i16_3(n: i16) -> [u8; 3] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::r_i16_3, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = r_i16_3(0);
+/// assert_eq!(formatted, [0, 0, DigitBits::Zero as u8]);
+///
 /// let formatted = r_i16_3(1);
 /// assert_eq!(formatted, [0, 0, DigitBits::One as u8]);
 ///
@@ -577,7 +586,7 @@ pub fn i16_3(n: i16) -> [u8; 3] {
 pub fn r_i16_3(n: i16) -> [u8; 3] {
     let n = n.clamp(-99, 999);
 
-    if n > 0 {
+    if n >= 0 {
         r_u16_3(n.unsigned_abs())
     } else if n < -9 {
         [
@@ -600,6 +609,9 @@ pub fn r_i16_3(n: i16) -> [u8; 3] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::i16_4, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = i16_4(0);
+/// assert_eq!(formatted, [DigitBits::Zero as u8, 0, 0, 0]);
+///
 /// let formatted = i16_4(1);
 /// assert_eq!(formatted, [DigitBits::One as u8, 0, 0, 0]);
 ///
@@ -612,7 +624,7 @@ pub fn r_i16_3(n: i16) -> [u8; 3] {
 pub fn i16_4(n: i16) -> [u8; 4] {
     let n = n.clamp(-999, 9999);
 
-    if n > 0 {
+    if n >= 0 {
         u16_4(n.unsigned_abs())
     } else if n < -99 {
         [
@@ -644,6 +656,9 @@ pub fn i16_4(n: i16) -> [u8; 4] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::r_i16_4, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = r_i16_4(0);
+/// assert_eq!(formatted, [0, 0, 0, DigitBits::Zero as u8]);
+///
 /// let formatted = r_i16_4(1);
 /// assert_eq!(formatted, [0, 0, 0, DigitBits::One as u8]);
 ///
@@ -656,7 +671,7 @@ pub fn i16_4(n: i16) -> [u8; 4] {
 pub fn r_i16_4(n: i16) -> [u8; 4] {
     let n = n.clamp(-999, 9999);
 
-    if n > 0 {
+    if n >= 0 {
         r_u16_4(n.unsigned_abs())
     } else if n < -99 {
         [
@@ -688,6 +703,9 @@ pub fn r_i16_4(n: i16) -> [u8; 4] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::i32_5, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = i32_5(0);
+/// assert_eq!(formatted, [DigitBits::Zero as u8, 0, 0, 0, 0]);
+///
 /// let formatted = i32_5(1);
 /// assert_eq!(formatted, [DigitBits::One as u8, 0, 0, 0, 0]);
 ///
@@ -700,7 +718,7 @@ pub fn r_i16_4(n: i16) -> [u8; 4] {
 pub fn i32_5(n: i32) -> [u8; 5] {
     let n = n.clamp(-9999, 99999);
 
-    if n > 0 {
+    if n >= 0 {
         u32_5(n.unsigned_abs())
     } else if n < -999 {
         [
@@ -743,6 +761,9 @@ pub fn i32_5(n: i32) -> [u8; 5] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::r_i32_5, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = r_i32_5(0);
+/// assert_eq!(formatted, [0, 0, 0, 0, DigitBits::Zero as u8]);
+///
 /// let formatted = r_i32_5(1);
 /// assert_eq!(formatted, [0, 0, 0, 0, DigitBits::One as u8]);
 ///
@@ -755,7 +776,7 @@ pub fn i32_5(n: i32) -> [u8; 5] {
 pub fn r_i32_5(n: i32) -> [u8; 5] {
     let n = n.clamp(-9999, 99999);
 
-    if n > 0 {
+    if n >= 0 {
         r_u32_5(n.unsigned_abs())
     } else if n < -999 {
         [
@@ -798,6 +819,9 @@ pub fn r_i32_5(n: i32) -> [u8; 5] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::i32_6, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = i32_6(0);
+/// assert_eq!(formatted, [DigitBits::Zero as u8, 0, 0, 0, 0, 0]);
+///
 /// let formatted = i32_6(1);
 /// assert_eq!(formatted, [DigitBits::One as u8, 0, 0, 0, 0, 0]);
 ///
@@ -810,7 +834,7 @@ pub fn r_i32_5(n: i32) -> [u8; 5] {
 pub fn i32_6(n: i32) -> [u8; 6] {
     let n = n.clamp(-99999, 999999);
 
-    if n > 0 {
+    if n >= 0 {
         u32_6(n.unsigned_abs())
     } else if n < -9999 {
         [
@@ -866,6 +890,9 @@ pub fn i32_6(n: i32) -> [u8; 6] {
 ///
 /// ```
 /// # use tm1637_embedded_hal::{numbers::r_i32_6, mappings::{DigitBits, SpecialCharBits}};
+/// let formatted = r_i32_6(0);
+/// assert_eq!(formatted, [0, 0, 0, 0, 0, DigitBits::Zero as u8]);
+///
 /// let formatted = r_i32_6(1);
 /// assert_eq!(formatted, [0, 0, 0, 0, 0, DigitBits::One as u8]);
 ///
@@ -878,7 +905,7 @@ pub fn i32_6(n: i32) -> [u8; 6] {
 pub fn r_i32_6(n: i32) -> [u8; 6] {
     let n = n.clamp(-99999, 999999);
 
-    if n > 0 {
+    if n >= 0 {
         r_u32_6(n.unsigned_abs())
     } else if n < -9999 {
         [

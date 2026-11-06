@@ -55,18 +55,17 @@ where
                         return Some(self.buffer);
                     }
                 },
-                BufferState::Full => match self.iter.next_back() {
-                    Some(byte) => {
-                        for i in (1..N).rev() {
-                            self.buffer[i] = self.buffer[i - 1];
-                        }
+                BufferState::Full => {
+                    let byte = self.iter.next_back()?;
 
-                        self.buffer[0] = byte;
-
-                        return Some(self.buffer);
+                    for i in (1..N).rev() {
+                        self.buffer[i] = self.buffer[i - 1];
                     }
-                    None => return None,
-                },
+
+                    self.buffer[0] = byte;
+
+                    return Some(self.buffer);
+                }
                 BufferState::Interrupted => return None,
             }
         }

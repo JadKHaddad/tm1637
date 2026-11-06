@@ -90,14 +90,13 @@ impl Iterator for StrParser<'_> {
                         None => self.current = Some(byte),
                     },
                 },
-                None => match self.current.take().map(from_ascii_byte) {
-                    Some(current) => {
-                        self.size -= 1;
+                None => {
+                    let current = self.current.take().map(from_ascii_byte)?;
 
-                        return Some(current);
-                    }
-                    None => return None,
-                },
+                    self.size -= 1;
+
+                    return Some(current);
+                }
             }
         }
     }
@@ -132,17 +131,15 @@ impl DoubleEndedIterator for StrParser<'_> {
                         return Some(byte);
                     }
                 },
-                None => match self.current.take() {
-                    Some(current) => {
-                        let byte = from_ascii_byte(current) | self.or;
+                None => {
+                    let current = self.current.take()?;
+                    let byte = from_ascii_byte(current) | self.or;
 
-                        self.or = 0;
-                        self.size -= 1;
+                    self.or = 0;
+                    self.size -= 1;
 
-                        return Some(byte);
-                    }
-                    None => return None,
-                },
+                    return Some(byte);
+                }
             }
         }
     }
