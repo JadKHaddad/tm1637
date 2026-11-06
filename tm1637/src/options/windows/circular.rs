@@ -177,8 +177,8 @@ mod test {
 
     #[test]
     fn shift_left_test() {
-        let first = [b'l', b'o', b'r'];
-        let last = [b'r', b'e', b'm'];
+        let first = *b"lor";
+        let last = *b"rem";
 
         assert_eq!([b'e', b'm', b'l'], shift_left(&first, &last, 0));
     }
@@ -216,7 +216,7 @@ mod test {
         let windows = CircularWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+        assert_eq!(vec![*b"1234"], collected);
     }
 
     #[test]
@@ -227,16 +227,8 @@ mod test {
 
         assert_eq!(
             vec![
-                [b'1', b'2', b'3', b'4'],
-                [b'2', b'3', b'4', b'5'],
-                [b'3', b'4', b'5', b'6'],
-                [b'4', b'5', b'6', b'7'],
-                [b'5', b'6', b'7', b'8'],
-                // N times shifted
-                [b'6', b'7', b'8', b'1'],
-                [b'7', b'8', b'1', b'2'],
-                [b'8', b'1', b'2', b'3'],
-                [b'1', b'2', b'3', b'4'],
+                *b"1234", *b"2345", *b"3456", *b"4567", *b"5678", // N times shifted
+                *b"6781", *b"7812", *b"8123", *b"1234",
             ],
             collected
         );
@@ -275,7 +267,7 @@ mod test {
         let windows = CircularWindowsReversed::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+        assert_eq!(vec![*b"1234"], collected);
     }
 
     #[test]
@@ -286,16 +278,8 @@ mod test {
 
         assert_eq!(
             vec![
-                [b'1', b'2', b'3', b'4'],
-                [b'8', b'1', b'2', b'3'],
-                [b'7', b'8', b'1', b'2'],
-                [b'6', b'7', b'8', b'1'],
-                [b'5', b'6', b'7', b'8'],
-                // N times shifted
-                [b'4', b'5', b'6', b'7'],
-                [b'3', b'4', b'5', b'6'],
-                [b'2', b'3', b'4', b'5'],
-                [b'1', b'2', b'3', b'4'],
+                *b"1234", *b"8123", *b"7812", *b"6781", *b"5678", // N times shifted
+                *b"4567", *b"3456", *b"2345", *b"1234",
             ],
             collected
         );

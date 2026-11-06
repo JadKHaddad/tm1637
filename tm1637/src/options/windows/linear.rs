@@ -174,7 +174,7 @@ mod test {
         let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+        assert_eq!(vec![*b"1234"], collected);
     }
 
     #[test]
@@ -183,14 +183,7 @@ mod test {
         let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.collect::<Vec<_>>();
 
-        assert_eq!(
-            vec![
-                [b'1', b'2', b'3', b'4'],
-                [b'2', b'3', b'4', b'5'],
-                [b'3', b'4', b'5', b'6']
-            ],
-            collected
-        );
+        assert_eq!(vec![*b"1234", *b"2345", *b"3456"], collected);
     }
 
     #[test]
@@ -226,7 +219,7 @@ mod test {
         let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
-        assert_eq!(vec![[b'1', b'2', b'3', b'4']], collected);
+        assert_eq!(vec![*b"1234"], collected);
     }
 
     #[test]
@@ -235,11 +228,7 @@ mod test {
         let windows = LinearWindows::<4, _>::new(iter);
         let collected = windows.rev().collect::<Vec<_>>();
 
-        let mut expected = vec![
-            [b'1', b'2', b'3', b'4'],
-            [b'2', b'3', b'4', b'5'],
-            [b'3', b'4', b'5', b'6'],
-        ];
+        let mut expected = vec![*b"1234", *b"2345", *b"3456"];
 
         expected.reverse();
 
